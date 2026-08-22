@@ -1,0 +1,85 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// আপডেটেড User মডেল
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  phone         String?
+  role          String    @default("member") 
+  deposit       Int       @default(0)        
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  accounts      Account[]
+  sessions      Session[]
+  
+  // নতুন যুক্ত করা রিলেশন
+  meals         Meal[]    // একজন ইউজারের অনেকগুলো মিলের রেকর্ড থাকতে পারে
+  expenses      Expense[] // একজন ম্যানেজার অনেকগুলো বাজারের খরচ যুক্ত করতে পারে
+}
+
+// ১. মিলের জন্য নতুন মডেল
+model Meal {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  date      String   // তারিখ "YYYY-MM-DD" ফরম্যাটে সেভ হবে
+  breakfast Float    @default(0) // ০.৫ (হাফ মিল) বা ১ হতে পারে
+  lunch     Float    @default(0)
+  dinner    Float    @default(0)
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // এটি নিশ্চিত করবে যে, একদিনে একজন ইউজারের একটাই ডাটাবেস এন্ট্রি থাকবে
+  @@unique([userId, date]) 
+}
+
+// ২. বাজারের খরচের জন্য নতুন মডেল
+model Expense {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  amount      Int      // কত টাকা খরচ হলো
+  description String   // কী কী বাজার হলো (যেমন: চাল, ডাল, মুরগি)
+  date        String   // "YYYY-MM-DD"
+  managerId   String   @db.ObjectId 
+  createdAt   DateTime @default(now())
+
+  manager     User     @relation(fields: [managerId], references: [id])
+}
