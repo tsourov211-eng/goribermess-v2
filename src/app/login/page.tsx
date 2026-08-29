@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { signIn, getSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -14,7 +14,7 @@ export default function LoginPage() {
 
 
     // ফর্ম সাবমিট করার ফাংশন
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError("");
 
@@ -30,7 +30,7 @@ export default function LoginPage() {
             } else {
                 // সফলভাবে লগইন হলে সেশন (Session) থেকে ইউজারের রোল বের করা
                 const session = await getSession();
-                const userRole = (session?.user as any)?.role;
+                const userRole = (session?.user as { role?: string })?.role;
 
                 // রোল অনুযায়ী নির্দিষ্ট ড্যাশবোর্ডে পাঠানো
                 if (userRole === "admin") {
@@ -47,7 +47,9 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-amber-50 flex items-center justify-center p-6 font-sans">
+        <div className="min-h-screen bg-[url('/login-bg-mobile.png')] md:bg-[url('/login-bg.png')] bg-cover bg-center bg-no-repeat flex items-center justify-center">
+  
+
             <div className="bg-white w-full max-w-md rounded-[2rem] shadow-xl p-10 border border-orange-50">
 
                 <div className="text-center mb-8">
@@ -66,33 +68,40 @@ export default function LoginPage() {
 
                 {/* ফর্ম */}
                 <form onSubmit={handleSubmit} className="space-y-5">
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700 ml-1">ইমেইল এড্রেস</label>
+
+
+                    {/* ইমেইল ফিল্ড */}
+                    <div className="flex flex-col gap-2 mb-5">
+                        <label className="text-sm font-bold text-gray-700">
+                            ইমেইল এড্রেস
+                        </label>
                         <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="admin@gmail.com"
-                            className="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-all"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-orange-500 transition-all placeholder-gray-400"
                             required
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700 ml-1">পাসওয়ার্ড</label>
+                    {/* পাসওয়ার্ড ফিল্ড */}
+                    <div className="flex flex-col gap-2 mb-6">
+                        <label className="text-sm font-bold text-gray-700">
+                            পাসওয়ার্ড
+                        </label>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="••••••••"
-                            className="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-all"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-orange-500 transition-all placeholder-gray-400"
                             required
                         />
                     </div>
-
                     <button
                         type="submit"
-                        className="w-full bg-orange-600 text-white font-bold text-lg py-4 rounded-xl hover:bg-orange-700 hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 mt-2 cursor-pointer"
+                        className="w-3/4 block mx-auto bg-orange-600 text-white font-bold text-lg py-4 rounded-xl hover:bg-orange-700 hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 mt-2 cursor-pointer"
                     >
                         লগইন করুন
                     </button>
