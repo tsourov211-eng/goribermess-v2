@@ -69,7 +69,7 @@ export default function LoginPage() {
                         Good Food <br />
                         Brighter Days
                     </h2>
-                    <p className="text-gray-600 text-sm sm:text-base mt-1.5 font-bold drop-shadow-sm">
+                    <p className="text-gray-600 text-sm sm:text-base mt-1.5 font-bold ">
                         Sign in to manage your mess with ease
                     </p>
                 </div>
@@ -97,7 +97,7 @@ export default function LoginPage() {
                         
                         {/* Email Field */}
                         <div>
-                            <label className="block text-sm font-bold text-gray-900 mb-1.5 ml-1 drop-shadow-sm">
+                            <label className="block text-sm font-bold text-gray-900 mb-2.5 ml-1 drop-shadow-sm">
                                 Email Address
                             </label>
                             <div className="relative flex items-center">
@@ -109,7 +109,7 @@ export default function LoginPage() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="admin@gmail.com"
-                                    className="w-full pl-14 pr-4 py-3 sm:py-3.5 bg-white/40 border border-white/50 rounded-xl outline-none focus:bg-white/60 focus:ring-2 focus:ring-orange-400 transition-all placeholder-gray-400 text-base text-gray-900 font-bold shadow-inner"
+                                    className="w-full pl-14 pr-4 py-3 sm:py-3.5 bg-white/40 border border-white/50 rounded-xl outline-none focus:bg-white/60 focus:ring-2 focus:ring-orange-400 transition-all placeholder-gray-400 text-base text-gray-900 font-normal shadow-inner"
                                     required
                                 />
                             </div>
@@ -129,7 +129,7 @@ export default function LoginPage() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
-                                    className="w-full pl-14 pr-12 py-3 sm:py-3.5 bg-white/40 border border-white/50 rounded-xl outline-none focus:bg-white/60 focus:ring-2 focus:ring-orange-400 transition-all placeholder-gray-400 text-base text-gray-900 font-bold shadow-inner"
+                                    className="w-full pl-14 pr-12 py-3 sm:py-3.5 bg-white/40 border border-white/50 rounded-xl outline-none focus:bg-white/60 focus:ring-2 focus:ring-orange-400 transition-all placeholder-gray-400 text-base text-gray-900 font-normal shadow-inner"
                                     required
                                 />
                                 <div className="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer group">

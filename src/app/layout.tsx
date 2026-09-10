@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "গড়িবের মেস",
-  description: "মেস ম্যানেজমেন্ট সিস্টেম",
+  title: "আমাদের মেস",
+  description: "স্মার্ট মেস ম্যানেজমেন্ট সলিউশন",
 };
 
 export default function RootLayout({
