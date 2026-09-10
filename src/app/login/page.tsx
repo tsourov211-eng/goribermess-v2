@@ -1,4 +1,3 @@
-// app/login/page.tsx-এর ভেতরে ফর্ম হ্যান্ডেল করার অংশটি এভাবে যুক্ত করুন:
 "use client";
 
 import Link from "next/link";
@@ -6,6 +5,7 @@ import { signIn, getSession } from "next-auth/react";
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { IconBrandGoogle, IconMail, IconLock, IconEye, IconLogin } from "@tabler/icons-react";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -13,8 +13,6 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const router = useRouter();
 
-
-    // ফর্ম সাবমিট করার ফাংশন
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError("");
@@ -27,13 +25,11 @@ export default function LoginPage() {
             });
 
             if (res?.error) {
-                setError("ইমেইল অথবা পাসওয়ার্ড ভুল হয়েছে!");
+                setError("ইমেইল অথবা পাসওয়ার্ড ভুল হয়েছে!");
             } else {
-                // সফলভাবে লগইন হলে সেশন (Session) থেকে ইউজারের রোল বের করা
                 const session = await getSession();
                 const userRole = (session?.user as { role?: string })?.role;
 
-                // রোল অনুযায়ী নির্দিষ্ট ড্যাশবোর্ডে পাঠানো
                 if (userRole === "admin") {
                     router.push("/admin");
                 } else if (userRole === "manager") {
@@ -48,88 +44,142 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[url('/login-bg-mobile.png')] md:bg-[url('/login-bg.png')] bg-cover bg-center bg-no-repeat flex items-center justify-center">
+        // min-h-screen এর জায়গায় min-h-[100dvh] ব্যবহার করা হয়েছে যাতে মোবাইলে পারফেক্ট সেন্টারিং হয়
+        <div className="min-h-[100dvh] w-full bg-[url('/login-bg-mobile.png')] lg:bg-[url('/login-bg.png')] bg-cover bg-center bg-no-repeat flex items-center justify-center lg:justify-end px-4 sm:px-6 lg:pr-[18%] xl:pr-[22%] relative py-6 lg:py-0">
 
+            {/* কার্ডটিকে ফুটিয়ে তোলার জন্য ওভারলে */}
+            <div className="absolute inset-0 bg-black/10 sm:bg-black/5"></div>
 
-            <div className="bg-white w-full max-w-lg rounded-[2rem] shadow-xl p-10 border border-orange-50">
-
-                <div className="text-center mb-8">
-                    <Link href="/" className="flex justify-center mb-2 cursor-pointer">
-                        {/* "গড়িবের মেস" লেখার বদলে নিচে লোগো বসানো হয়েছে */}
+            {/* মেইন কন্টেইনার */}
+            <div className="w-full max-w-md flex flex-col items-center relative z-10">
+                
+                {/* ─── মোবাইল ভিউ হেডার (লোগো এবং টেক্সট - গ্যাপ কমানো হয়েছে) ─── */}
+                <div className="lg:hidden flex flex-col items-center text-center mb-5 sm:mb-6">
+                    <Link href="/" className="flex items-center justify-center mb-2 transition-transform hover:scale-105">
                         <Image
                             src="/logo.png"
-                            alt="গরিবের মেস লোগো"
-                            width={180}
-                            height={60}
+                            alt="আমাদের মেস লোগো"
+                            width={180} 
+                            height={180}
                             priority
+                            className="w-28 sm:w-32 h-auto object-contain drop-shadow-md"
                         />
                     </Link>
-
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-[#5e2818] leading-tight drop-shadow-sm mb-6">
+                        Good Food <br />
+                        Brighter Days
+                    </h2>
+                    <p className="text-gray-600 text-sm sm:text-base mt-1.5 font-bold drop-shadow-sm">
+                        Sign in to manage your mess with ease
+                    </p>
                 </div>
 
-                {/* যদি পাসওয়ার্ড ভুল হয়, এখানে এরর দেখাবে */}
-                {error && (
-                    <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm font-semibold mb-6 text-center border border-red-100">
-                        {error}
-                    </div>
-                )}
-
-                {/* ফর্ম */}
-                <form onSubmit={handleSubmit} className="space-y-5">
-
-
-                    {/* ইমেইল ফিল্ড */}
-                    <div className="flex flex-col gap-2 mb-5">
-                        <label className="text-base font-bold text-gray-700 ml-1">
-                            Email Address
-                        </label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="admin@gmail.com"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-orange-500 transition-all placeholder-gray-400"
-                            required
-                        />
+                {/* ─── লগইন কার্ড (Glassmorphism Effect) ─── */}
+                <div className="bg-white/30 backdrop-blur-xl w-full rounded-3xl sm:rounded-[2.5rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] p-6 sm:p-8 border border-white/50">
+                    
+                    {/* ─── ডেস্কটপ ভিউ টাইটেল ─── */}
+                    <div className="hidden lg:block text-center mb-10">
+                        <h2 className="text-3xl font-extrabold text-[#5e2818] tracking-tight drop-shadow-sm mb-6">
+                            Welcome Back
+                        </h2>
+                        <p className="text-gray-600 text-sm sm:text-base font-bold mt-2 drop-shadow-sm">
+                            Sign in to your Amader Mess account
+                        </p>
                     </div>
 
-                    {/* পাসওয়ার্ড ফিল্ড */}
-                    <div className="flex flex-col gap-2 mb-6 ">
-                        <label className="text-base font-bold text-gray-700 ml-1">
-                            Password
-                        </label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="••••••••"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-orange-500 transition-all placeholder-gray-400"
-                            required
-                        />
+                    {error && (
+                        <div className="bg-red-500/20 backdrop-blur-md text-red-700 p-3 rounded-xl text-sm font-bold mb-5 text-center border border-red-500/30">
+                            {error}
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        
+                        {/* Email Field */}
+                        <div>
+                            <label className="block text-sm font-bold text-gray-900 mb-1.5 ml-1 drop-shadow-sm">
+                                Email Address
+                            </label>
+                            <div className="relative flex items-center">
+                                <div className="absolute left-1.5 w-10 h-10 bg-white/50 rounded-lg flex items-center justify-center shadow-sm">
+                                    <IconMail className="h-5 w-5 text-orange-600" stroke={2} />
+                                </div>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="admin@gmail.com"
+                                    className="w-full pl-14 pr-4 py-3 sm:py-3.5 bg-white/40 border border-white/50 rounded-xl outline-none focus:bg-white/60 focus:ring-2 focus:ring-orange-400 transition-all placeholder-gray-400 text-base text-gray-900 font-bold shadow-inner"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        {/* Password Field */}
+                        <div>
+                            <label className="block text-sm font-bold text-gray-900 mb-1.5 ml-1 drop-shadow-sm">
+                                Password
+                            </label>
+                            <div className="relative flex items-center">
+                                <div className="absolute left-1.5 w-10 h-10 bg-white/50 rounded-lg flex items-center justify-center shadow-sm">
+                                    <IconLock className="h-5 w-5 text-orange-600" stroke={2} />
+                                </div>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    className="w-full pl-14 pr-12 py-3 sm:py-3.5 bg-white/40 border border-white/50 rounded-xl outline-none focus:bg-white/60 focus:ring-2 focus:ring-orange-400 transition-all placeholder-gray-400 text-base text-gray-900 font-bold shadow-inner"
+                                    required
+                                />
+                                <div className="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer group">
+                                    <IconEye className="h-5 w-5 text-gray-700 group-hover:text-orange-600 transition-colors" stroke={2} />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Forgot Password Link */}
+                        <div className="flex justify-end pt-1">
+                            <Link href="#" className="text-sm font-bold text-orange-600 hover:text-orange-700 transition-colors drop-shadow-sm">
+                                Forgot Password?
+                            </Link>
+                        </div>
+
+                        {/* Sign In Button */}
+                        <button
+                            type="submit"
+                            className="w-full py-3.5 mt-1 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-lg font-bold rounded-xl shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:-translate-y-0.5 transition-all duration-300 tracking-wide cursor-pointer"
+                        >
+                            <IconLogin className="w-5 h-5" stroke={2.5} />
+                            Sign In
+                        </button>
+                    </form>
+
+                    {/* OR Divider */}
+                    <div className="my-5 flex items-center gap-4">
+                        <div className="h-px bg-gray-400/30 flex-1"></div>
+                        <span className="text-xs font-bold text-gray-700 uppercase tracking-widest drop-shadow-sm">Or</span>
+                        <div className="h-px bg-gray-400/30 flex-1"></div>
                     </div>
+
+                    {/* Google Sign In Button */}
                     <button
-                        type="submit"
-                        className="w-full py-3 mt-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-lg font-bold rounded-lg shadow-lg shadow-orange-500/40 hover:shadow-orange-500/60 hover:-translate-y-1 transition-all duration-300 tracking-wide"
+                        type="button"
+                        className="w-full py-3.5 flex items-center justify-center gap-3 bg-white/40 backdrop-blur-sm border border-white/50 text-gray-900 text-base font-bold rounded-xl shadow-sm hover:bg-white/60 transition-all duration-300 cursor-pointer"
                     >
-                        Sign In
+                        <IconBrandGoogle className="w-6 h-6 text-orange-600" stroke={1.5} />
+                        Continue with Google
                     </button>
-                </form>
 
-                <div className="my-6 flex items-center gap-4">
-                    <div className="h-px bg-gray-200 flex-1"></div>
-                    <span className="text-sm font-medium text-gray-400">OR</span>
-                    <div className="h-px bg-gray-200 flex-1"></div>
+                    {/* Create Account Link */}
+                    <div className="mt-6 text-center text-sm font-bold text-gray-800 drop-shadow-sm">
+                        Don't have an account?{" "}
+                        <Link href="/register" className="text-orange-600 font-extrabold hover:text-orange-700 transition-colors">
+                            Create New Account
+                        </Link>
+                    </div>
+
                 </div>
-
-                <button
-                    onClick={() => signIn('google', { callbackUrl: '/member' })}
-                    type="button"
-                    className="w-full bg-white border-2 border-gray-200 text-gray-700 font-bold text-lg py-3.5 rounded-xl flex items-center justify-center gap-3 hover:bg-gray-50 hover:border-gray-300 transition-all cursor-pointer"
-                >
-                    {/* গুগল আইকন এসভিজি আগের মতোই থাকবে */}
-                    Sign In with Google
-                </button>
-
             </div>
         </div>
     );

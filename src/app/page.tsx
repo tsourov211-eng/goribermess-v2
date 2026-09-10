@@ -1,116 +1,208 @@
-// app/page.tsx
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { 
+  IconLogin, 
+  IconUserPlus, 
+  IconChecklist, 
+  IconCalculator, 
+  IconChartBar, 
+  IconShieldCheck,
+  IconMenu2,
+  IconX
+} from "@tabler/icons-react";
+
+export default function HomePage() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // মেনু খোলা অবস্থায় যেন পেজ স্ক্রল না হয়, তার জন্য এই Effect-টি যুক্ত করা হয়েছে
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+  }, [isMobileMenuOpen]);
+
   return (
-    <div className="min-h-screen bg-amber-50 text-gray-900 font-sans">
-      {/* মূল ব্যাকগ্রাউন্ড - ব্যাগের হালকা ক্রিম কালার (amber-50) */}
+    <div className="min-h-screen bg-[#FEF8F4] text-gray-800">
+      
+      {/* ─── Navbar ─── */}
+      <header className="sticky top-0 z-50 bg-[#FEF8F4]/90 backdrop-blur-md border-b border-orange-100/60 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 sm:h-24 flex items-center justify-between relative z-50">
+          
+          {/* Logo Section */}
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/logo.png"
+              alt="আমাদের মেস লোগো"
+              width={220}
+              height={80}
+              priority
+              className="h-12 sm:h-16 lg:h-20 w-auto object-contain cursor-pointer transition-transform hover:scale-105"
+            />
+          </Link>
 
-      {/* ১. নেভিগেশন বার (Navbar) */}
-      <nav className="bg-[#FDFBF7] shadow-sm sticky top-0 z-50 border-b border-orange-100">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="text-3xl font-extrabold text-orange-600 tracking-tight">
-            গড়িবের মেস
-          </div>
-          <div className="hidden md:flex items-center gap-6 font-medium text-gray-700">
-            <a href="#features" className="hover:text-orange-600 transition">ফিচার</a>
-            <a href="#" className="hover:text-orange-600 transition">আমাদের সম্পর্কে</a>
-            <a href="#" className="hover:text-orange-600 transition">লগইন</a>
-            <button className="bg-orange-600 text-white px-5 py-2.5 rounded-lg hover:bg-orange-700 shadow-md transition">
+          {/* Desktop Nav Links */}
+          <nav className="hidden md:flex items-center gap-8 text-gray-700 font-bold">
+            <a href="#features" className="hover:text-orange-600 transition-colors">ফিচার</a>
+            <a href="#about" className="hover:text-orange-600 transition-colors">আমাদের সম্পর্কে</a>
+            <Link href="/login" className="hover:text-orange-600 transition-colors flex items-center gap-1">
+              লগইন
+            </Link>
+          </nav>
+
+          {/* Desktop Action Button */}
+          <div className="hidden md:flex items-center gap-3">
+            <Link
+              href="/register"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-md shadow-orange-500/20 hover:shadow-orange-500/40 hover:-translate-y-0.5 transition-all cursor-pointer text-sm sm:text-base"
+            >
               নতুন মেস খুলুন
+            </Link>
+          </div>
+
+          {/* Mobile Menu Toggle Button */}
+          <div className="md:hidden flex items-center">
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+              className="text-orange-600 p-2 focus:outline-none bg-orange-100/50 hover:bg-orange-100 rounded-lg transition-colors"
+            >
+              {isMobileMenuOpen ? <IconX className="w-7 h-7" /> : <IconMenu2 className="w-7 h-7" />}
             </button>
           </div>
         </div>
-      </nav>
 
-      {/* ২. হিরো সেকশন (Hero Section) */}
-      <section className="py-20 px-6">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div>
-            <h1 className="text-5xl md:text-6xl font-extrabold leading-tight mb-8 text-gray-800">
-              মেসের হিসাব-নিকাশ এখন <span className="text-orange-600">আপনার হাতের মুঠোয়!</span>
+        {/* ─── Mobile Dropdown & Overlay ─── */}
+        {isMobileMenuOpen && (
+          <>
+            {/* Dark Blur Overlay (পেছনের অংশ কালো ও ব্লার করার জন্য) */}
+            <div 
+              className="md:hidden fixed inset-0 top-[80px] sm:top-[96px] bg-black/40 backdrop-blur-sm z-40"
+              onClick={() => setIsMobileMenuOpen(false)}
+            ></div>
+            
+            {/* White Dropdown Menu Panel (বাটনগুলো মুছে দেওয়া হয়েছে) */}
+            <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-2xl rounded-b-[2rem] flex flex-col z-50 overflow-hidden border-b border-orange-50">
+              <div className="px-6 py-6 flex flex-col gap-4">
+                
+                <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-800 font-bold text-lg hover:text-orange-600 border-b border-gray-100 pb-3">
+                  ফিচার
+                </a>
+                
+                <a href="#about" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-800 font-bold text-lg hover:text-orange-600">
+                  আমাদের সম্পর্কে
+                </a>
+
+              </div>
+            </div>
+          </>
+        )}
+      </header>
+
+      {/* ─── Hero Section ─── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 lg:pt-20 lg:pb-28">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          
+          {/* Left Text Column */}
+          <div className="lg:col-span-6 space-y-5 lg:space-y-6 text-center lg:text-left">
+          
+            <h1 className="text-[2rem] sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight lg:leading-[1.15]">
+              মেসের হিসাব-নিকাশ <br className="hidden sm:block" />
+              এখন <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600">আপনার হাতের মুঠোয়!</span>
             </h1>
-            <p className="text-xl text-gray-700 mb-12 font-medium">
-              খাতা-কলমের দিন শেষ, এবার স্মার্টলি ম্যানেজ করুন আপনার মেসের মিল, বাজার আর খরচের হিসাব।
+
+            <p className="text-base sm:text-lg text-gray-600 max-w-xl mx-auto lg:mx-0 leading-relaxed px-2 sm:px-0">
+              খাতা-কলমের দিন শেষ! <strong className="text-gray-800">আমাদের মেস</strong>-এর মাধ্যমে একদম নির্ভুল ও সহজভাবে ট্র্যাক করুন মিল কাউন্ট, বাজার খরচ এবং মেম্বারদের ডিপোজিট।
             </p>
-            <div className="flex flex-wrap gap-4">
-              <button className="bg-orange-600 text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-orange-700 shadow-lg hover:shadow-orange-500/30 transition transform hover:-translate-y-1">
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-4">
+              <Link
+                href="/login"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-3.5 sm:py-4 rounded-xl font-bold shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:-translate-y-0.5 transition-all cursor-pointer text-lg"
+              >
+                <IconLogin className="w-5 h-5 sm:w-6 sm:h-6" stroke={2.5} />
                 লগইন করুন
-              </button>
-              <button className="bg-[#FDFBF7] text-orange-600 px-10 py-4 rounded-xl font-bold text-lg border-2 border-orange-600 hover:bg-orange-100 transition">
+              </Link>
+
+              <Link
+                href="/register"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-orange-600 border-2 border-orange-500/80 px-8 py-3.5 sm:py-4 rounded-xl font-bold hover:bg-orange-50 transition-all cursor-pointer text-lg"
+              >
+                <IconUserPlus className="w-5 h-5 sm:w-6 sm:h-6" stroke={2.5} />
                 নতুন মেস খুলুন
-              </button>
+              </Link>
             </div>
           </div>
 
-          {/* ইলাস্ট্রেশন বক্স */}
-          <div className="relative aspect-video bg-orange-100 rounded-3xl flex items-center justify-center border-4 border-dashed border-orange-300 shadow-inner">
-            <p className="text-orange-600 font-bold text-lg">[ ড্যাশবোর্ডের ছবি ]</p>
+          {/* Right Showcase Column */}
+          <div className="lg:col-span-6 px-4 sm:px-0 mt-6 lg:mt-0">
+            <div className="relative mx-auto max-w-md lg:max-w-none">
+              <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-amber-300 rounded-3xl blur-2xl opacity-20"></div>
+
+              <div className="relative bg-gradient-to-br from-orange-50/80 to-amber-50/70 border-2 border-dashed border-orange-300 rounded-3xl p-6 sm:p-14 min-h-[280px] sm:min-h-[420px] flex flex-col items-center justify-center text-center shadow-inner">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-600 mb-4 shadow-sm">
+                  <IconChartBar className="w-7 h-7 sm:w-8 sm:h-8" stroke={1.8} />
+                </div>
+                <h3 className="text-orange-700 font-bold text-lg sm:text-xl mb-2">[ ড্যাশবোর্ডের ছবি ]</h3>
+                <p className="text-gray-500 text-xs sm:text-sm max-w-xs leading-relaxed">
+                  পরবর্তীতে আপনার আসল ড্যাশবোর্ডের একটি স্ক্রিনশট এখানে বসিয়ে দিতে পারেন।
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ─── Features Section ─── */}
+      <section id="features" className="bg-white py-16 sm:py-20 border-t border-orange-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900 mb-3 sm:mb-4">
+            আমাদের সেরা বৈশিষ্ট্যসমূহ
+          </h2>
+          <p className="text-gray-500 text-sm sm:text-lg mb-10 sm:mb-14 max-w-2xl mx-auto px-4">
+            মেস লাইফ সহজ ও ঝামেলামুক্ত করার জন্য যা কিছু প্রয়োজন, সব এক প্ল্যাটফর্মে
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            <div className="bg-[#FEF8F4] p-6 sm:p-8 rounded-2xl border border-orange-100 hover:shadow-lg transition-all text-left group">
+              <div className="w-12 h-12 rounded-xl bg-orange-500 text-white flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                <IconChecklist className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">প্রতিদিনের মিল কাউন্ট</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                সকাল, দুপুর এবং রাতের মিল এন্ট্রি করুন এক ক্লিকে। রিয়েল-টাইমে আপডেট থাকবে মেম্বারদের মিল শিট।
+              </p>
+            </div>
+
+            <div className="bg-[#FEF8F4] p-6 sm:p-8 rounded-2xl border border-orange-100 hover:shadow-lg transition-all text-left group">
+              <div className="w-12 h-12 rounded-xl bg-orange-500 text-white flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                <IconCalculator className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">স্বয়ংক্রিয় বাজার খরচ হিসাব</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                কে কত টাকা বাজার করলো এবং কার কত ডিপোজিট জমা আছে, সিস্টেম নিজ থেকেই স্বয়ংক্রিয় মিল রেট তৈরি করবে।
+              </p>
+            </div>
+
+            <div className="bg-[#FEF8F4] p-6 sm:p-8 rounded-2xl border border-orange-100 hover:shadow-lg transition-all text-left group">
+              <div className="w-12 h-12 rounded-xl bg-orange-500 text-white flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                <IconShieldCheck className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">স্বচ্ছ অডিট ও হিসেব</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                ম্যানেজার ও মেম্বারদের আলাদা ড্যাশবোর্ড থাকায় প্রতিটি খরচের স্বচ্ছতা থাকে ১০০% নিশ্চিত।
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ৩. ফিচার সেকশন (Features Section) */}
-      <section id="features" className="py-24 px-6 bg-white rounded-t-[3rem] shadow-[0_-10px_40px_rgba(0,0,0,0.02)]">
-        <div className="max-w-7xl mx-auto text-center mb-16">
-          <h2 className="text-4xl font-extrabold mb-4 text-gray-800">আমাদের সেরা বৈশিষ্ট্যসমূহ</h2>
-          <p className="text-lg text-gray-500 font-medium">মেস লাইফ সহজ করার জন্য যা কিছু প্রয়োজন, সব এক জায়গায়</p>
-        </div>
-
-        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-          <FeatureCard
-            icon="📊"
-            title="অটোমেটিক হিসাব"
-            description="মাস শেষে এক ক্লিকে পুরো হিসাব তৈরি। ভুল হওয়ার কোনো সুযোগ নেই।"
-            accentColor="text-red-600"
-            bgColor="bg-red-50"
-          />
-          <FeatureCard
-            icon="🛒"
-            title="স্মার্ট বাজার রুটিন"
-            description="কে কবে বাজার করবে তার নোটিফিকেশন। ঝামেলা ছাড়াই ম্যানেজ করুন।"
-            accentColor="text-green-600"
-            bgColor="bg-green-50"
-          />
-          <FeatureCard
-            icon="🍽️"
-            title="রিয়েল-টাইম মিল আপডেট"
-            description="নিজের ফোন থেকেই মিল অন/অফ করার সুবিধা। সবাই থাকবে আপডেটেড।"
-            accentColor="text-orange-600"
-            bgColor="bg-orange-50"
-          />
-        </div>
-      </section>
-
-      {/* ৪. ফুটার (Footer) */}
-      <footer className="bg-orange-600 py-12 px-6 text-orange-50">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between">
-          <div className="text-3xl font-extrabold mb-4 md:mb-0 tracking-tight">গড়িবের মেস</div>
-          <p className="font-medium text-orange-100">&copy; ২০২৬ গড়িবের মেস. সর্বস্বত্ব সংরক্ষিত।</p>
-          <p className="font-medium text-orange-100 hover:text-white cursor-pointer transition">যোগাযোগ: support@goribermess.com</p>
-        </div>
-      </footer>
-
-    </div>
-  );
-}
-
-// ফিচার কার্ডের কম্পোনেন্ট
-interface FeatureCardProps {
-  icon: string;
-  title: string;
-  description: string;
-  accentColor: string;
-  bgColor: string;
-}
-
-function FeatureCard({ icon, title, description, accentColor, bgColor }: FeatureCardProps) {
-  return (
-    <div className="bg-white p-10 rounded-3xl shadow-lg hover:shadow-xl border border-gray-100 flex flex-col items-center text-center transition duration-300 transform hover:-translate-y-2">
-      <div className={`text-6xl mb-6 p-4 rounded-full ${bgColor}`}>
-        {icon}
-      </div>
-      <h3 className={`text-2xl font-bold mb-4 ${accentColor}`}>{title}</h3>
-      <p className="text-gray-600 leading-relaxed font-medium">{description}</p>
     </div>
   );
 }
