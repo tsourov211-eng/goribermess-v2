@@ -1,208 +1,313 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
+import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { 
-  IconLogin, 
-  IconUserPlus, 
-  IconChecklist, 
-  IconCalculator, 
-  IconChartBar, 
-  IconShieldCheck,
-  IconMenu2,
-  IconX
+    IconCheck, 
+    IconLogin, 
+    IconUserPlus, 
+    IconUsers, 
+    IconToolsKitchen2, 
+    IconReceipt, 
+    IconChartBar,
+    IconBell,
+    IconWallet,
+    IconMenu2,
+    IconX
 } from "@tabler/icons-react";
 
-export default function HomePage() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+export default function LandingPage() {
+    // Mobile Menu State
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // মেনু খোলা অবস্থায় যেন পেজ স্ক্রল না হয়, তার জন্য এই Effect-টি যুক্ত করা হয়েছে
-  useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-  }, [isMobileMenuOpen]);
-
-  return (
-    <div className="min-h-screen bg-[#FEF8F4] text-gray-800">
-      
-      {/* ─── Navbar ─── */}
-      <header className="sticky top-0 z-50 bg-[#FEF8F4]/90 backdrop-blur-md border-b border-orange-100/60 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 sm:h-24 flex items-center justify-between relative z-50">
-          
-          {/* Logo Section */}
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/logo.png"
-              alt="আমাদের মেস লোগো"
-              width={220}
-              height={80}
-              priority
-              className="h-12 sm:h-16 lg:h-20 w-auto object-contain cursor-pointer transition-transform hover:scale-105"
-            />
-          </Link>
-
-          {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-8 text-gray-700 font-bold">
-            <a href="#features" className="hover:text-orange-600 transition-colors">ফিচার</a>
-            <a href="#about" className="hover:text-orange-600 transition-colors">আমাদের সম্পর্কে</a>
-            <Link href="/login" className="hover:text-orange-600 transition-colors flex items-center gap-1">
-              লগইন
-            </Link>
-          </nav>
-
-          {/* Desktop Action Button */}
-          <div className="hidden md:flex items-center gap-3">
-            <Link
-              href="/register"
-              className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-md shadow-orange-500/20 hover:shadow-orange-500/40 hover:-translate-y-0.5 transition-all cursor-pointer text-sm sm:text-base"
-            >
-              নতুন মেস খুলুন
-            </Link>
-          </div>
-
-          {/* Mobile Menu Toggle Button */}
-          <div className="md:hidden flex items-center">
-            <button 
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-              className="text-orange-600 p-2 focus:outline-none bg-orange-100/50 hover:bg-orange-100 rounded-lg transition-colors"
-            >
-              {isMobileMenuOpen ? <IconX className="w-7 h-7" /> : <IconMenu2 className="w-7 h-7" />}
-            </button>
-          </div>
-        </div>
-
-        {/* ─── Mobile Dropdown & Overlay ─── */}
-        {isMobileMenuOpen && (
-          <>
-            {/* Dark Blur Overlay (পেছনের অংশ কালো ও ব্লার করার জন্য) */}
-            <div 
-              className="md:hidden fixed inset-0 top-[80px] sm:top-[96px] bg-black/40 backdrop-blur-sm z-40"
-              onClick={() => setIsMobileMenuOpen(false)}
-            ></div>
+    return (
+        <div className="min-h-screen font-sans overflow-hidden bg-white">
             
-            {/* White Dropdown Menu Panel (বাটনগুলো মুছে দেওয়া হয়েছে) */}
-            <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-2xl rounded-b-[2rem] flex flex-col z-50 overflow-hidden border-b border-orange-50">
-              <div className="px-6 py-6 flex flex-col gap-4">
-                
-                <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-800 font-bold text-lg hover:text-orange-600 border-b border-gray-100 pb-3">
-                  ফিচার
-                </a>
-                
-                <a href="#about" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-800 font-bold text-lg hover:text-orange-600">
-                  আমাদের সম্পর্কে
-                </a>
+            {/* ─── Sticky & Transparent Navbar (Glassmorphism) ─── */}
+            <nav className="fixed top-0 left-0 w-full z-50 bg-white/60 backdrop-blur-md border-b border-white/30 shadow-sm transition-all duration-300">
+                <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+                    
+                    {/* Logo Section */}
+                    <Link href="/" className="flex items-center transition-transform hover:scale-105">
+                        <Image 
+                            src="/logo.png" 
+                            alt="Amader Mess Logo" 
+                            width={120} 
+                            height={120} 
+                            className="h-14 w-auto object-contain drop-shadow-sm" 
+                            priority
+                        />
+                    </Link>
 
-              </div>
-            </div>
-          </>
-        )}
-      </header>
+                    {/* Desktop Links */}
+                    <div className="hidden md:flex items-center gap-8">
+                        <Link href="/" className="text-[#FF6B00] font-bold text-base border-b-2 border-[#FF6B00] pb-1">Home</Link>
+                        <Link href="#about" className="text-gray-700 hover:text-[#FF6B00] font-bold text-base transition-colors pb-1">About Us</Link>
+                        <Link href="#features" className="text-gray-700 hover:text-[#FF6B00] font-bold text-base transition-colors pb-1">Features</Link>
+                        <Link href="#contact" className="text-gray-700 hover:text-[#FF6B00] font-bold text-base transition-colors pb-1">Contact</Link>
+                    </div>
 
-      {/* ─── Hero Section ─── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 lg:pt-20 lg:pb-28">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          
-          {/* Left Text Column */}
-          <div className="lg:col-span-6 space-y-5 lg:space-y-6 text-center lg:text-left">
-          
-            <h1 className="text-[2rem] sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight lg:leading-[1.15]">
-              মেসের হিসাব-নিকাশ <br className="hidden sm:block" />
-              এখন <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600">আপনার হাতের মুঠোয়!</span>
-            </h1>
+                    {/* Desktop Auth Buttons */}
+                    <div className="hidden sm:flex items-center gap-4">
+                        <Link href="/login" className="flex items-center gap-2 bg-[#FF6B00] hover:bg-orange-600 text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-md shadow-orange-500/20 transition-all">
+                            <IconLogin size={18} stroke={2.5} /> Login
+                        </Link>
+                        <Link href="/register" className="flex items-center gap-2 bg-white text-[#FF6B00] border border-[#FF6B00] hover:bg-orange-50 px-6 py-2.5 rounded-full font-bold text-sm transition-all">
+                            <IconUserPlus size={18} stroke={2.5} /> Create Account
+                        </Link>
+                    </div>
 
-            <p className="text-base sm:text-lg text-gray-600 max-w-xl mx-auto lg:mx-0 leading-relaxed px-2 sm:px-0">
-              খাতা-কলমের দিন শেষ! <strong className="text-gray-800">আমাদের মেস</strong>-এর মাধ্যমে একদম নির্ভুল ও সহজভাবে ট্র্যাক করুন মিল কাউন্ট, বাজার খরচ এবং মেম্বারদের ডিপোজিট।
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-4">
-              <Link
-                href="/login"
-                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-3.5 sm:py-4 rounded-xl font-bold shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:-translate-y-0.5 transition-all cursor-pointer text-lg"
-              >
-                <IconLogin className="w-5 h-5 sm:w-6 sm:h-6" stroke={2.5} />
-                লগইন করুন
-              </Link>
-
-              <Link
-                href="/register"
-                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-orange-600 border-2 border-orange-500/80 px-8 py-3.5 sm:py-4 rounded-xl font-bold hover:bg-orange-50 transition-all cursor-pointer text-lg"
-              >
-                <IconUserPlus className="w-5 h-5 sm:w-6 sm:h-6" stroke={2.5} />
-                নতুন মেস খুলুন
-              </Link>
-            </div>
-          </div>
-
-          {/* Right Showcase Column */}
-          <div className="lg:col-span-6 px-4 sm:px-0 mt-6 lg:mt-0">
-            <div className="relative mx-auto max-w-md lg:max-w-none">
-              <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-amber-300 rounded-3xl blur-2xl opacity-20"></div>
-
-              <div className="relative bg-gradient-to-br from-orange-50/80 to-amber-50/70 border-2 border-dashed border-orange-300 rounded-3xl p-6 sm:p-14 min-h-[280px] sm:min-h-[420px] flex flex-col items-center justify-center text-center shadow-inner">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-600 mb-4 shadow-sm">
-                  <IconChartBar className="w-7 h-7 sm:w-8 sm:h-8" stroke={1.8} />
+                    {/* Mobile Menu Toggle Button */}
+                    <button 
+                        onClick={() => setIsMobileMenuOpen(true)}
+                        className="sm:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                        <IconMenu2 size={28} />
+                    </button>
                 </div>
-                <h3 className="text-orange-700 font-bold text-lg sm:text-xl mb-2">[ ড্যাশবোর্ডের ছবি ]</h3>
-                <p className="text-gray-500 text-xs sm:text-sm max-w-xs leading-relaxed">
-                  পরবর্তীতে আপনার আসল ড্যাশবোর্ডের একটি স্ক্রিনশট এখানে বসিয়ে দিতে পারেন।
-                </p>
-              </div>
+            </nav>
+
+            {/* ─── Mobile Menu Overlay ─── */}
+            {isMobileMenuOpen && (
+                <div className="fixed inset-0 z-[100] bg-white flex flex-col sm:hidden animate-in fade-in zoom-in-95 duration-200">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                        <Image 
+                            src="/logo.png" 
+                            alt="Amader Mess Logo" 
+                            width={100} 
+                            height={100} 
+                            className="h-10 w-auto object-contain" 
+                        />
+                        <button 
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="p-2 text-gray-500 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors"
+                        >
+                            <IconX size={28} />
+                        </button>
+                    </div>
+                    
+                    <div className="flex flex-col flex-1 px-6 pt-8 gap-6">
+                        <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="text-[#FF6B00] font-extrabold text-xl">Home</Link>
+                        <Link href="#about" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-800 font-bold text-xl">About Us</Link>
+                        <Link href="#features" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-800 font-bold text-xl">Features</Link>
+                        <Link href="#contact" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-800 font-bold text-xl">Contact</Link>
+                        
+                        <div className="mt-auto pb-10 flex flex-col gap-4">
+                            <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 w-full bg-[#FF6B00] hover:bg-orange-600 text-white px-6 py-4 rounded-xl font-bold text-base shadow-md">
+                                <IconLogin size={22} stroke={2.5} /> Login
+                            </Link>
+                            <Link href="/register" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 w-full bg-white text-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-50 px-6 py-4 rounded-xl font-bold text-base">
+                                <IconUserPlus size={22} stroke={2.5} /> Create Account
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ─── Top Section (Hero) with Custom Background Image ─── */}
+            <div className="bg-[url('/landing_page_bg.png')] bg-cover bg-top bg-no-repeat w-full">
+                
+                {/* ─── Hero Section ─── */}
+                <section className="max-w-7xl mx-auto px-6 pt-28 pb-24 lg:pt-36 lg:pb-32 flex flex-col lg:flex-row items-center relative z-10">
+
+
+                    {/* Left Content */}
+                    <div className="lg:w-1/2 text-center lg:text-left z-10">
+                        <h1 className="text-5xl lg:text-[4.5rem] font-extrabold text-[#0B132B] leading-[1.1] tracking-tight mb-6">
+                            Manage Your <br className="hidden lg:block" /> Mess, <span className="text-[#FF6B00]">Smarter <br className="hidden lg:block" /> and Simpler</span>
+                        </h1>
+                        <p className="text-gray-600 text-lg md:text-xl font-medium mb-10 max-w-lg mx-auto lg:mx-0">
+                            Our Mess helps you manage members, track expenses, handle menus, and keep everything organized — all in one place.
+                        </p>
+                        
+                        <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-10">
+                            <Link href="/login" className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#FF6B00] hover:bg-orange-600 text-white px-8 py-3.5 rounded-xl font-bold text-base shadow-lg shadow-orange-500/30 transition-all">
+                                <IconLogin size={20} stroke={2.5} /> Login Now
+                            </Link>
+                            <Link href="/register" className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-[#FF6B00] border-2 border-orange-200 hover:border-[#FF6B00] hover:bg-orange-50 px-8 py-3.5 rounded-xl font-bold text-base transition-all">
+                                <IconUserPlus size={20} stroke={2.5} /> Create Account
+                            </Link>
+                        </div>
+
+                        <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-3">
+                            <div className="flex items-center gap-2 text-gray-700 font-bold text-sm">
+                                <div className="bg-orange-100 text-orange-600 rounded-full p-0.5"><IconCheck size={16} stroke={3}/></div>
+                                Easy to Use
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-700 font-bold text-sm">
+                                <div className="bg-orange-100 text-orange-600 rounded-full p-0.5"><IconCheck size={16} stroke={3}/></div>
+                                Secure & Reliable
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-700 font-bold text-sm">
+                                <div className="bg-orange-100 text-orange-600 rounded-full p-0.5"><IconCheck size={16} stroke={3}/></div>
+                                Built for Mess Communities
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Content (CSS Dashboard Mockup Floating Over Background) */}
+                    <div className="lg:w-1/2 mt-16 lg:mt-0 relative w-full h-[400px] md:h-[500px]">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] sm:w-[500px] bg-white rounded-3xl shadow-2xl shadow-gray-200/80 border border-gray-100 p-6 flex gap-6 transform lg:rotate-2 hover:rotate-0 transition-all duration-500 backdrop-blur-sm bg-white/95">
+                            
+                            {/* Sidebar Mock */}
+                            <div className="hidden sm:flex w-[120px] bg-gray-50 rounded-2xl p-4 flex-col gap-4 border border-gray-100">
+                                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center mb-4">
+                                    <IconToolsKitchen2 className="text-orange-500 w-5 h-5" />
+                                </div>
+                                <div className="h-8 rounded-lg bg-white border border-orange-100 flex items-center px-2 text-[10px] font-bold text-orange-600 shadow-sm"><IconChartBar size={14} className="mr-1"/> Dashboard</div>
+                                <div className="h-8 rounded-lg flex items-center px-2 text-[10px] font-bold text-gray-400"><IconUsers size={14} className="mr-1"/> Members</div>
+                                <div className="h-8 rounded-lg flex items-center px-2 text-[10px] font-bold text-gray-400"><IconToolsKitchen2 size={14} className="mr-1"/> Menu</div>
+                                <div className="h-8 rounded-lg flex items-center px-2 text-[10px] font-bold text-gray-400"><IconReceipt size={14} className="mr-1"/> Expenses</div>
+                            </div>
+
+                            {/* Main Content Mock */}
+                            <div className="flex-1">
+                                <div className="flex justify-between items-start mb-6">
+                                    <div>
+                                        <h3 className="font-extrabold text-xl text-[#0B132B]">Welcome Back!</h3>
+                                        <p className="text-xs text-gray-500 font-medium">Here's what's happening in your mess today.</p>
+                                    </div>
+                                    <div className="relative">
+                                        <IconBell className="text-gray-400" size={24} />
+                                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                                    <div className="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm">
+                                        <div className="w-8 h-8 bg-orange-50 text-orange-500 rounded-lg flex items-center justify-center mb-2"><IconUsers size={16}/></div>
+                                        <p className="text-[10px] text-gray-500 font-bold">Total Members</p>
+                                        <p className="font-extrabold text-lg text-[#0B132B]">12</p>
+                                    </div>
+                                    <div className="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm">
+                                        <div className="w-8 h-8 bg-green-50 text-green-500 rounded-lg flex items-center justify-center mb-2"><IconReceipt size={16}/></div>
+                                        <p className="text-[10px] text-gray-500 font-bold">Food Cost</p>
+                                        <p className="font-extrabold text-lg text-[#0B132B]">৳ 12,500</p>
+                                    </div>
+                                    <div className="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm hidden md:block">
+                                        <div className="w-8 h-8 bg-blue-50 text-blue-500 rounded-lg flex items-center justify-center mb-2"><IconWallet size={16}/></div>
+                                        <p className="text-[10px] text-gray-500 font-bold">Current Balance</p>
+                                        <p className="font-extrabold text-lg text-[#0B132B]">৳ 3,200</p>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <p className="text-xs font-bold text-gray-800 flex items-center gap-1"><span className="text-orange-500">●</span> Today's Menu</p>
+                                        <p className="text-[10px] text-gray-400 font-bold">Sep 12, 2026</p>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        <span className="px-2 py-1 bg-gray-50 text-gray-600 rounded text-[10px] font-bold">Rice</span>
+                                        <span className="px-2 py-1 bg-gray-50 text-gray-600 rounded text-[10px] font-bold">Dal</span>
+                                        <span className="px-2 py-1 bg-gray-50 text-gray-600 rounded text-[10px] font-bold">Chicken Curry</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
-          </div>
+
+            {/* ─── Features Section ─── */}
+            <section id="features" className="bg-white py-20 px-6 relative z-10">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl lg:text-4xl font-extrabold text-[#0B132B] mb-4">Everything You Need for Better Mess Management</h2>
+                        <p className="text-gray-500 text-base font-medium max-w-2xl mx-auto">Simple tools to manage your mess efficiently, so you can focus on what matters — good food and great company.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+                        <div className="flex flex-col items-center lg:items-start text-center lg:text-left group">
+                            <div className="w-16 h-16 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center mb-5 group-hover:-translate-y-2 transition-transform duration-300">
+                                <IconUsers size={32} stroke={2} />
+                            </div>
+                            <h3 className="text-lg font-extrabold text-[#0B132B] mb-2">Manage Members</h3>
+                            <p className="text-sm font-medium text-gray-500">Add, remove and manage mess members easily with roles and access.</p>
+                        </div>
+                        <div className="flex flex-col items-center lg:items-start text-center lg:text-left group">
+                            <div className="w-16 h-16 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center mb-5 group-hover:-translate-y-2 transition-transform duration-300">
+                                <IconToolsKitchen2 size={32} stroke={2} />
+                            </div>
+                            <h3 className="text-lg font-extrabold text-[#0B132B] mb-2">Track Expenses</h3>
+                            <p className="text-sm font-medium text-gray-500">Keep track of daily food costs, bazaar lists and other mess expenses.</p>
+                        </div>
+                        <div className="flex flex-col items-center lg:items-start text-center lg:text-left group">
+                            <div className="w-16 h-16 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center mb-5 group-hover:-translate-y-2 transition-transform duration-300">
+                                <IconReceipt size={32} stroke={2} />
+                            </div>
+                            <h3 className="text-lg font-extrabold text-[#0B132B] mb-2">Plan Menus</h3>
+                            <p className="text-sm font-medium text-gray-500">Set and manage daily or weekly menus so everyone knows what's cooking.</p>
+                        </div>
+                        <div className="flex flex-col items-center lg:items-start text-center lg:text-left group">
+                            <div className="w-16 h-16 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center mb-5 group-hover:-translate-y-2 transition-transform duration-300">
+                                <IconChartBar size={32} stroke={2} />
+                            </div>
+                            <h3 className="text-lg font-extrabold text-[#0B132B] mb-2">View Reports</h3>
+                            <p className="text-sm font-medium text-gray-500">Get insights with detailed reports, summaries and automatic meal rate calculations.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ─── Footer Section ─── */}
+            <footer className="bg-[#0B132B] pt-16 pb-8 px-6 border-t-4 border-[#FF6B00]">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+                        
+                        {/* Brand Column */}
+                        <div className="col-span-1 md:col-span-2">
+                            <Link href="/" className="flex items-center gap-2 mb-4">
+                                <div className="w-10 h-10 rounded-full border-2 border-orange-500 flex items-center justify-center bg-white shadow-sm">
+                                     <Image 
+                            src="/logo.png" 
+                            alt="Amader Mess Logo" 
+                            width={100} 
+                            height={100} 
+                            className="h-10 w-auto object-contain" 
+                        />
+                                </div>
+                                <span className="text-xl font-extrabold text-white">Our<span className="text-[#FF6B00]">Mess</span></span>
+                            </Link>
+                            <p className="text-gray-400 text-sm font-medium max-w-sm mb-6 leading-relaxed">
+                                Simplifying mess management for students and bachelors. Track meals, manage daily expenses, and keep everyone connected.
+                            </p>
+                        </div>
+
+                        {/* Quick Links */}
+                        <div>
+                            <h4 className="text-white font-extrabold mb-5 uppercase tracking-wider text-sm">Quick Links</h4>
+                            <ul className="space-y-3 text-sm font-medium text-gray-400">
+                                <li><Link href="/" className="hover:text-[#FF6B00] transition-colors">Home</Link></li>
+                                <li><Link href="#about" className="hover:text-[#FF6B00] transition-colors">About Us</Link></li>
+                                <li><Link href="#features" className="hover:text-[#FF6B00] transition-colors">Features</Link></li>
+                                <li><Link href="#contact" className="hover:text-[#FF6B00] transition-colors">Contact</Link></li>
+                            </ul>
+                        </div>
+
+                        {/* Legal */}
+                        <div>
+                            <h4 className="text-white font-extrabold mb-5 uppercase tracking-wider text-sm">Legal</h4>
+                            <ul className="space-y-3 text-sm font-medium text-gray-400">
+                                <li><Link href="#" className="hover:text-[#FF6B00] transition-colors">Privacy Policy</Link></li>
+                                <li><Link href="#" className="hover:text-[#FF6B00] transition-colors">Terms of Service</Link></li>
+                                <li><Link href="#" className="hover:text-[#FF6B00] transition-colors">FAQ</Link></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    {/* Bottom Copyright */}
+                    <div className="border-t border-gray-800/80 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+                        <p className="text-gray-500 text-sm font-medium">
+                            © {new Date().getFullYear()} OurMess. All rights reserved.
+                        </p>
+                        <p className="text-gray-500 text-sm font-medium flex items-center gap-1">
+                            Made with <span className="text-red-500 px-1">♥</span> by <span className="text-[#FF6B00] font-bold">@tanvir_ahammed0</span>
+                        </p>
+                    </div>
+                </div>
+            </footer>
 
         </div>
-      </section>
-
-      {/* ─── Features Section ─── */}
-      <section id="features" className="bg-white py-16 sm:py-20 border-t border-orange-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900 mb-3 sm:mb-4">
-            আমাদের সেরা বৈশিষ্ট্যসমূহ
-          </h2>
-          <p className="text-gray-500 text-sm sm:text-lg mb-10 sm:mb-14 max-w-2xl mx-auto px-4">
-            মেস লাইফ সহজ ও ঝামেলামুক্ত করার জন্য যা কিছু প্রয়োজন, সব এক প্ল্যাটফর্মে
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            <div className="bg-[#FEF8F4] p-6 sm:p-8 rounded-2xl border border-orange-100 hover:shadow-lg transition-all text-left group">
-              <div className="w-12 h-12 rounded-xl bg-orange-500 text-white flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                <IconChecklist className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">প্রতিদিনের মিল কাউন্ট</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                সকাল, দুপুর এবং রাতের মিল এন্ট্রি করুন এক ক্লিকে। রিয়েল-টাইমে আপডেট থাকবে মেম্বারদের মিল শিট।
-              </p>
-            </div>
-
-            <div className="bg-[#FEF8F4] p-6 sm:p-8 rounded-2xl border border-orange-100 hover:shadow-lg transition-all text-left group">
-              <div className="w-12 h-12 rounded-xl bg-orange-500 text-white flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                <IconCalculator className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">স্বয়ংক্রিয় বাজার খরচ হিসাব</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                কে কত টাকা বাজার করলো এবং কার কত ডিপোজিট জমা আছে, সিস্টেম নিজ থেকেই স্বয়ংক্রিয় মিল রেট তৈরি করবে।
-              </p>
-            </div>
-
-            <div className="bg-[#FEF8F4] p-6 sm:p-8 rounded-2xl border border-orange-100 hover:shadow-lg transition-all text-left group">
-              <div className="w-12 h-12 rounded-xl bg-orange-500 text-white flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                <IconShieldCheck className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">স্বচ্ছ অডিট ও হিসেব</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                ম্যানেজার ও মেম্বারদের আলাদা ড্যাশবোর্ড থাকায় প্রতিটি খরচের স্বচ্ছতা থাকে ১০০% নিশ্চিত।
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-    </div>
-  );
+    );
 }

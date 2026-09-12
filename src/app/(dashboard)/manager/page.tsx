@@ -23,7 +23,7 @@ export default function ManagerDashboard() {
                 <div>
                     <p className="text-gray-500 font-bold mb-1">Welcome back,</p>
                     <h1 className="text-2xl sm:text-4xl font-extrabold text-[#0B132B] tracking-tight">Manager Dashboard</h1>
-                    <p className="text-gray-500 text-sm mt-2 font-medium">Overview of today's mess operations and quick actions.</p>
+                    <p className="text-gray-500 text-sm mt-2 font-medium">Overview of today&apos;s mess operations and quick actions.</p>
                 </div>
                 
                 <div className="bg-white px-5 py-3 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 w-full sm:w-auto">
@@ -68,7 +68,7 @@ export default function ManagerDashboard() {
                         </Link>
                     </div>
                     <div className="mt-4 z-10">
-                        <p className="text-gray-500 text-sm font-semibold mb-1">Today's Bazaar</p>
+                        <p className="text-gray-500 text-sm font-semibold mb-1">Today&apos;s Bazaar</p>
                         <h3 className="text-3xl font-extrabold text-gray-900">৳ 850</h3>
                     </div>
                     <IconShoppingBag className="absolute -bottom-4 -right-4 w-24 h-24 text-orange-50/50 transform group-hover:scale-110 transition-transform" stroke={1} />
