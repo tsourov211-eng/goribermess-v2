@@ -38,42 +38,64 @@ export default function MemberDashboard() {
         <div className="max-w-7xl mx-auto space-y-6 lg:space-y-8">
             
             {/* ─── Greeting Section ─── */}
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5">
-                <div>
-                    <p className="text-gray-500 font-bold mb-1">Welcome back,</p>
-                    <h1 className="text-2xl sm:text-4xl font-extrabold text-[#0B132B] tracking-tight">Tanvir Ahammed</h1>
-                    <p className="text-gray-500 text-sm mt-2 font-medium">Here is your current mess status and upcoming schedule.</p>
+            <div className="space-y-4">
+                
+                {/* Welcome Text & Date Box */}
+                <div className="flex justify-between items-start gap-4">
+                    <div>
+                        <p className="text-gray-500 font-bold mb-1">Welcome back,</p>
+                        <h1 className="text-2xl sm:text-4xl font-extrabold text-[#0B132B] tracking-tight">Tanvir Ahammed</h1>
+                    </div>
+                    
+                    {/* Date Box (Top Right) */}
+                    <div className="bg-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl border border-gray-100 shadow-sm shrink-0 text-right">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Today</p>
+                        <p className="text-xs sm:text-sm font-extrabold text-gray-800">13 Sep, '26</p>
+                    </div>
                 </div>
                 
-                <div className="bg-white px-5 py-3 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 w-full sm:w-auto">
-                    <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 shrink-0">
-                        <IconClock className="w-5 h-5" stroke={2} />
+                <p className="text-gray-500 text-sm font-medium">Here is your current mess status and upcoming schedule.</p>
+                
+                {/* Notification Box */}
+                <div className="bg-orange-50/60 px-4 py-3 sm:px-5 sm:py-3.5 rounded-2xl border border-orange-200 shadow-sm flex items-center gap-3 w-full">
+                    <div className="w-10 h-10 rounded-xl bg-white border border-orange-100 flex items-center justify-center text-orange-500 shrink-0 shadow-sm">
+                        <IconBell className="w-5 h-5" stroke={2.5} />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Today</p>
-                        <p className="text-sm font-extrabold text-gray-900">Friday, Sep 11</p>
+                        <p className="text-[10px] font-extrabold text-orange-600 uppercase tracking-wider mb-0.5">Notification</p>
+                        <p className="text-xs sm:text-sm font-bold text-gray-800 line-clamp-1 sm:line-clamp-none">
+                            Please clear your advance deposit by 15th to avoid penalty.
+                        </p>
                     </div>
                 </div>
+
             </div>
 
             {/* ─── Top Stats (Responsive Order) ─── */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                 
-                {/* Stat 1: Current Balance */}
+                {/* Stat 1: Current Balance & Live Meal Rate */}
                 <div className="order-1 md:order-3 bg-gradient-to-br from-emerald-500 to-emerald-700 p-6 rounded-3xl border border-emerald-600 shadow-lg shadow-emerald-500/20 relative overflow-hidden flex flex-col justify-between min-h-[140px]">
-                    <div className="flex justify-between items-start gap-4">
+                    <div className="flex justify-between items-start gap-4 relative z-10">
                         <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-white shrink-0 backdrop-blur-sm">
                             <IconReceipt2 className="w-6 h-6" stroke={2} />
                         </div>
-                        <span className="text-xs font-extrabold text-emerald-800 bg-emerald-100 px-3 py-1.5 rounded-lg">
-                            Refundable
-                        </span>
+                        
+                        <div className="flex flex-col items-end gap-1.5">
+                            <span className="text-[10px] sm:text-xs font-extrabold text-emerald-800 bg-emerald-100 px-3 py-1.5 rounded-lg">
+                                Refundable
+                            </span>
+                            <div className="flex items-center gap-1.5 bg-black/20 backdrop-blur-sm border border-white/10 px-2.5 py-1 rounded-lg text-white shadow-sm">
+                                <IconCalculator size={12} className="text-emerald-200" />
+                                <span className="text-[10px] sm:text-xs font-bold tracking-wide">Rate: ৳48.05</span>
+                            </div>
+                        </div>
                     </div>
                     <div className="mt-4 z-10">
                         <p className="text-emerald-100 text-sm font-semibold mb-1">Current Balance</p>
                         <h3 className="text-3xl font-extrabold text-white">+ ৳ 835</h3>
                     </div>
-                    <div className="absolute right-0 bottom-0 opacity-20">
+                    <div className="absolute right-0 bottom-0 opacity-20 z-0">
                         <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19l16 0"></path><path d="M4 15l4 -6l4 2l4 -5l4 4"></path></svg>
                     </div>
                 </div>
@@ -101,7 +123,7 @@ export default function MemberDashboard() {
                         <div className="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-600 shrink-0">
                             <IconToolsKitchen2 className="w-6 h-6" stroke={2} />
                         </div>
-                        <Link href="/member/my-meals" className="text-xs font-bold text-orange-600 hover:text-orange-700 bg-orange-50 px-3 py-1.5 rounded-lg transition-colors">
+                        <Link href="/my-meals" className="text-xs font-bold text-orange-600 hover:text-orange-700 bg-orange-50 px-3 py-1.5 rounded-lg transition-colors">
                             View Logs
                         </Link>
                     </div>
@@ -120,7 +142,7 @@ export default function MemberDashboard() {
                 {/* ─── Left Column (Bazaar Schedule & Meals) ─── */}
                 <div className="lg:col-span-2 space-y-6">
                     
-                    {/* UPDATED: Tomorrow's Meal Plan (With Guest Meal) */}
+                    {/* Tomorrow's Meal Plan (With Guest Meal) */}
                     <div className="bg-white rounded-3xl border border-blue-200 shadow-sm overflow-hidden relative">
                         <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
                         <div className="p-6 sm:p-8 flex flex-col gap-5 pl-8 bg-blue-50/30">
@@ -130,7 +152,7 @@ export default function MemberDashboard() {
                                         <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> Daily Update
                                     </span>
                                     <h3 className="text-xl font-extrabold text-gray-900">Tomorrow's Meal Plan</h3>
-                                    <p className="text-sm font-medium text-gray-600 mt-1">Adjust your meal counts or add guest meals for <span className="font-bold text-gray-800">Sep 12, Saturday</span>.</p>
+                                    <p className="text-sm font-medium text-gray-600 mt-1">Adjust your meal counts or add guest meals for <span className="font-bold text-gray-800">Sep 14, Monday</span>.</p>
                                 </div>
                                 <span className="hidden sm:flex text-xs font-bold text-gray-500 bg-white px-3 py-1.5 rounded-lg border border-gray-200 h-fit">
                                     Auto-filled from default
@@ -183,7 +205,7 @@ export default function MemberDashboard() {
                                         max="2026-09-30"
                                         value={currentDate}
                                         onChange={(e) => setCurrentDate(e.target.value)}
-                                        className="w-full sm:w-auto flex-1 px-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm text-gray-900 font-bold transition-all shadow-sm cursor-pointer"
+                                        className="w-full sm:w-auto flex-1 px-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm text-gray-400 font-bold transition-all shadow-sm cursor-pointer"
                                     />
                                     <button 
                                         onClick={handleAddDate}
@@ -214,49 +236,49 @@ export default function MemberDashboard() {
                         </div>
                     </div>
 
-                    {/* My Recent Meals Table */}
-                    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-                        <div className="p-5 sm:p-6 border-b border-gray-100 flex items-center justify-between bg-[#F8FAFC]">
+                    {/* 💡 My Recent Meals Table (UPDATED FOR MOBILE) */}
+                    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col w-full">
+                        <div className="p-4 sm:p-6 border-b border-gray-100 flex items-center justify-between bg-[#F8FAFC]">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-600 shadow-sm shrink-0">
-                                    <IconToolsKitchen2 className="w-5 h-5" stroke={1.5} />
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-600 shadow-sm shrink-0">
+                                    <IconToolsKitchen2 className="w-4 h-4 sm:w-5 sm:h-5" stroke={1.5} />
                                 </div>
                                 <div>
-                                    <h2 className="text-base font-extrabold text-gray-900">My Recent Meals</h2>
-                                    <p className="text-xs font-bold text-gray-500 mt-0.5">Last 3 days log</p>
+                                    <h2 className="text-sm sm:text-base font-extrabold text-gray-900">My Recent Meals</h2>
+                                    <p className="text-[10px] sm:text-xs font-bold text-gray-500 mt-0.5">Last 3 days log</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse min-w-[500px]">
+                        <div className="overflow-x-auto w-full">
+                            <table className="w-full text-left border-collapse min-w-full">
                                 <thead>
-                                    <tr className="border-b border-gray-100">
-                                        <th className="py-4 px-6 text-xs font-extrabold text-gray-500 uppercase tracking-wider whitespace-nowrap">Date</th>
-                                        <th className="py-4 px-6 text-xs font-extrabold text-gray-500 uppercase tracking-wider text-center">Breakfast</th>
-                                        <th className="py-4 px-6 text-xs font-extrabold text-gray-500 uppercase tracking-wider text-center">Lunch</th>
-                                        <th className="py-4 px-6 text-xs font-extrabold text-gray-500 uppercase tracking-wider text-center">Dinner</th>
-                                        <th className="py-4 px-6 text-xs font-extrabold text-[#FF6B00] uppercase tracking-wider text-center bg-orange-50/50">Total</th>
+                                    <tr className="border-b border-gray-100 bg-gray-50/50">
+                                        <th className="py-2.5 px-3 sm:py-4 sm:px-6 text-[9px] sm:text-xs font-extrabold text-gray-500 uppercase tracking-tight sm:tracking-wider whitespace-nowrap">Date</th>
+                                        <th className="py-2.5 px-1 sm:py-4 sm:px-6 text-[9px] sm:text-xs font-extrabold text-gray-500 uppercase tracking-tight sm:tracking-wider text-center">B'fast</th>
+                                        <th className="py-2.5 px-1 sm:py-4 sm:px-6 text-[9px] sm:text-xs font-extrabold text-gray-500 uppercase tracking-tight sm:tracking-wider text-center">Lunch</th>
+                                        <th className="py-2.5 px-1 sm:py-4 sm:px-6 text-[9px] sm:text-xs font-extrabold text-gray-500 uppercase tracking-tight sm:tracking-wider text-center">Dinner</th>
+                                        <th className="py-2.5 px-2 sm:py-4 sm:px-6 text-[9px] sm:text-xs font-extrabold text-[#FF6B00] uppercase tracking-tight sm:tracking-wider text-center bg-orange-50/50">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
                                     <tr className="hover:bg-gray-50/50 transition-colors">
-                                        <td className="py-4 px-6 whitespace-nowrap">
-                                            <p className="font-extrabold text-gray-900 text-sm">Sep 11 (Today)</p>
+                                        <td className="py-2.5 px-3 sm:py-4 sm:px-6 whitespace-nowrap">
+                                            <p className="font-extrabold text-gray-900 text-[10px] sm:text-sm">Sep 13 (Today)</p>
                                         </td>
-                                        <td className="py-4 px-6 text-center font-bold text-gray-700">0.5</td>
-                                        <td className="py-4 px-6 text-center font-bold text-gray-700">1</td>
-                                        <td className="py-4 px-6 text-center font-bold text-gray-700">1</td>
-                                        <td className="py-4 px-6 text-center bg-orange-50/50 font-extrabold text-gray-900 text-base border-l border-orange-100/50">2.5</td>
+                                        <td className="py-2.5 px-1 sm:py-4 sm:px-6 text-center font-bold text-gray-700 text-[11px] sm:text-sm">0.5</td>
+                                        <td className="py-2.5 px-1 sm:py-4 sm:px-6 text-center font-bold text-gray-700 text-[11px] sm:text-sm">1</td>
+                                        <td className="py-2.5 px-1 sm:py-4 sm:px-6 text-center font-bold text-gray-700 text-[11px] sm:text-sm">1</td>
+                                        <td className="py-2.5 px-2 sm:py-4 sm:px-6 text-center bg-orange-50/50 font-extrabold text-gray-900 text-xs sm:text-base border-l border-orange-100/50">2.5</td>
                                     </tr>
                                     <tr className="hover:bg-gray-50/50 transition-colors">
-                                        <td className="py-4 px-6 whitespace-nowrap">
-                                            <p className="font-extrabold text-gray-900 text-sm">Sep 10, Thu</p>
+                                        <td className="py-2.5 px-3 sm:py-4 sm:px-6 whitespace-nowrap">
+                                            <p className="font-extrabold text-gray-900 text-[10px] sm:text-sm">Sep 12, Sat</p>
                                         </td>
-                                        <td className="py-4 px-6 text-center font-bold text-gray-700">0</td>
-                                        <td className="py-4 px-6 text-center font-bold text-gray-700">1</td>
-                                        <td className="py-4 px-6 text-center font-bold text-gray-700">1</td>
-                                        <td className="py-4 px-6 text-center bg-orange-50/50 font-extrabold text-gray-900 text-base border-l border-orange-100/50">2.0</td>
+                                        <td className="py-2.5 px-1 sm:py-4 sm:px-6 text-center font-bold text-gray-700 text-[11px] sm:text-sm">0</td>
+                                        <td className="py-2.5 px-1 sm:py-4 sm:px-6 text-center font-bold text-gray-700 text-[11px] sm:text-sm">1</td>
+                                        <td className="py-2.5 px-1 sm:py-4 sm:px-6 text-center font-bold text-gray-700 text-[11px] sm:text-sm">1</td>
+                                        <td className="py-2.5 px-2 sm:py-4 sm:px-6 text-center bg-orange-50/50 font-extrabold text-gray-900 text-xs sm:text-base border-l border-orange-100/50">2.0</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -264,20 +286,10 @@ export default function MemberDashboard() {
                     </div>
                 </div>
 
-                {/* ─── Right Column (Meal Rate, Default Setting & Notice) ─── */}
+                {/* ─── Right Column (Default Setting & Notice) ─── */}
                 <div className="lg:col-span-1 space-y-6">
                     
-                    {/* Live Meal Rate Widget */}
-                    <div className="bg-[#0B132B] rounded-3xl border border-gray-800 p-6 shadow-md text-white text-center">
-                        <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4 backdrop-blur-sm text-orange-400">
-                            <IconCalculator className="w-6 h-6" stroke={2} />
-                        </div>
-                        <p className="text-gray-400 text-sm font-semibold mb-1">Live Meal Rate</p>
-                        <h3 className="font-extrabold text-3xl mb-2">৳ 48.05</h3>
-                        <p className="text-gray-500 text-xs font-medium">May fluctuate by month end</p>
-                    </div>
-
-                    {/* NEW: Default Meal Template Setting */}
+                    {/* Default Meal Template Setting */}
                     <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
                         <div className="p-5 border-b border-gray-100 flex items-center gap-2 bg-[#F8FAFC]">
                             <IconAdjustmentsHorizontal className="w-5 h-5 text-teal-600" stroke={2} />
@@ -307,7 +319,7 @@ export default function MemberDashboard() {
                         </div>
                     </div>
 
-                    {/* Notice Board */}
+                    {/* Notice Board (Right side, old placement just in case) */}
                     <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
                         <div className="p-5 border-b border-gray-100 flex items-center gap-2 bg-[#F8FAFC]">
                             <IconBell className="w-5 h-5 text-gray-600" stroke={2} />
@@ -319,8 +331,8 @@ export default function MemberDashboard() {
                                     <IconAlertCircle className="w-5 h-5" stroke={2} />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-bold text-gray-900">Submit your mess fees</p>
-                                    <p className="text-xs text-gray-500 font-medium mt-1">Please clear your advance deposit by 15th of this month to avoid penalty.</p>
+                                    <p className="text-sm font-bold text-gray-900">Important Reminders</p>
+                                    <p className="text-xs text-gray-500 font-medium mt-1">Check the top notification bar for the latest urgent alerts.</p>
                                 </div>
                             </div>
                         </div>

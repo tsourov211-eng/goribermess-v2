@@ -19,21 +19,69 @@ import {
     IconChevronDown
 } from "@tabler/icons-react";
 
-const sidebarLinks = [
-    { name: "Dashboard", href: "/admin", icon: IconHome },
-    { name: "Members", href: "/admin/members-list", icon: IconUsers },
-    { name: "Food Management", href: "/manager/meals", icon: IconToolsKitchen2 },
-    { name: "Expenses", href: "/manager/bazaar", icon: IconReceipt },
-    { name: "Reports", href: "/admin/reports", icon: IconChartBar },
-    { name: "Settings", href: "/admin/settings", icon: IconSettings },
-];
-
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const pathname = usePathname();
 
+    // 💡 ডায়নামিক রুট ডিটেকশন (Dynamic Route Detection)
+    let basePath = "admin";
+    if (pathname.startsWith("/manager")) basePath = "manager";
+    if (pathname.startsWith("/member")) basePath = "member";
+
+    // 💡 ইউজারের রোল অনুযায়ী আপনার হাতে লেখা ছকের লেআউট
+    const getSidebarLinks = () => {
+        // ১. Admin এর লেআউট
+        if (basePath === "admin") {
+            return [
+                { name: "Dashboard", href: "/admin", icon: IconHome },
+                { name: "Members", href: "/members-list", icon: IconUsers },
+                { name: "Food Management", href: "/meals", icon: IconToolsKitchen2 },
+                { name: "Expenses", href: "/bazaar", icon: IconReceipt },
+                { name: "Reports", href: "/reports", icon: IconChartBar },
+                { name: "Settings", href: "/settings", icon: IconSettings },
+            ];
+        }
+        
+        // ২. Manager এর লেআউট (Settings নেই)
+        if (basePath === "manager") {
+            return [
+                { name: "Dashboard", href: "/manager", icon: IconHome },
+                { name: "Members", href: "/members-list", icon: IconUsers },
+                { name: "Food Management", href: "/meals", icon: IconToolsKitchen2 },
+                { name: "Expenses", href: "/bazaar", icon: IconReceipt },
+                { name: "Reports", href: "/reports", icon: IconChartBar },
+            ];
+        }
+        
+        // ৩. Member এর লেআউট
+        if (basePath === "member") {
+            return [
+                { name: "Dashboard", href: "/member", icon: IconHome },
+                { name: "My Meals", href: "/my-meals", icon: IconToolsKitchen2 }, // আপনার ফোল্ডার ট্রি অনুযায়ী guest-meal দেওয়া হলো
+                { name: "Reports", href: "/reports", icon: IconChartBar }, 
+            ];
+        }
+
+        return [];
+    };
+
+    const sidebarLinks = getSidebarLinks();
+
+    // 💡 প্রোফাইলের নাম এবং রোল ডায়নামিক করা
+    let roleTitle = "Administrator";
+    let userName = "Super Admin";
+    
+    if (basePath === "manager") { 
+        roleTitle = "Mess Manager"; 
+        userName = "Tanvir Ahammed"; 
+    } else if (basePath === "member") { 
+        roleTitle = "Mess Member"; 
+        userName = "Tanvir Ahammed"; 
+    }
+    
+    const userInitial = userName.charAt(0);
+
     return (
-        // মোবাইলের জন্য dashboard_mobile_bg.png এবং ডেস্কটপের জন্য admin_dashboard_desktop_bg.png ব্যবহার করা হয়েছে
         <div className="min-h-screen bg-[#F8FAFC] bg-[url('/admin_dashboard_mobile_bg.png')] lg:bg-[url('/admin_dashboard_desktop_bg.png')] bg-cover bg-center bg-no-repeat bg-fixed flex font-sans">
             
             {/* ─── Mobile Sidebar Overlay ─── */}
@@ -44,12 +92,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 ></div>
             )}
 
-            {/* ─── Sidebar (Updated with Sticky behavior) ─── */}
+            {/* ─── Sidebar ─── */}
             <aside className={`fixed inset-y-0 left-0 z-50 w-[260px] bg-white bg-[url('/sidebar_bg.png')] bg-no-repeat bg-cover bg-center border-r border-gray-100 flex flex-col transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen shrink-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
                 
                 {/* ─── Sidebar Logo ─── */}
                 <div className="pt-8 pb-6 flex items-center justify-center relative">
-                    <Link href="/admin" className="flex flex-col items-center justify-center transition-transform hover:scale-105">
+                    <Link href={`/${basePath}`} className="flex flex-col items-center justify-center transition-transform hover:scale-105">
                         <Image 
                             src="/logo.png" 
                             alt="Amader Mess" 
@@ -64,11 +112,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </button>
                 </div>
 
-                {/* ─── Sidebar Links (Fixed Active State) ─── */}
+                {/* ─── Sidebar Links ─── */}
                 <nav className="flex-1 px-3 py-2 space-y-2 overflow-y-auto">
                     {sidebarLinks.map((link) => {
-                        // FIX: Dashboard should only be active on exact match, others can match prefix
-                        const isActive = link.href === "/admin" 
+                        // খুব সহজে Active State চেক করার লজিক
+                        const isActive = link.name === "Dashboard" 
                             ? pathname === link.href 
                             : pathname === link.href || pathname.startsWith(`${link.href}/`);
                             
@@ -97,11 +145,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </div>
                     <div className="flex items-center gap-3 px-1 mb-5">
                         <div className="w-10 h-10 rounded-full bg-[#1e293b] flex items-center justify-center text-white font-bold text-sm shadow-md shrink-0">
-                            S
+                            {userInitial}
                         </div>
                         <div>
-                            <p className="text-sm font-extrabold text-[#450705] leading-tight">Super Admin</p>
-                            <p className="text-[11px] text-gray-500 font-bold mt-0.5">Administrator</p>
+                            <p className="text-sm font-extrabold text-[#450705] leading-tight">{userName}</p>
+                            <p className="text-[11px] text-gray-500 font-bold mt-0.5">{roleTitle}</p>
                         </div>
                     </div>
                     <button className="flex items-center gap-3 px-2 py-1 text-gray-600 hover:text-red-600 transition-all font-bold text-sm w-full">
@@ -114,7 +162,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* ─── Main Content Area ─── */}
             <div className="flex-1 flex flex-col min-w-0">
                 
-                {/* ─── Top Navbar (Glassmorphism / Fog Effect) ─── */}
+                {/* ─── Top Navbar ─── */}
                 <header className="h-20 bg-white/40 backdrop-blur-md border-b border-white/40 flex items-center justify-between px-6 lg:px-10 z-30 sticky top-0">
                     <div className="flex items-center gap-4">
                         <button 
@@ -125,10 +173,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         </button>
                     </div>
                     
-                    {/* Right Section: Search & Profile */}
                     <div className="flex items-center gap-6">
-                        
-                        {/* Search Bar */}
                         <div className="hidden md:flex relative w-80 items-center">
                             <IconSearch className="absolute left-3 text-gray-500 w-5 h-5 z-10" stroke={2} />
                             <input 
@@ -138,7 +183,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             />
                         </div>
                         
-                        {/* Notification Bell */}
                         <button className="relative p-2 text-gray-600 bg-white/60 backdrop-blur-sm hover:bg-white hover:shadow-sm rounded-full transition-all border border-white/50">
                             <IconBell size={28} stroke={1.5} />
                             <span className="absolute top-1.5 right-1.5 w-4.5 h-4.5 bg-orange-600 border-2 border-white rounded-full flex items-center justify-center text-[10px] text-white font-bold">
@@ -146,12 +190,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             </span>
                         </button>
                         
-                        {/* Top Navbar User Profile */}
                         <div className="hidden sm:flex items-center gap-3 cursor-pointer p-1.5 pr-3 rounded-full bg-white/60 backdrop-blur-sm hover:bg-white hover:shadow-sm transition-all border border-white/50">
                             <div className="w-9 h-9 rounded-full bg-[#1e293b] flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">
-                                S
+                                {userInitial}
                             </div>
-                            <span className="text-sm font-bold text-[#450705]">Super Admin</span>
+                            <span className="text-sm font-bold text-[#450705]">{userName}</span>
                             <IconChevronDown size={16} className="text-gray-600" stroke={2} />
                         </div>
                     </div>

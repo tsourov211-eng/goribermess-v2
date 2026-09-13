@@ -43,9 +43,9 @@ export default function LandingPage() {
                     {/* Desktop Links */}
                     <div className="hidden md:flex items-center gap-8">
                         <Link href="/" className="text-[#FF6B00] font-bold text-base border-b-2 border-[#FF6B00] pb-1">Home</Link>
-                        <Link href="#about" className="text-gray-700 hover:text-[#FF6B00] font-bold text-base transition-colors pb-1">About Us</Link>
-                        <Link href="#features" className="text-gray-700 hover:text-[#FF6B00] font-bold text-base transition-colors pb-1">Features</Link>
-                        <Link href="#contact" className="text-gray-700 hover:text-[#FF6B00] font-bold text-base transition-colors pb-1">Contact</Link>
+                        <Link href="/about" className="text-gray-700 hover:text-[#FF6B00] font-bold text-base transition-colors pb-1">About Us</Link>
+                        <Link href="/features" className="text-gray-700 hover:text-[#FF6B00] font-bold text-base transition-colors pb-1">Features</Link>
+                        <Link href="/contact" className="text-gray-700 hover:text-[#FF6B00] font-bold text-base transition-colors pb-1">Contact</Link>
                     </div>
 
                     {/* Desktop Auth Buttons */}
@@ -89,9 +89,9 @@ export default function LandingPage() {
                     
                     <div className="flex flex-col flex-1 px-6 pt-8 gap-6">
                         <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="text-[#FF6B00] font-extrabold text-xl">Home</Link>
-                        <Link href="#about" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-800 font-bold text-xl">About Us</Link>
-                        <Link href="#features" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-800 font-bold text-xl">Features</Link>
-                        <Link href="#contact" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-800 font-bold text-xl">Contact</Link>
+                        <Link href="/about" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-800 font-bold text-xl">About Us</Link>
+                        <Link href="/features" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-800 font-bold text-xl">Features</Link>
+                        <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-800 font-bold text-xl">Contact</Link>
                         
                         <div className="mt-auto pb-10 flex flex-col gap-4">
                             <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 w-full bg-[#FF6B00] hover:bg-orange-600 text-white px-6 py-4 rounded-xl font-bold text-base shadow-md">
@@ -279,9 +279,9 @@ export default function LandingPage() {
                             <h4 className="text-white font-extrabold mb-5 uppercase tracking-wider text-sm">Quick Links</h4>
                             <ul className="space-y-3 text-sm font-medium text-gray-400">
                                 <li><Link href="/" className="hover:text-[#FF6B00] transition-colors">Home</Link></li>
-                                <li><Link href="#about" className="hover:text-[#FF6B00] transition-colors">About Us</Link></li>
+                                <li><Link href="/about" className="hover:text-[#FF6B00] transition-colors">About Us</Link></li>
                                 <li><Link href="#features" className="hover:text-[#FF6B00] transition-colors">Features</Link></li>
-                                <li><Link href="#contact" className="hover:text-[#FF6B00] transition-colors">Contact</Link></li>
+                                <li><Link href="/contact" className="hover:text-[#FF6B00] transition-colors">Contact</Link></li>
                             </ul>
                         </div>
 
