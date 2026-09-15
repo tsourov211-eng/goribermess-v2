@@ -1,14 +1,13 @@
-// prisma/schema.prisma
-
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ─── NEXT-AUTH DEFAULT MODELS ───
 model Account {
   id                String  @id @default(auto()) @map("_id") @db.ObjectId
   userId            String  @db.ObjectId
@@ -24,6 +23,7 @@ model Account {
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([provider, providerAccountId])
 }
 
@@ -35,51 +35,105 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// আপডেটেড User মডেল
+// ─── MESS MANAGEMENT MODELS ───
+
+// ১. ইউজার টেবিল
 model User {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
   name          String?
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  password      String?
-  phone         String?
-  role          String    @default("member") 
-  deposit       Int       @default(0)        
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
+  role          String    @default("member")
+
+  // ইউজারের ডিফল্ট মিল সেটিং
+  defaultBreakfast Float @default(0.5)
+  defaultLunch     Float @default(1.0)
+  defaultDinner    Float @default(1.0)
+
   accounts      Account[]
   sessions      Session[]
-  
-  // নতুন যুক্ত করা রিলেশন
-  meals         Meal[]    // একজন ইউজারের অনেকগুলো মিলের রেকর্ড থাকতে পারে
-  expenses      Expense[] // একজন ম্যানেজার অনেকগুলো বাজারের খরচ যুক্ত করতে পারে
+
+  // রিলেশনশিপ
+  meals         MealLog[]
+  deposits      Deposit[]
+  expenses      Expense[] // 💡 নতুন যোগ করা হয়েছে
+  bazaarDates   BazaarSchedule[]
+  guestMeals    GuestMealRequest[]
 }
 
-// ১. মিলের জন্য নতুন মডেল
-model Meal {
+// ২. প্রতিদিনের মিল সেভ করার টেবিল
+model MealLog {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userId    String   @db.ObjectId
-  date      String   // তারিখ "YYYY-MM-DD" ফরম্যাটে সেভ হবে
-  breakfast Float    @default(0) // ০.৫ (হাফ মিল) বা ১ হতে পারে
-  lunch     Float    @default(0)
-  dinner    Float    @default(0)
+  date      DateTime
+  breakfast Float    @default(0.0)
+  lunch     Float    @default(0.0)
+  dinner    Float    @default(0.0)
+  guest     Int      @default(0)
   
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  // এটি নিশ্চিত করবে যে, একদিনে একজন ইউজারের একটাই ডাটাবেস এন্ট্রি থাকবে
-  @@unique([userId, date]) 
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, date]) // এক দিনে একজন ইউজারের একটাই লগ থাকবে
 }
 
-// ২. বাজারের খরচের জন্য নতুন মডেল
+// ৩. ইউজারের জমা দেওয়া টাকার টেবিল (Deposit)
+model Deposit {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  amount    Float
+  method    String   @default("Cash")    // 💡 Payment Method
+  note      String?                      // 💡 User Note
+  status    String   @default("Pending") // 💡 Pending, Approved, Rejected
+  date      DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ৪. মেসের খরচের টেবিল (Expense / Bazar)
 model Expense {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  amount      Int      // কত টাকা খরচ হলো
-  description String   // কী কী বাজার হলো (যেমন: চাল, ডাল, মুরগি)
-  date        String   // "YYYY-MM-DD"
-  managerId   String   @db.ObjectId 
-  createdAt   DateTime @default(now())
+  userId      String   @db.ObjectId        // 💡 addedBy এর বদলে userId দেওয়া হয়েছে রিলেশনের জন্য
+  amount      Float
+  description String?                      // 💡 User Note / Details
+  status      String   @default("Pending") // 💡 Pending, Approved, Rejected
+  date        DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade) // 💡 রিলেশন যোগ করা হয়েছে
+}
 
-  manager     User     @relation(fields: [managerId], references: [id])
+// ৫. বাজারের রিকোয়েস্ট ডেট
+model BazaarSchedule {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  date      DateTime
+  status    String   @default("pending") // pending, approved, completed
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ৬. নোটিশ বোর্ডের টেবিল
+model Notice {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  type        String   @default("info") // info, warning, success, alert
+  isActive    Boolean  @default(true) 
+  createdAt   DateTime @default(now())
+}
+
+// ৭. গেস্ট মিল রিকোয়েস্ট টেবিল
+model GuestMealRequest {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  date      DateTime
+  mealType  String   // Lunch, Dinner, Both
+  guests    Int
+  status    String   @default("Pending") // Pending, Approved, Rejected
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

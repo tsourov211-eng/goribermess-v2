@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { 
@@ -20,6 +22,23 @@ import {
 export default function LandingPage() {
     // Mobile Menu State
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    
+    const { data: session, status } = useSession();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (status === "authenticated" && session?.user) {
+            const userRole = (session.user as { role?: string })?.role;
+
+            if (userRole === "admin") {
+                router.push("/admin");
+            } else if (userRole === "manager") {
+                router.push("/manager");
+            } else {
+                router.push("/member");
+            }
+        }
+    }, [session, status, router]);
 
     return (
         <div className="min-h-screen font-sans overflow-hidden bg-white">

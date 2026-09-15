@@ -44,16 +44,16 @@ export default function LoginPage() {
     };
 
     return (
-        // min-h-screen এর জায়গায় min-h-[100dvh] ব্যবহার করা হয়েছে যাতে মোবাইলে পারফেক্ট সেন্টারিং হয়
+        // min-h-screen এর জায়গায় min-h-[100dvh] ব্যবহার করা হয়েছে যাতে মোবাইলে পারফেক্ট সেন্টারিং হয়
         <div className="min-h-[100dvh] w-full bg-[url('/login-bg-mobile.png')] lg:bg-[url('/login-bg.png')] bg-cover bg-center bg-no-repeat flex items-center justify-center lg:justify-end px-4 sm:px-6 lg:pr-[18%] xl:pr-[22%] relative py-6 lg:py-0">
 
-            {/* কার্ডটিকে ফুটিয়ে তোলার জন্য ওভারলে */}
+            {/* কার্ডটিকে ফুটিয়ে তোলার জন্য ওভারলে */}
             <div className="absolute inset-0 bg-black/10 sm:bg-black/5"></div>
 
             {/* মেইন কন্টেইনার */}
             <div className="w-full max-w-md flex flex-col items-center relative z-10">
                 
-                {/* ─── মোবাইল ভিউ হেডার (লোগো এবং টেক্সট - গ্যাপ কমানো হয়েছে) ─── */}
+                {/* ─── মোবাইল ভিউ হেডার (লোগো এবং টেক্সট - গ্যাপ কমানো হয়েছে) ─── */}
                 <div className="lg:hidden flex flex-col items-center text-center mb-5 sm:mb-6">
                     <Link href="/" className="flex items-center justify-center mb-2 transition-transform hover:scale-105">
                         <Image
@@ -165,6 +165,7 @@ export default function LoginPage() {
                     {/* Google Sign In Button */}
                     <button
                         type="button"
+                        onClick={() => signIn("google", { callbackUrl: "/" })}
                         className="w-full py-3.5 flex items-center justify-center gap-3 bg-white/40 backdrop-blur-sm border border-white/50 text-gray-900 text-base font-bold rounded-xl shadow-sm hover:bg-white/60 transition-all duration-300 cursor-pointer"
                     >
                         <IconBrandGoogle className="w-6 h-6 text-orange-600" stroke={1.5} />

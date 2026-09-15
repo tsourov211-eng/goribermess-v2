@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "আমাদের মেস",
-  description: "স্মার্ট মেস ম্যানেজমেন্ট সলিউশন",
+  title: "OurMess",
+  description: "A smart mess management system", 
 };
 
 export default function RootLayout({
