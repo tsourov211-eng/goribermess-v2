@@ -45,6 +45,10 @@ model User {
   emailVerified DateTime?
   image         String?
   role          String    @default("member")
+  
+  // 💡 নতুন যোগ করা ফিল্ড
+  phone         String?   
+  address       String?   
 
   // ইউজারের ডিফল্ট মিল সেটিং
   defaultBreakfast Float @default(0.5)
@@ -57,7 +61,7 @@ model User {
   // রিলেশনশিপ
   meals         MealLog[]
   deposits      Deposit[]
-  expenses      Expense[] // 💡 নতুন যোগ করা হয়েছে
+  expenses      Expense[]
   bazaarDates   BazaarSchedule[]
   guestMeals    GuestMealRequest[]
 }
@@ -85,9 +89,9 @@ model Deposit {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userId    String   @db.ObjectId
   amount    Float
-  method    String   @default("Cash")    // 💡 Payment Method
-  note      String?                      // 💡 User Note
-  status    String   @default("Pending") // 💡 Pending, Approved, Rejected
+  method    String   @default("Cash")    
+  note      String?                      
+  status    String   @default("Pending") 
   date      DateTime @default(now())
   
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -96,13 +100,13 @@ model Deposit {
 // ৪. মেসের খরচের টেবিল (Expense / Bazar)
 model Expense {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String   @db.ObjectId        // 💡 addedBy এর বদলে userId দেওয়া হয়েছে রিলেশনের জন্য
+  userId      String   @db.ObjectId        
   amount      Float
-  description String?                      // 💡 User Note / Details
-  status      String   @default("Pending") // 💡 Pending, Approved, Rejected
+  description String?                      
+  status      String   @default("Pending") 
   date        DateTime @default(now())
   
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade) // 💡 রিলেশন যোগ করা হয়েছে
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade) 
 }
 
 // ৫. বাজারের রিকোয়েস্ট ডেট
@@ -110,7 +114,7 @@ model BazaarSchedule {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userId    String   @db.ObjectId
   date      DateTime
-  status    String   @default("pending") // pending, approved, completed
+  status    String   @default("pending") 
   
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -120,7 +124,7 @@ model Notice {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   description String
-  type        String   @default("info") // info, warning, success, alert
+  type        String   @default("info") 
   isActive    Boolean  @default(true) 
   createdAt   DateTime @default(now())
 }
@@ -130,9 +134,9 @@ model GuestMealRequest {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userId    String   @db.ObjectId
   date      DateTime
-  mealType  String   // Lunch, Dinner, Both
+  mealType  String   
   guests    Int
-  status    String   @default("Pending") // Pending, Approved, Rejected
+  status    String   @default("Pending") 
   createdAt DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
