@@ -1,16 +1,113 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { 
     IconToolsKitchen2, 
     IconCalendarEvent, 
     IconChevronLeft, 
     IconChevronRight, 
-    IconDeviceFloppy,
-    IconChartPie,
-    IconReceipt2
+    IconDeviceFloppy, 
+    IconChartPie, 
+    IconReceipt2 
 } from "@tabler/icons-react";
 
 export default function FoodManagementPage() {
+    const [currentDate, setCurrentDate] = useState(() => {
+        const d = new Date();
+        return d.toISOString().split("T")[0];
+    });
+
+    const [members, setMembers] = useState<any[]>([]);
+    const [stats, setStats] = useState({
+        totalMealsToday: 0,
+        currentMealRate: 0,
+        todayBazaar: 0,
+    });
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        fetchMeals();
+    }, [currentDate]);
+
+    const fetchMeals = async () => {
+        setIsLoading(true);
+        try {
+            const res = await fetch(`/api/meals?date=${currentDate}`);
+            if (res.ok) {
+                const data = await res.json();
+                setMembers(data.members || []);
+                if (data.stats) {
+                    setStats(data.stats);
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching meals:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleMealChange = (index: number, field: string, val: string) => {
+        const updated = [...members];
+        updated[index] = {
+            ...updated[index],
+            [field]: Math.max(0, Number(val) || 0),
+        };
+        setMembers(updated);
+    };
+
+    const handlePrevDay = () => {
+        const d = new Date(currentDate);
+        d.setDate(d.getDate() - 1);
+        setCurrentDate(d.toISOString().split("T")[0]);
+    };
+
+    const handleNextDay = () => {
+        const d = new Date(currentDate);
+        d.setDate(d.getDate() + 1);
+        setCurrentDate(d.toISOString().split("T")[0]);
+    };
+
+    const handleSaveMeals = async () => {
+        setIsSaving(true);
+        try {
+            const res = await fetch("/api/meals", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    date: currentDate,
+                    meals: members,
+                }),
+            });
+
+            if (res.ok) {
+                alert("✅ মিলের হিসাব সফলভাবে সংরক্ষিত হয়েছে!");
+                fetchMeals();
+            } else {
+                alert("❌ মিল সংরক্ষণ করতে সমস্যা হয়েছে!");
+            }
+        } catch (error) {
+            console.error("Save meals error:", error);
+            alert("❌ সার্ভারে কোনো সমস্যা হয়েছে!");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    // ফরম্যাটেড ডেট টেক্সট
+    const targetDateObj = new Date(currentDate);
+    const todayObj = new Date();
+    const isToday = targetDateObj.toDateString() === todayObj.toDateString();
+    const formattedDateText = isToday 
+        ? `Today, ${targetDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+        : targetDateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+    // পেজের মোট মিল হিসাব
+    const totalMealsAdded = members.reduce((acc, m) => {
+        return acc + (Number(m.breakfast) || 0) + (Number(m.lunch) || 0) + (Number(m.dinner) || 0);
+    }, 0);
+
     return (
         <div className="max-w-7xl mx-auto space-y-6 lg:space-y-8">
             
@@ -22,9 +119,13 @@ export default function FoodManagementPage() {
                 </div>
 
                 {/* Save Button */}
-                <button className="flex items-center justify-center gap-2 bg-[#FF6B00] hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-orange-500/20 transition-all w-full sm:w-auto">
+                <button 
+                    onClick={handleSaveMeals}
+                    disabled={isSaving}
+                    className="flex items-center justify-center gap-2 bg-[#FF6B00] hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-orange-500/20 transition-all w-full sm:w-auto cursor-pointer disabled:opacity-50"
+                >
                     <IconDeviceFloppy className="w-5 h-5" stroke={2.5} />
-                    Save Today's Meals
+                    {isSaving ? "Saving..." : "Save Today's Meals"}
                 </button>
             </div>
 
@@ -38,7 +139,7 @@ export default function FoodManagementPage() {
                     </div>
                     <div>
                         <p className="text-gray-500 text-xs font-bold mb-0.5">Total Meals (Today)</p>
-                        <h3 className="text-2xl font-extrabold text-gray-900">12.5</h3>
+                        <h3 className="text-2xl font-extrabold text-gray-900">{stats.totalMealsToday}</h3>
                     </div>
                 </div>
 
@@ -49,7 +150,7 @@ export default function FoodManagementPage() {
                     </div>
                     <div>
                         <p className="text-gray-500 text-xs font-bold mb-0.5">Current Meal Rate</p>
-                        <h3 className="text-2xl font-extrabold text-gray-900">৳ 45.50</h3>
+                        <h3 className="text-2xl font-extrabold text-gray-900">৳ {stats.currentMealRate.toFixed(2)}</h3>
                     </div>
                 </div>
 
@@ -60,7 +161,7 @@ export default function FoodManagementPage() {
                     </div>
                     <div>
                         <p className="text-gray-500 text-xs font-bold mb-0.5">Today's Bazaar</p>
-                        <h3 className="text-2xl font-extrabold text-gray-900">৳ 550</h3>
+                        <h3 className="text-2xl font-extrabold text-gray-900">৳ {stats.todayBazaar}</h3>
                     </div>
                 </div>
             </div>
@@ -82,13 +183,19 @@ export default function FoodManagementPage() {
 
                     {/* Date Navigation */}
                     <div className="flex items-center bg-white border border-gray-200 rounded-xl p-1 shadow-sm w-full sm:w-auto justify-between sm:justify-center">
-                        <button className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors">
+                        <button 
+                            onClick={handlePrevDay}
+                            className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors cursor-pointer"
+                        >
                             <IconChevronLeft className="w-5 h-5" stroke={2} />
                         </button>
                         <span className="px-4 py-1 text-sm font-extrabold text-gray-800 w-36 text-center">
-                            Today, Sep 11
+                            {formattedDateText}
                         </span>
-                        <button className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors">
+                        <button 
+                            onClick={handleNextDay}
+                            className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors cursor-pointer"
+                        >
                             <IconChevronRight className="w-5 h-5" stroke={2} />
                         </button>
                     </div>
@@ -107,51 +214,68 @@ export default function FoodManagementPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            
-                            {/* Row 1: Rajib */}
-                            <tr className="hover:bg-gray-50/50 transition-colors">
-                                <td className="py-4 px-6">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs shrink-0">R</div>
-                                        <span className="font-extrabold text-gray-900 text-sm">Rajib</span>
-                                    </div>
-                                </td>
-                                <td className="py-4 px-6 text-center">
-                                    <input type="number" defaultValue="0.5" step="0.5" min="0" className="w-16 text-center py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all" />
-                                </td>
-                                <td className="py-4 px-6 text-center">
-                                    <input type="number" defaultValue="1" step="0.5" min="0" className="w-16 text-center py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all" />
-                                </td>
-                                <td className="py-4 px-6 text-center">
-                                    <input type="number" defaultValue="1" step="0.5" min="0" className="w-16 text-center py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all" />
-                                </td>
-                                <td className="py-4 px-6 text-center bg-orange-50/50 border-l border-orange-100/50">
-                                    <span className="font-extrabold text-gray-900 text-base">2.5</span>
-                                </td>
-                            </tr>
+                            {isLoading ? (
+                                <tr>
+                                    <td colSpan={5} className="py-12 text-center text-gray-400 font-bold">
+                                        Loading meals...
+                                    </td>
+                                </tr>
+                            ) : members.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="py-12 text-center text-gray-400 font-bold">
+                                        No members registered yet.
+                                    </td>
+                                </tr>
+                            ) : members.map((member, idx) => {
+                                const rowTotal = (Number(member.breakfast) || 0) + (Number(member.lunch) || 0) + (Number(member.dinner) || 0);
+                                const initial = member.name ? member.name.charAt(0).toUpperCase() : "M";
 
-                            {/* Row 2: Super Admin */}
-                            <tr className="hover:bg-gray-50/50 transition-colors">
-                                <td className="py-4 px-6">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs shrink-0">S</div>
-                                        <span className="font-extrabold text-gray-900 text-sm">Super Admin</span>
-                                    </div>
-                                </td>
-                                <td className="py-4 px-6 text-center">
-                                    <input type="number" defaultValue="0" step="0.5" min="0" className="w-16 text-center py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all" />
-                                </td>
-                                <td className="py-4 px-6 text-center">
-                                    <input type="number" defaultValue="1" step="0.5" min="0" className="w-16 text-center py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all" />
-                                </td>
-                                <td className="py-4 px-6 text-center">
-                                    <input type="number" defaultValue="1" step="0.5" min="0" className="w-16 text-center py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all" />
-                                </td>
-                                <td className="py-4 px-6 text-center bg-orange-50/50 border-l border-orange-100/50">
-                                    <span className="font-extrabold text-gray-900 text-base">2.0</span>
-                                </td>
-                            </tr>
-
+                                return (
+                                    <tr key={member.userId} className="hover:bg-gray-50/50 transition-colors">
+                                        <td className="py-4 px-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs shrink-0">
+                                                    {initial}
+                                                </div>
+                                                <span className="font-extrabold text-gray-900 text-sm">{member.name}</span>
+                                            </div>
+                                        </td>
+                                        <td className="py-4 px-6 text-center">
+                                            <input 
+                                                type="number" 
+                                                value={member.breakfast} 
+                                                onChange={(e) => handleMealChange(idx, "breakfast", e.target.value)}
+                                                step="0.5" 
+                                                min="0" 
+                                                className="w-16 text-center py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all" 
+                                            />
+                                        </td>
+                                        <td className="py-4 px-6 text-center">
+                                            <input 
+                                                type="number" 
+                                                value={member.lunch} 
+                                                onChange={(e) => handleMealChange(idx, "lunch", e.target.value)}
+                                                step="0.5" 
+                                                min="0" 
+                                                className="w-16 text-center py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all" 
+                                            />
+                                        </td>
+                                        <td className="py-4 px-6 text-center">
+                                            <input 
+                                                type="number" 
+                                                value={member.dinner} 
+                                                onChange={(e) => handleMealChange(idx, "dinner", e.target.value)}
+                                                step="0.5" 
+                                                min="0" 
+                                                className="w-16 text-center py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all" 
+                                            />
+                                        </td>
+                                        <td className="py-4 px-6 text-center bg-orange-50/50 border-l border-orange-100/50">
+                                            <span className="font-extrabold text-gray-900 text-base">{rowTotal.toFixed(1)}</span>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
@@ -159,7 +283,7 @@ export default function FoodManagementPage() {
                 {/* Bottom Total Row for the Table */}
                 <div className="bg-gray-50 p-4 border-t border-gray-100 flex justify-end px-6">
                     <p className="text-sm font-bold text-gray-600">
-                        Total Meals Added: <span className="text-lg font-extrabold text-[#FF6B00] ml-2">4.5</span>
+                        Total Meals Added: <span className="text-lg font-extrabold text-[#FF6B00] ml-2">{totalMealsAdded.toFixed(1)}</span>
                     </p>
                 </div>
             </div>

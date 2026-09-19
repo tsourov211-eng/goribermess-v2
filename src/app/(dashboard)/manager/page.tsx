@@ -11,13 +11,18 @@ import {
     IconClock,
     IconCheck,
     IconX,
-    IconWallet
+    IconWallet,
+    IconUserPlus,
+    IconMail,
+    IconPhone
 } from "@tabler/icons-react";
 
 export default function ManagerDashboard() {
     const [stats, setStats] = useState({ totalMealsToday: 0, totalBazaarToday: 0 });
     const [pendingDeposits, setPendingDeposits] = useState<any[]>([]);
     const [pendingExpenses, setPendingExpenses] = useState<any[]>([]);
+    const [pendingBazaarSchedules, setPendingBazaarSchedules] = useState<any[]>([]);
+    const [pendingMembers, setPendingMembers] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const today = new Date();
@@ -35,6 +40,8 @@ export default function ManagerDashboard() {
                 setStats(data.stats);
                 setPendingDeposits(data.pendingDeposits);
                 setPendingExpenses(data.pendingExpenses);
+                setPendingBazaarSchedules(data.pendingBazaarSchedules || []);
+                setPendingMembers(data.pendingMembers || []);
             }
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -65,6 +72,69 @@ export default function ManagerDashboard() {
         }
     };
 
+    const handleScheduleAction = async (id: string, action: 'Approve' | 'Reject') => {
+        const status = action === 'Approve' ? 'approved' : 'rejected';
+        if (!confirm(`Are you sure you want to ${action.toLowerCase()} this schedule?`)) return;
+
+        try {
+            const res = await fetch("/api/members/bazaar-schedule", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ scheduleId: id, status })
+            });
+
+            if (res.ok) {
+                alert(`✅ Schedule ${action.toLowerCase()}ed successfully!`);
+                fetchDashboardData();
+            } else {
+                alert(`❌ Failed to ${action.toLowerCase()} schedule.`);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleApproveAllSchedules = async () => {
+        if (!confirm("Are you sure you want to approve all pending schedules?")) return;
+        
+        try {
+            const promises = pendingBazaarSchedules.map(schedule => 
+                fetch("/api/members/bazaar-schedule", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ scheduleId: schedule.id, status: "approved" })
+                })
+            );
+            await Promise.all(promises);
+            alert("✅ All pending schedules approved successfully!");
+            fetchDashboardData();
+        } catch (error) {
+            console.error(error);
+            alert("❌ Failed to approve all schedules.");
+        }
+    };
+
+    const handleMemberApproval = async (userId: string, action: 'approve' | 'reject') => {
+        if (!confirm(`Are you sure you want to ${action} this member?`)) return;
+
+        try {
+            const res = await fetch("/api/admin/users/approve", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId, action })
+            });
+
+            if (res.ok) {
+                alert(`✅ Member ${action}d successfully!`);
+                fetchDashboardData();
+            } else {
+                alert(`❌ Failed to ${action} member.`);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     return (
         <div className="max-w-7xl mx-auto space-y-6 lg:space-y-8 p-4">
             
@@ -84,6 +154,92 @@ export default function ManagerDashboard() {
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Today</p>
                         <p className="text-sm font-extrabold text-gray-900">{formattedToday}</p>
                     </div>
+                </div>
+            </div>
+
+            {/* ─── NEW: Pending Member Requests Section ─── */}
+            <div className="mt-8 bg-blue-50/50 rounded-3xl border border-blue-200 overflow-hidden shadow-sm">
+                <div className="p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-blue-200 bg-white">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 shadow-sm shrink-0">
+                            <IconUserPlus className="w-5 h-5" stroke={2} />
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-extrabold text-gray-900">Pending Member Requests</h2>
+                            <p className="text-xs font-bold text-gray-500 mt-0.5">Review and approve new member registrations.</p>
+                        </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 w-full sm:w-auto justify-end flex-wrap">
+                        <div className="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border border-blue-200">
+                            <IconClock size={14} /> {pendingMembers.length} Pending
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="bg-white overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-gray-50/50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                <th className="p-4 w-12">#</th>
+                                <th className="p-4">Name</th>
+                                <th className="p-4">Email Address</th>
+                                <th className="p-4">Phone Number</th>
+                                <th className="p-4">Status</th>
+                                <th className="p-4 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {isLoading ? (
+                                <tr>
+                                    <td colSpan={6} className="p-8 text-center text-gray-400 font-bold">Loading...</td>
+                                </tr>
+                            ) : pendingMembers.length === 0 ? (
+                                <tr>
+                                    <td colSpan={6} className="p-8 text-center text-gray-400 font-bold">No pending member requests.</td>
+                                </tr>
+                            ) : pendingMembers.map((user, idx) => (
+                                <tr key={user.id} className="hover:bg-blue-50/30 transition-colors group">
+                                    <td className="p-4 text-sm font-bold text-gray-500">{idx + 1}</td>
+                                    <td className="p-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+                                                {user.name?.charAt(0) || 'M'}
+                                            </div>
+                                            <span className="font-extrabold text-gray-900 text-sm">{user.name || 'Member'}</span>
+                                        </div>
+                                    </td>
+                                    <td className="p-4">
+                                        <div className="flex items-center gap-1.5 text-sm font-bold text-gray-700">
+                                            <IconMail size={16} className="text-gray-400" />
+                                            {user.email}
+                                        </div>
+                                    </td>
+                                    <td className="p-4">
+                                        <div className="flex items-center gap-1.5 text-sm font-bold text-gray-500">
+                                            <IconPhone size={16} className="text-gray-400" />
+                                            {user.phone || 'N/A'}
+                                        </div>
+                                    </td>
+                                    <td className="p-4">
+                                        <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-md text-xs font-bold border border-amber-200">
+                                            Pending
+                                        </span>
+                                    </td>
+                                    <td className="p-4">
+                                        <div className="flex items-center justify-center gap-2">
+                                            <button onClick={() => handleMemberApproval(user.id, 'approve')} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm transition-colors">
+                                                <IconCheck size={14} stroke={3} /> Approve
+                                            </button>
+                                            <button onClick={() => handleMemberApproval(user.id, 'reject')} className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm transition-colors">
+                                                <IconX size={14} stroke={3} /> Reject
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -130,7 +286,110 @@ export default function ManagerDashboard() {
                 </div>
             </div>
 
-            {/* ─── NEW: Pending Approvals Section ─── */}
+            {/* ─── NEW: Member Bazaar Date Requests Section ─── */}
+            <div className="mt-8 bg-orange-50/50 rounded-3xl border border-orange-200 overflow-hidden shadow-sm">
+                <div className="p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-orange-200 bg-white">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 shadow-sm shrink-0">
+                            <IconCalendarUser className="w-5 h-5" stroke={2} />
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-extrabold text-gray-900">Member Bazaar Date Requests</h2>
+                            <p className="text-xs font-bold text-gray-500 mt-0.5">Review and approve members' requested bazar dates for this month.</p>
+                        </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 w-full sm:w-auto justify-end flex-wrap">
+                        <div className="bg-orange-100 text-orange-600 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border border-orange-200">
+                            <IconClock size={14} /> {pendingBazaarSchedules.length} Pending
+                        </div>
+                        <button className="text-sm font-bold text-gray-700 hover:text-orange-600 transition-colors flex items-center gap-1 bg-white px-4 py-2 rounded-xl border border-gray-200 hover:border-orange-200 shadow-sm">
+                            View All <IconArrowRight size={16} />
+                        </button>
+                        {pendingBazaarSchedules.length > 0 && (
+                            <button onClick={handleApproveAllSchedules} className="bg-[#00B050] hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition-all">
+                                <IconCheck size={16} stroke={3} /> Approve All ({pendingBazaarSchedules.length})
+                            </button>
+                        )}
+                    </div>
+                </div>
+                
+                <div className="bg-white overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-gray-50/50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                <th className="p-4 w-12 text-center">
+                                    <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500" />
+                                </th>
+                                <th className="p-4 w-12">#</th>
+                                <th className="p-4">Member</th>
+                                <th className="p-4">Requested Date</th>
+                                <th className="p-4">Request Time</th>
+                                <th className="p-4">Note</th>
+                                <th className="p-4">Status</th>
+                                <th className="p-4 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {isLoading ? (
+                                <tr>
+                                    <td colSpan={8} className="p-8 text-center text-gray-400 font-bold">Loading...</td>
+                                </tr>
+                            ) : pendingBazaarSchedules.length === 0 ? (
+                                <tr>
+                                    <td colSpan={8} className="p-8 text-center text-gray-400 font-bold">No pending bazaar requests.</td>
+                                </tr>
+                            ) : pendingBazaarSchedules.map((item, idx) => (
+                                <tr key={item.id} className="hover:bg-orange-50/30 transition-colors group">
+                                    <td className="p-4 text-center">
+                                        <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500" />
+                                    </td>
+                                    <td className="p-4 text-sm font-bold text-gray-500">{idx + 1}</td>
+                                    <td className="p-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-[#0B132B] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+                                                {item.user.name?.charAt(0) || 'M'}
+                                            </div>
+                                            <span className="font-extrabold text-gray-900 text-sm">{item.user.name || 'Member'}</span>
+                                        </div>
+                                    </td>
+                                    <td className="p-4">
+                                        <div className="flex items-center gap-1.5 text-sm font-bold text-gray-700">
+                                            <IconCalendarUser size={16} className="text-gray-400" />
+                                            {new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                        </div>
+                                    </td>
+                                    <td className="p-4">
+                                        <div className="flex items-center gap-1.5 text-sm font-bold text-gray-500">
+                                            <IconClock size={16} className="text-gray-400" />
+                                            {/* using date for fallback since createdAt is missing */}
+                                            {new Date(item.date).toLocaleTimeString('en-US', { hour: '2-digit', minute:'2-digit' })}
+                                        </div>
+                                    </td>
+                                    <td className="p-4 text-sm font-medium text-gray-600">
+                                        I will go to the bazar.
+                                    </td>
+                                    <td className="p-4">
+                                        <span className="bg-orange-100 text-orange-600 px-3 py-1 rounded-md text-xs font-bold border border-orange-200">
+                                            Pending
+                                        </span>
+                                    </td>
+                                    <td className="p-4">
+                                        <div className="flex items-center justify-center gap-2">
+                                            <button onClick={() => handleScheduleAction(item.id, 'Approve')} className="bg-[#00B050] hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm transition-colors">
+                                                <IconCheck size={14} stroke={3} /> Approve
+                                            </button>
+                                            <button onClick={() => handleScheduleAction(item.id, 'Reject')} className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm transition-colors">
+                                                <IconX size={14} stroke={3} /> Reject
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 pt-4">
                 
                 {/* 1. Pending Payments */}

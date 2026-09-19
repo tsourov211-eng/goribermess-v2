@@ -49,10 +49,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }
     }, [status]);
 
-    // 💡 ইউজারের রোল ডিটেকশন
-    let basePath = "admin";
-    if (pathname.startsWith("/manager")) basePath = "manager";
-    if (pathname.startsWith("/member")) basePath = "member";
+    // 💡 ইউজারের সঠিক রোল ডিটেকশন (সেশন থেকে, ফলব্যাক পাথনেম)
+    const sessionRole = (session?.user as { role?: string })?.role;
+    let basePath = sessionRole || "member";
+    if (!sessionRole) {
+        if (pathname.startsWith("/admin")) basePath = "admin";
+        else if (pathname.startsWith("/manager")) basePath = "manager";
+        else basePath = "member";
+    }
 
     const getSidebarLinks = () => {
         if (basePath === "admin") {

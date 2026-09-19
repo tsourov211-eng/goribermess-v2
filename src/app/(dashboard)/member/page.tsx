@@ -17,7 +17,8 @@ import {
     IconShoppingCart,
     IconChevronLeft,
     IconChevronRight,
-    IconCircleCheck
+    IconCircleCheck,
+    IconX
 } from "@tabler/icons-react";
 
 export default function MemberDashboard() {
@@ -33,17 +34,33 @@ export default function MemberDashboard() {
     const [notices, setNotices] = useState<any[]>([]);
     const [isLoadingData, setIsLoadingData] = useState(true);
 
-    // 💡 NEW: Finance States (পেমেন্ট এবং বাজারের জন্য)
+    // 💡 Bazaar Schedules & Calendar States
+    const today = new Date();
+    const formattedToday = today.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+
+    const [activeMonth, setActiveMonth] = useState(today.getMonth()); // 0-11
+    const [activeYear, setActiveYear] = useState(today.getFullYear());
+
+    const [modalMonth, setModalMonth] = useState(today.getMonth());
+    const [modalYear, setModalYear] = useState(today.getFullYear());
+
+    const [bazarSchedules, setBazarSchedules] = useState<any[]>([]);
+    const [messSchedules, setMessSchedules] = useState<any[]>([]);
+    const [isLoadingBazar, setIsLoadingBazar] = useState(false);
+
+    const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+    const [selectedDates, setSelectedDates] = useState<string[]>([]);
+    const [isSubmittingBazarDates, setIsSubmittingBazarDates] = useState(false);
+
+    // 💡 Finance States (পেমেন্ট এবং বাজারের জন্য)
     const [paymentAmount, setPaymentAmount] = useState("");
     const [paymentNote, setPaymentNote] = useState("");
     const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
+    const [showPaymentForm, setShowPaymentForm] = useState(false);
 
     const [expenseAmount, setExpenseAmount] = useState("");
     const [expenseDetails, setExpenseDetails] = useState("");
     const [isSubmittingExpense, setIsSubmittingExpense] = useState(false);
-
-    const today = new Date();
-    const formattedToday = today.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -72,15 +89,164 @@ export default function MemberDashboard() {
         }
     }, [status]);
 
-    // ডামি বাজার ডেটা (ভবিষ্যতে ডাটাবেস থেকে আসবে)
-    const bazarDates = [
-        { day: "02", status: "Done" },
-        { day: "07", status: "Done" },
-        { day: "12", status: "Done" },
-        { day: "16", status: "Upcoming" },
-        { day: "21", status: "--" },
-        { day: "27", status: "--" }
+    // 💡 Fetch Bazar Schedules from API
+    const fetchBazarSchedules = async (m: number, y: number) => {
+        setIsLoadingBazar(true);
+        try {
+            const res = await fetch(`/api/members/bazaar-schedule?month=${m + 1}&year=${y}`);
+            if (res.ok) {
+                const data = await res.json();
+                setBazarSchedules(data.mySchedules || []);
+                setMessSchedules(data.allSchedules || []);
+            }
+        } catch (error) {
+            console.error("Error fetching bazaar schedules:", error);
+        } finally {
+            setIsLoadingBazar(false);
+        }
+    };
+
+    useEffect(() => {
+        if (status === "authenticated") {
+            fetchBazarSchedules(activeMonth, activeYear);
+        }
+    }, [status, activeMonth, activeYear]);
+
+    // কার্ডের মাস পরিবর্তন
+    const handlePrevActiveMonth = () => {
+        if (activeMonth === 0) {
+            setActiveMonth(11);
+            setActiveYear(prev => prev - 1);
+        } else {
+            setActiveMonth(prev => prev - 1);
+        }
+    };
+
+    const handleNextActiveMonth = () => {
+        if (activeMonth === 11) {
+            setActiveMonth(0);
+            setActiveYear(prev => prev + 1);
+        } else {
+            setActiveMonth(prev => prev + 1);
+        }
+    };
+
+    // মডালের মাস পরিবর্তন
+    const handlePrevModalMonth = () => {
+        if (modalMonth === 0) {
+            setModalMonth(11);
+            setModalYear(prev => prev - 1);
+        } else {
+            setModalMonth(prev => prev - 1);
+        }
+    };
+
+    const handleNextModalMonth = () => {
+        if (modalMonth === 11) {
+            setModalMonth(0);
+            setModalYear(prev => prev + 1);
+        } else {
+            setModalMonth(prev => prev + 1);
+        }
+    };
+
+    // তারিখ ফরম্যাট হেল্পার YYYY-MM-DD
+    const formatDateKey = (year: number, month: number, day: number) => {
+        return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    };
+
+    // ক্যালেন্ডারে ডেট সিলেকশন বা আনসিলেকশন
+    const toggleDateSelection = (dateKey: string) => {
+        setSelectedDates(prev =>
+            prev.includes(dateKey)
+                ? prev.filter(d => d !== dateKey)
+                : [...prev, dateKey].sort()
+        );
+    };
+
+    // সিলেক্টেড ডেট ম্যানেজারের অনুমোদনের জন্য সাবমিট করা
+    const handleConfirmBazarDates = async () => {
+        if (selectedDates.length === 0) {
+            alert("Please select at least one date for bazaar.");
+            return;
+        }
+
+        setIsSubmittingBazarDates(true);
+        try {
+            const res = await fetch("/api/members/bazaar-schedule", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ dates: selectedDates }),
+            });
+
+            if (res.ok) {
+                alert("✅ Bazaar dates submitted successfully for manager approval!");
+                setSelectedDates([]);
+                setIsCalendarModalOpen(false);
+                fetchBazarSchedules(activeMonth, activeYear);
+            } else {
+                const err = await res.json();
+                alert(`❌ ${err.error || "Failed to submit bazaar dates."}`);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("❌ An error occurred while submitting bazaar dates.");
+        } finally {
+            setIsSubmittingBazarDates(false);
+        }
+    };
+
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
     ];
+
+    // ক্যালেন্ডার গ্রিডের হিসাব
+    const daysInModalMonth = new Date(modalYear, modalMonth + 1, 0).getDate();
+    const firstDayOfModalMonth = new Date(modalYear, modalMonth, 1).getDay(); // 0 = Sun
+    const daysInPrevModalMonth = new Date(modalYear, modalMonth, 0).getDate();
+
+    const prevMonthDays = Array.from(
+        { length: firstDayOfModalMonth },
+        (_, i) => daysInPrevModalMonth - firstDayOfModalMonth + 1 + i
+    );
+    const currentMonthDays = Array.from({ length: daysInModalMonth }, (_, i) => i + 1);
+    const totalCells = firstDayOfModalMonth + daysInModalMonth;
+    const remainingCells = (7 - (totalCells % 7)) % 7;
+    const nextMonthDays = Array.from({ length: remainingCells }, (_, i) => i + 1);
+
+    const getDateStatus = (day: number) => {
+        const key = formatDateKey(modalYear, modalMonth, day);
+        const isSelected = selectedDates.includes(key);
+
+        const mySchedule = bazarSchedules.find(s => {
+            const d = new Date(s.date);
+            return d.getUTCFullYear() === modalYear && d.getUTCMonth() === modalMonth && d.getUTCDate() === day;
+        });
+
+        const messSchedule = messSchedules.find(s => {
+            const d = new Date(s.date);
+            return d.getUTCFullYear() === modalYear && d.getUTCMonth() === modalMonth && d.getUTCDate() === day;
+        });
+
+        const sched = mySchedule || messSchedule;
+        const dayDate = new Date(modalYear, modalMonth, day);
+        const todayZero = new Date();
+        todayZero.setHours(0, 0, 0, 0);
+
+        const isPast = dayDate.getTime() < todayZero.getTime();
+        const isCompleted = sched ? (sched.status === "done" || (isPast && sched.status === "approved")) : false;
+        const isUpcoming = sched ? !isCompleted : false;
+
+        return {
+            key,
+            isSelected,
+            isCompleted,
+            isUpcoming,
+            isScheduled: !!sched,
+            status: sched?.status
+        };
+    };
 
     // 💡 Payment Request Submit Logic (API Connection)
     const handlePaymentSubmit = async (e: React.FormEvent) => {
@@ -260,75 +426,137 @@ export default function MemberDashboard() {
                     </div>
                     <div className="flex items-center gap-3 bg-white border border-orange-100 text-orange-700 px-4 py-2 rounded-xl font-bold text-sm shadow-sm shrink-0">
                         <IconCalendarEvent size={18} stroke={2} /> 
-                        September 2026
+                        {monthNames[activeMonth]} {activeYear}
                         <div className="flex items-center gap-1 ml-2">
-                            <IconChevronLeft size={16} className="cursor-pointer hover:text-orange-900" stroke={3} />
-                            <IconChevronRight size={16} className="cursor-pointer hover:text-orange-900" stroke={3} />
+                            <IconChevronLeft size={16} onClick={handlePrevActiveMonth} className="cursor-pointer hover:text-orange-900 transition-colors" stroke={3} />
+                            <IconChevronRight size={16} onClick={handleNextActiveMonth} className="cursor-pointer hover:text-orange-900 transition-colors" stroke={3} />
                         </div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                     
                     {/* 1. Bazar Dates */}
-                    <div className="bg-white p-5 rounded-2xl border border-orange-100 shadow-sm flex flex-col">
-                        <h4 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <IconCalendarEvent size={18} className="text-orange-500"/> Bazar Dates (This Month)
-                        </h4>
-                        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                            {bazarDates.map((b, i) => (
-                                <div key={i} className={`flex flex-col items-center justify-center py-2 px-3 rounded-xl border min-w-[65px] shrink-0
-                                    ${b.status === 'Done' ? 'border-green-200 bg-green-50/50' : b.status === 'Upcoming' ? 'border-orange-200 bg-orange-50' : 'border-gray-100 bg-gray-50'}`}>
-                                    <span className="text-[10px] font-bold text-gray-500 uppercase">Sep</span>
-                                    <span className="text-xl font-extrabold text-gray-900 leading-none my-1.5">{b.day}</span>
-                                    {b.status === 'Done' && <IconCircleCheck size={16} className="text-green-500" stroke={2.5} />}
-                                    {b.status === 'Upcoming' && <span className="text-[9px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded-md">Upcoming</span>}
-                                    {b.status === '--' && <span className="text-[10px] font-bold text-gray-400">--</span>}
+                    <div className="bg-white p-5 rounded-2xl border border-orange-100 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <h4 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <IconCalendarEvent size={18} className="text-orange-500"/> Bazar Dates (This Month)
+                            </h4>
+                            {isLoadingBazar ? (
+                                <div className="py-6 text-center text-xs font-bold text-gray-400">Loading bazar dates...</div>
+                            ) : bazarSchedules.length === 0 ? (
+                                <div className="py-5 px-4 text-center rounded-xl bg-orange-50/40 border border-dashed border-orange-200">
+                                    <p className="text-xs font-bold text-gray-600">No bazar dates scheduled yet for this month.</p>
+                                    <p className="text-[11px] text-gray-400 mt-0.5">Click below to select your dates for manager approval.</p>
                                 </div>
-                            ))}
+                            ) : (
+                                <div className="flex items-center gap-2.5 sm:gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                                    {bazarSchedules.map((s: any) => {
+                                        const d = new Date(s.date);
+                                        const dayStr = String(d.getUTCDate()).padStart(2, "0");
+                                        const monthStr = d.toLocaleDateString("en-US", { month: "short", timeZone: "UTC" }).toUpperCase();
+                                        
+                                        const todayZero = new Date();
+                                        todayZero.setHours(0, 0, 0, 0);
+                                        const isPast = d.getTime() < todayZero.getTime();
+                                        const isDone = s.status === "done" || (isPast && s.status === "approved");
+                                        const isUpcoming = s.status === "approved" && !isPast;
+                                        const isPending = s.status === "pending";
+
+                                        return (
+                                            <div 
+                                                key={s.id} 
+                                                className={`flex flex-col items-center justify-center py-2 px-3 sm:px-3.5 rounded-xl border min-w-[68px] shrink-0
+                                                    ${isDone ? "border-green-200 bg-green-50/60 text-green-900" 
+                                                      : isUpcoming ? "border-orange-200 bg-orange-50 text-orange-900" 
+                                                      : "border-amber-200 bg-amber-50/70 text-amber-900"}`}
+                                            >
+                                                <span className="text-[10px] font-bold text-gray-500 uppercase">{monthStr}</span>
+                                                <span className="text-xl font-extrabold text-gray-900 leading-none my-1.5">{dayStr}</span>
+                                                {isDone && (
+                                                    <div className="flex items-center gap-1 text-[10px] font-bold text-green-600">
+                                                        <IconCircleCheck size={14} className="text-green-500" stroke={2.5} />
+                                                        <span>Done</span>
+                                                    </div>
+                                                )}
+                                                {isUpcoming && (
+                                                    <div className="flex items-center gap-1 text-[9px] font-bold text-orange-600 bg-orange-100/80 px-1.5 py-0.5 rounded-md">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-[#FF6B00]"></span>
+                                                        <span>Upcoming</span>
+                                                    </div>
+                                                )}
+                                                {isPending && (
+                                                    <span className="text-[9px] font-bold text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded-md">
+                                                        Pending
+                                                    </span>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
+
+                        {/* 💡 Button: Select Bazar Date (opens calendar modal) */}
+                        <button 
+                            type="button"
+                            onClick={() => {
+                                setModalMonth(activeMonth);
+                                setModalYear(activeYear);
+                                setSelectedDates([]);
+                                setIsCalendarModalOpen(true);
+                            }}
+                            className="w-full mt-4 bg-[#FF6B00] hover:bg-orange-600 text-white font-bold py-3 rounded-2xl text-sm flex items-center justify-center gap-2 shadow-md shadow-orange-500/20 transition-all cursor-pointer active:scale-[0.99]"
+                        >
+                            <IconCalendarEvent size={18} stroke={2.5} />
+                            Select Bazar Date
+                        </button>
                     </div>
 
-                    {/* 2. Request Payment */}
-                    <div className="bg-white p-5 rounded-2xl border border-orange-100 shadow-sm flex flex-col">
-                        <h4 className="text-sm font-bold text-gray-800 mb-1 flex items-center gap-2">
-                            <IconCoin size={18} className="text-orange-500"/> Request to Submit Payment
-                        </h4>
-                        <p className="text-[11px] text-gray-500 mb-4 font-medium">Let manager know how much you have paid.</p>
-                        <form className="space-y-3 mt-auto" onSubmit={handlePaymentSubmit}>
-                            <div className="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 focus-within:ring-2 ring-orange-500/20 focus-within:border-orange-500 transition-all">
-                                <span className="text-gray-500 font-bold mr-2">৳</span>
-                                {/* 💡 value এবং onChange যোগ করা হয়েছে */}
-                                <input type="number" value={paymentAmount} onChange={(e) => setPaymentAmount(e.target.value)} placeholder="Enter amount (e.g. 500)" className="bg-transparent w-full outline-none text-sm font-bold text-gray-800" required />
+                    {/* 2. Update Expense / Submit Payment Card */}
+                    <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div className="flex items-center justify-between mb-1">
+                                <h4 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                                    <IconShoppingCart size={18} className="text-orange-500"/> 
+                                    {showPaymentForm ? "Request to Submit Payment" : "Update Bazar Expense"}
+                                </h4>
+                                <button 
+                                    type="button" 
+                                    onClick={() => setShowPaymentForm(!showPaymentForm)} 
+                                    className="text-[11px] font-bold text-orange-600 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                                >
+                                    {showPaymentForm ? "← Update Expense" : "+ Submit Payment"}
+                                </button>
                             </div>
-                            {/* 💡 value এবং onChange যোগ করা হয়েছে */}
-                            <input type="text" value={paymentNote} onChange={(e) => setPaymentNote(e.target.value)} placeholder="Add a note (optional)" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none text-sm font-bold text-gray-800 focus:ring-2 ring-orange-500/20 focus:border-orange-500 transition-all" />
-                            {/* 💡 disabled স্টেট যোগ করা হয়েছে */}
-                            <button type="submit" disabled={isSubmittingPayment} className="w-full bg-[#FF6B00] hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-md shadow-orange-500/20 transition-all disabled:opacity-50">
-                                <IconSend size={16} stroke={2.5} /> {isSubmittingPayment ? "Sending..." : "Send Payment Request"}
-                            </button>
-                        </form>
-                    </div>
+                            <p className="text-[11px] text-gray-500 mb-4 font-medium">
+                                {showPaymentForm ? "Let manager know how much you have paid." : "If bazar is done, submit the total expense."}
+                            </p>
 
-                    {/* 3. Update Expense */}
-                    <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col">
-                        <h4 className="text-sm font-bold text-gray-800 mb-1 flex items-center gap-2">
-                            <IconShoppingCart size={18} className="text-gray-700"/> Update Bazar Expense
-                        </h4>
-                        <p className="text-[11px] text-gray-500 mb-4 font-medium">If bazar is done, submit the total expense.</p>
-                        <form className="space-y-3 mt-auto" onSubmit={handleExpenseSubmit}>
-                            <div className="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 focus-within:ring-2 ring-gray-900/20 focus-within:border-gray-900 transition-all">
-                                <span className="text-gray-500 font-bold mr-2">৳</span>
-                                {/* 💡 value এবং onChange যোগ করা হয়েছে */}
-                                <input type="number" value={expenseAmount} onChange={(e) => setExpenseAmount(e.target.value)} placeholder="Enter bazar amount (e.g. 1250)" className="bg-transparent w-full outline-none text-sm font-bold text-gray-800" required />
-                            </div>
-                            {/* 💡 value এবং onChange যোগ করা হয়েছে */}
-                            <input type="text" value={expenseDetails} onChange={(e) => setExpenseDetails(e.target.value)} placeholder="Add details (optional)" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none text-sm font-bold text-gray-800 focus:ring-2 ring-gray-900/20 focus:border-gray-900 transition-all" />
-                            {/* 💡 disabled স্টেট যোগ করা হয়েছে */}
-                            <button type="submit" disabled={isSubmittingExpense} className="w-full bg-[#0B132B] hover:bg-gray-800 text-white font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-50">
-                                <IconCheck size={16} stroke={3} /> {isSubmittingExpense ? "Submitting..." : "Submit to Manager"}
-                            </button>
-                        </form>
+                            {showPaymentForm ? (
+                                <form className="space-y-3" onSubmit={handlePaymentSubmit}>
+                                    <div className="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 focus-within:ring-2 ring-orange-500/20 focus-within:border-orange-500 transition-all">
+                                        <span className="text-gray-500 font-bold mr-2">৳</span>
+                                        <input type="number" value={paymentAmount} onChange={(e) => setPaymentAmount(e.target.value)} placeholder="Enter payment amount (e.g. 500)" className="bg-transparent w-full outline-none text-sm font-bold text-gray-800" required />
+                                    </div>
+                                    <input type="text" value={paymentNote} onChange={(e) => setPaymentNote(e.target.value)} placeholder="Add a note (optional)" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none text-sm font-bold text-gray-800 focus:ring-2 ring-orange-500/20 focus:border-orange-500 transition-all" />
+                                    <button type="submit" disabled={isSubmittingPayment} className="w-full bg-[#FF6B00] hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-md shadow-orange-500/20 transition-all disabled:opacity-50 cursor-pointer">
+                                        <IconSend size={16} stroke={2.5} /> {isSubmittingPayment ? "Sending..." : "Send Payment Request"}
+                                    </button>
+                                </form>
+                            ) : (
+                                <form className="space-y-3" onSubmit={handleExpenseSubmit}>
+                                    <div className="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 focus-within:ring-2 ring-gray-900/20 focus-within:border-gray-900 transition-all">
+                                        <span className="text-gray-500 font-bold mr-2">৳</span>
+                                        <input type="number" value={expenseAmount} onChange={(e) => setExpenseAmount(e.target.value)} placeholder="Enter bazar amount (e.g, 1250)" className="bg-transparent w-full outline-none text-sm font-bold text-gray-800" required />
+                                    </div>
+                                    <input type="text" value={expenseDetails} onChange={(e) => setExpenseDetails(e.target.value)} placeholder="Add details (optional)" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none text-sm font-bold text-gray-800 focus:ring-2 ring-gray-900/20 focus:border-gray-900 transition-all" />
+                                    <button type="submit" disabled={isSubmittingExpense} className="w-full bg-[#0B132B] hover:bg-gray-800 text-white font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-50 cursor-pointer">
+                                        <IconCheck size={16} stroke={3} /> {isSubmittingExpense ? "Submitting..." : "Submit to Manager"}
+                                    </button>
+                                </form>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -437,6 +665,149 @@ export default function MemberDashboard() {
                 </div>
 
             </div>
+            
+            {/* ─── Popup Calendar Modal: Select Bazar Date ─── */}
+            {isCalendarModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200">
+                    {/* Backdrop */}
+                    <div className="fixed inset-0" onClick={() => setIsCalendarModalOpen(false)}></div>
+
+                    {/* Modal Content */}
+                    <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 max-w-[420px] w-full p-5 sm:p-6 relative z-10 animate-in zoom-in-95 duration-150">
+                        {/* Header */}
+                        <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center">
+                                    <IconCalendarEvent size={20} stroke={2.5} />
+                                </div>
+                                <h3 className="text-base font-extrabold text-gray-900">Select Bazar Date</h3>
+                            </div>
+                            <button 
+                                type="button"
+                                onClick={() => setIsCalendarModalOpen(false)}
+                                className="w-8 h-8 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 flex items-center justify-center transition-colors cursor-pointer"
+                            >
+                                <IconX size={18} stroke={2.5} />
+                            </button>
+                        </div>
+
+                        {/* Month Navigator */}
+                        <div className="flex items-center justify-between my-3.5 px-2">
+                            <button 
+                                type="button"
+                                onClick={handlePrevModalMonth}
+                                className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors cursor-pointer"
+                            >
+                                <IconChevronLeft size={20} stroke={2.5} />
+                            </button>
+                            <span className="text-sm sm:text-base font-extrabold text-gray-800">
+                                {monthNames[modalMonth]} {modalYear}
+                            </span>
+                            <button 
+                                type="button"
+                                onClick={handleNextModalMonth}
+                                className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors cursor-pointer"
+                            >
+                                <IconChevronRight size={20} stroke={2.5} />
+                            </button>
+                        </div>
+
+                        {/* Weekday Row */}
+                        <div className="grid grid-cols-7 text-center text-xs font-bold text-gray-400 mb-1">
+                            <span>Sun</span>
+                            <span>Mon</span>
+                            <span>Tue</span>
+                            <span>Wed</span>
+                            <span>Thu</span>
+                            <span>Fri</span>
+                            <span>Sat</span>
+                        </div>
+
+                        {/* Days Grid */}
+                        <div className="grid grid-cols-7 gap-y-2 gap-x-1 text-center my-2">
+                            {/* Trailing days from previous month */}
+                            {prevMonthDays.map((d, idx) => (
+                                <div key={`prev-${idx}`} className="h-9 flex items-center justify-center text-xs font-semibold text-gray-300 select-none">
+                                    {d}
+                                </div>
+                            ))}
+
+                            {/* Current month days */}
+                            {currentMonthDays.map((d) => {
+                                const status = getDateStatus(d);
+                                return (
+                                    <button
+                                        key={`day-${d}`}
+                                        type="button"
+                                        onClick={() => toggleDateSelection(status.key)}
+                                        className={`h-9 w-9 mx-auto rounded-full flex flex-col items-center justify-center transition-all cursor-pointer text-xs font-bold relative
+                                            ${status.isSelected
+                                                ? "bg-[#FF6B00] text-white shadow-md shadow-orange-500/30 scale-105"
+                                                : status.isCompleted
+                                                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80 hover:bg-emerald-100/80"
+                                                    : status.isUpcoming
+                                                        ? "bg-orange-50 text-orange-800 border border-orange-200/80 hover:bg-orange-100/80"
+                                                        : "text-gray-800 hover:bg-orange-50 hover:text-orange-600"
+                                            }
+                                        `}
+                                    >
+                                        <span className="leading-none">{d}</span>
+                                        {status.isSelected ? (
+                                            <span className="w-1 h-1 rounded-full bg-white block mt-0.5"></span>
+                                        ) : status.isCompleted ? (
+                                            <span className="w-1 h-1 rounded-full bg-emerald-500 block mt-0.5"></span>
+                                        ) : status.isUpcoming ? (
+                                            <span className="w-1 h-1 rounded-full bg-[#FF6B00] block mt-0.5"></span>
+                                        ) : null}
+                                    </button>
+                                );
+                            })}
+
+                            {/* Leading days from next month */}
+                            {nextMonthDays.map((d, idx) => (
+                                <div key={`next-${idx}`} className="h-9 flex items-center justify-center text-xs font-semibold text-gray-300 select-none">
+                                    {d}
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Legend */}
+                        <div className="flex items-center justify-center gap-3 pt-3 pb-1 border-t border-gray-100 text-[11px] font-semibold text-gray-600 select-none flex-wrap">
+                            <div className="flex items-center gap-1.5">
+                                <span className="w-2.5 h-2.5 rounded-full bg-[#FF6B00]"></span>
+                                <span>Selected Date</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span className="w-2.5 h-2.5 rounded-full bg-[#FED7AA]"></span>
+                                <span>Upcoming Bazar Date</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                                <span>Completed</span>
+                            </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex items-center justify-end gap-3 mt-4 pt-2">
+                            <button
+                                type="button"
+                                onClick={() => { setSelectedDates([]); setIsCalendarModalOpen(false); }}
+                                className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-xs sm:text-sm font-bold hover:bg-gray-50 transition-colors cursor-pointer"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleConfirmBazarDates}
+                                disabled={selectedDates.length === 0 || isSubmittingBazarDates}
+                                className="px-5 py-2.5 rounded-xl bg-[#FF6B00] hover:bg-orange-600 disabled:opacity-50 text-white text-xs sm:text-sm font-bold shadow-md shadow-orange-500/20 transition-all cursor-pointer flex items-center gap-1.5"
+                            >
+                                {isSubmittingBazarDates ? "Submitting..." : "Confirm Date"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

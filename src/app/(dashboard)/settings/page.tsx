@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { 
     IconSettings, 
     IconBuilding, 
@@ -10,6 +12,63 @@ import {
 } from "@tabler/icons-react";
 
 export default function SettingsPage() {
+    const { data: session } = useSession();
+    const [messName, setMessName] = useState("Amader Mess");
+    const [fullName, setFullName] = useState("");
+    const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
+    const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        if (session?.user) {
+            setFullName(session.user.name || "");
+            setEmail(session.user.email || "");
+        }
+        fetchProfile();
+    }, [session]);
+
+    const fetchProfile = async () => {
+        try {
+            const res = await fetch("/api/members/profile");
+            if (res.ok) {
+                const data = await res.json();
+                if (data.profile) {
+                    setFullName(data.profile.name || "");
+                    setEmail(data.profile.email || "");
+                    setPhone(data.profile.phone || "");
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching settings profile:", error);
+        }
+    };
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            const res = await fetch("/api/members/profile", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: fullName,
+                    phone,
+                }),
+            });
+
+            if (res.ok) {
+                alert("✅ Settings saved successfully!");
+            } else {
+                alert("❌ Failed to save settings.");
+            }
+        } catch (error) {
+            console.error("Save settings error:", error);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const initial = fullName ? fullName.charAt(0).toUpperCase() : "A";
+
     return (
         <div className="max-w-5xl mx-auto space-y-6 lg:space-y-8">
             
@@ -21,9 +80,13 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Save All Button */}
-                <button className="flex items-center justify-center gap-2 bg-[#FF6B00] hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-orange-500/20 transition-all w-full sm:w-auto">
+                <button 
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="flex items-center justify-center gap-2 bg-[#FF6B00] hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-orange-500/20 transition-all w-full sm:w-auto cursor-pointer disabled:opacity-50"
+                >
                     <IconDeviceFloppy className="w-5 h-5" stroke={2.5} />
-                    Save All Changes
+                    {isSaving ? "Saving..." : "Save All Changes"}
                 </button>
             </div>
 
@@ -38,7 +101,7 @@ export default function SettingsPage() {
                         </button>
                         <button className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-bold text-sm transition-all w-full text-left">
                             <IconUser className="w-5 h-5" stroke={2} />
-                            Admin Profile
+                            Profile Details
                         </button>
                         <button className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-bold text-sm transition-all w-full text-left">
                             <IconLock className="w-5 h-5" stroke={2} />
@@ -74,7 +137,8 @@ export default function SettingsPage() {
                                 <label className="block text-sm font-bold text-gray-900 mb-2 ml-1">Mess Name</label>
                                 <input
                                     type="text"
-                                    defaultValue="Amader Mess"
+                                    value={messName}
+                                    onChange={(e) => setMessName(e.target.value)}
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm text-gray-900 font-bold"
                                 />
                             </div>
@@ -95,32 +159,24 @@ export default function SettingsPage() {
                                     </select>
                                 </div>
                             </div>
-
-                            <div>
-                                <label className="block text-sm font-bold text-gray-900 mb-2 ml-1">Mess Rules / Notice</label>
-                                <textarea
-                                    rows={3}
-                                    placeholder="Enter any rules or notices for the dashboard..."
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm text-gray-900 font-medium resize-none"
-                                ></textarea>
-                            </div>
                         </div>
                     </div>
 
-                    {/* Admin Profile Card */}
+                    {/* Profile Card */}
                     <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-8">
                         <h2 className="text-lg font-extrabold text-gray-900 mb-6 flex items-center gap-2">
                             <IconUser className="w-5 h-5 text-blue-500" stroke={2} />
-                            Admin Profile
+                            Account Profile
                         </h2>
                         
                         <div className="flex flex-col sm:flex-row items-center gap-6 mb-6">
                             <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center text-white font-bold text-2xl shadow-md shrink-0">
-                                S
+                                {initial}
                             </div>
-                            <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-bold text-sm transition-all">
-                                Change Avatar
-                            </button>
+                            <div>
+                                <p className="font-extrabold text-gray-900">{fullName || "User"}</p>
+                                <p className="text-sm text-gray-500">{email || "No email"}</p>
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -128,15 +184,18 @@ export default function SettingsPage() {
                                 <label className="block text-sm font-bold text-gray-900 mb-2 ml-1">Full Name</label>
                                 <input
                                     type="text"
-                                    defaultValue="Super Admin"
+                                    value={fullName}
+                                    onChange={(e) => setFullName(e.target.value)}
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm text-gray-900 font-bold"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-gray-900 mb-2 ml-1">Email Address</label>
+                                <label className="block text-sm font-bold text-gray-900 mb-2 ml-1">Phone Number</label>
                                 <input
-                                    type="email"
-                                    defaultValue="admin@gmail.com"
+                                    type="text"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    placeholder="01700000000"
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm text-gray-900 font-bold"
                                 />
                             </div>

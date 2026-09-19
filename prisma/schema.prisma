@@ -47,6 +47,8 @@ model User {
   role          String    @default("member")
   
   // 💡 নতুন যোগ করা ফিল্ড
+  password      String?   
+  messName      String?   @default("Amader Mess")
   phone         String?   
   address       String?   
 

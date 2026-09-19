@@ -16,6 +16,7 @@ import {
 
 export default function AdminDashboardPage() {
     const [users, setUsers] = useState<any[]>([]);
+    const [stats, setStats] = useState({ totalFoodCost: 0, messFund: 0, totalMembers: 0, totalMessMeals: 0 });
     const [isLoading, setIsLoading] = useState(true);
 
     // আজকের তারিখ ডাইনামিকভাবে দেখানোর জন্য
@@ -32,7 +33,10 @@ export default function AdminDashboardPage() {
             const res = await fetch("/api/admin/users");
             if (res.ok) {
                 const data = await res.json();
-                setUsers(data.users);
+                setUsers(data.users || []);
+                if (data.stats) {
+                    setStats(data.stats);
+                }
             }
         } catch (error) {
             console.error("Error fetching users:", error);
@@ -116,7 +120,7 @@ export default function AdminDashboardPage() {
                         <p className="text-gray-500 text-xs font-semibold text-right">Total Food Cost (This Month)</p>
                     </div>
                     <div className="flex items-end gap-3 z-10 mt-3">
-                        <h3 className="text-3xl font-extrabold text-gray-900">৳ 0</h3>
+                        <h3 className="text-3xl font-extrabold text-gray-900">{isLoading ? "..." : `৳ ${stats.totalFoodCost.toLocaleString()}`}</h3>
                     </div>
                     <p className="text-gray-500 text-xs font-medium z-10 mt-1">Total expense on food</p>
                     <div className="absolute bottom-2 right-4 flex items-end gap-1 opacity-20">
@@ -135,10 +139,10 @@ export default function AdminDashboardPage() {
                         <p className="text-gray-500 text-xs font-semibold text-right">Mess Fund</p>
                     </div>
                     <div className="flex items-end gap-3 z-10 mt-3">
-                        <h3 className="text-3xl font-extrabold text-gray-900">৳ 0</h3>
+                        <h3 className="text-3xl font-extrabold text-gray-900">{isLoading ? "..." : `৳ ${stats.messFund.toLocaleString()}`}</h3>
                     </div>
                     <div className="flex items-center justify-between z-10 mt-1">
-                        <p className="text-gray-500 text-xs font-medium">Pending calculation</p>
+                        <p className="text-gray-500 text-xs font-medium">{stats.messFund >= 0 ? "Surplus in fund" : "Deficit in fund"}</p>
                     </div>
                 </div>
 

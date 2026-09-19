@@ -1,52 +1,182 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { PrismaClient } from "@prisma/client";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
-const prisma = new PrismaClient();
-
-// সব ইউজারদের লিস্ট আনার জন্য
+// সব ইউজারদের লিস্ট ও ড্যাশবোর্ড স্ট্যাটাস আনার জন্য
 export async function GET() {
-    try {
-        const session = await getServerSession();
-        // 💡 রিয়েল অ্যাপে চেক করতে হবে: if (session.user.role !== 'admin') return Error
-
-        const users = await prisma.user.findMany({
-            orderBy: { role: 'asc' }, // admin, manager, member ক্রমানুসারে আসবে
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                image: true,
-                role: true,
-                phone: true,
-            }
-        });
-
-        return NextResponse.json({ users }, { status: 200 });
-    } catch (error) {
-        console.error("Admin Users GET Error:", error);
-        return NextResponse.json({ error: "Server error" }, { status: 500 });
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // ১. সকল ইউজার ও তাদের অনুমোদিত ডিপোজিট ও মিল লগ আনা
+    const users = await prisma.user.findMany({
+      orderBy: { role: "asc" },
+      include: {
+        deposits: { where: { status: "Approved" } },
+        meals: true,
+      },
+    });
+
+    // ২. মোট মেসের খরচ (Approved expenses)
+    const expenseAgg = await prisma.expense.aggregate({
+      _sum: { amount: true },
+      where: { status: "Approved" },
+    });
+    const totalFoodCost = expenseAgg._sum.amount || 0;
+
+    // ৩. মোট মেসের মিল
+    const allMeals = await prisma.mealLog.findMany();
+    const totalMessMeals = allMeals.reduce(
+      (acc, m) => acc + m.breakfast + m.lunch + m.dinner + m.guest,
+      0
+    );
+
+    // ৪. লাইভ মিল রেট
+    const liveMealRate = totalMessMeals > 0 ? totalFoodCost / totalMessMeals : 0;
+
+    // ৫. মোট জমা টাকা
+    const depositAgg = await prisma.deposit.aggregate({
+      _sum: { amount: true },
+      where: { status: "Approved" },
+    });
+    const totalDeposits = depositAgg._sum.amount || 0;
+
+    // ৬. মেস ফান্ড (মোট জমা - মোট খরচ)
+    const messFund = totalDeposits - totalFoodCost;
+
+    // ৭. প্রতিটি ইউজারের ডিপোজিট, মিল ও ব্যালেন্স হিসাব করা
+    const formattedUsers = users.map((u) => {
+      const userDeposit = u.deposits.reduce((acc, d) => acc + d.amount, 0);
+      const userMeals = u.meals.reduce(
+        (acc, m) => acc + m.breakfast + m.lunch + m.dinner + m.guest,
+        0
+      );
+      const userCost = userMeals * liveMealRate;
+      const userBalance = userDeposit - userCost;
+
+      return {
+        id: u.id,
+        name: u.name || "Unnamed",
+        email: u.email,
+        phone: u.phone || "N/A",
+        image: u.image,
+        role: u.role,
+        deposit: Math.round(userDeposit * 100) / 100,
+        totalMeals: Math.round(userMeals * 10) / 10,
+        balance: Math.round(userBalance * 100) / 100,
+        status: "Active",
+      };
+    });
+
+    return NextResponse.json(
+      {
+        users: formattedUsers,
+        stats: {
+          totalMembers: users.length,
+          totalFoodCost: Math.round(totalFoodCost * 100) / 100,
+          messFund: Math.round(messFund * 100) / 100,
+          totalMessMeals: Math.round(totalMessMeals * 10) / 10,
+          liveMealRate: Math.round(liveMealRate * 100) / 100,
+        },
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Admin Users GET Error:", error);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
 }
 
-// ইউজারের রোল আপডেট করার জন্য
+// ইউজারের রোল অথবা তথ্য আপডেট করার জন্য
 export async function PATCH(req: Request) {
-    try {
-        const session = await getServerSession();
-        const { userId, newRole } = await req.json();
-
-        if (!userId || !newRole) {
-            return NextResponse.json({ error: "Missing data" }, { status: 400 });
-        }
-
-        const updatedUser = await prisma.user.update({
-            where: { id: userId },
-            data: { role: newRole }
-        });
-
-        return NextResponse.json({ message: "Role updated successfully", user: updatedUser }, { status: 200 });
-    } catch (error) {
-        console.error("Admin Users PATCH Error:", error);
-        return NextResponse.json({ error: "Server error" }, { status: 500 });
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const { userId, newRole, name, phone } = await req.json();
+
+    if (!userId) {
+      return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+    }
+
+    const dataToUpdate: any = {};
+    if (newRole) dataToUpdate.role = newRole;
+    if (name) dataToUpdate.name = name;
+    if (phone !== undefined) dataToUpdate.phone = phone;
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: dataToUpdate,
+    });
+
+    return NextResponse.json(
+      { message: "User updated successfully", user: updatedUser },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Admin Users PATCH Error:", error);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}
+
+// অ্যাডমিন কর্তৃক নতুন মেম্বার অ্যাড করার জন্য
+export async function POST(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { name, email, phone, role, password } = body;
+
+    if (!name || !email) {
+      return NextResponse.json(
+        { error: "Name and email are required" },
+        { status: 400 }
+      );
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const existing = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
+
+    if (existing) {
+      return NextResponse.json(
+        { error: "A user with this email already exists!" },
+        { status: 400 }
+      );
+    }
+
+    const plainPassword = password || "123456";
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+    const newUser = await prisma.user.create({
+      data: {
+        name: name.trim(),
+        email: normalizedEmail,
+        phone: phone?.trim() || "",
+        password: hashedPassword,
+        role: role || "member",
+        defaultBreakfast: 0.5,
+        defaultLunch: 1.0,
+        defaultDinner: 1.0,
+      },
+    });
+
+    return NextResponse.json(
+      { message: "Member created successfully!", user: newUser },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Admin Users POST Error:", error);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
 }
