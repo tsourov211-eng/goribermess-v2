@@ -10,12 +10,12 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Verify admin/manager privileges
+    // Verify admin-only privileges (only admin can approve/reject member requests)
     const adminUser = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
-    if (!adminUser || (adminUser.role !== "admin" && adminUser.role !== "manager")) {
+    if (!adminUser || adminUser.role !== "admin") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

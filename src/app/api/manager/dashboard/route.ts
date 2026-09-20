@@ -31,13 +31,6 @@ export async function GET() {
       orderBy: { date: "asc" },
     });
 
-    // 2.6 পেন্ডিং মেম্বার রিকোয়েস্ট (নতুন রেজিস্ট্রেশন)
-    const pendingMembers = await prisma.user.findMany({
-      where: { role: "pending" },
-      select: { id: true, name: true, email: true, phone: true },
-      orderBy: { id: "desc" },
-    });
-
     // ৩. আজকের মোট মিল
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
@@ -67,7 +60,6 @@ export async function GET() {
         pendingDeposits,
         pendingExpenses,
         pendingBazaarSchedules,
-        pendingMembers,
         stats: {
           totalMealsToday: Math.round(totalMealsToday * 10) / 10,
           totalBazaarToday: Math.round(totalBazaarToday),

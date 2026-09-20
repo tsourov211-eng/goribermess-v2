@@ -11,10 +11,7 @@ import {
     IconClock,
     IconCheck,
     IconX,
-    IconWallet,
-    IconUserPlus,
-    IconMail,
-    IconPhone
+    IconWallet
 } from "@tabler/icons-react";
 
 export default function ManagerDashboard() {
@@ -22,7 +19,7 @@ export default function ManagerDashboard() {
     const [pendingDeposits, setPendingDeposits] = useState<any[]>([]);
     const [pendingExpenses, setPendingExpenses] = useState<any[]>([]);
     const [pendingBazaarSchedules, setPendingBazaarSchedules] = useState<any[]>([]);
-    const [pendingMembers, setPendingMembers] = useState<any[]>([]);
+
     const [isLoading, setIsLoading] = useState(true);
 
     const today = new Date();
@@ -41,7 +38,7 @@ export default function ManagerDashboard() {
                 setPendingDeposits(data.pendingDeposits);
                 setPendingExpenses(data.pendingExpenses);
                 setPendingBazaarSchedules(data.pendingBazaarSchedules || []);
-                setPendingMembers(data.pendingMembers || []);
+
             }
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -114,26 +111,7 @@ export default function ManagerDashboard() {
         }
     };
 
-    const handleMemberApproval = async (userId: string, action: 'approve' | 'reject') => {
-        if (!confirm(`Are you sure you want to ${action} this member?`)) return;
 
-        try {
-            const res = await fetch("/api/admin/users/approve", {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId, action })
-            });
-
-            if (res.ok) {
-                alert(`✅ Member ${action}d successfully!`);
-                fetchDashboardData();
-            } else {
-                alert(`❌ Failed to ${action} member.`);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
 
     return (
         <div className="max-w-7xl mx-auto space-y-6 lg:space-y-8 p-4">
@@ -157,91 +135,7 @@ export default function ManagerDashboard() {
                 </div>
             </div>
 
-            {/* ─── NEW: Pending Member Requests Section ─── */}
-            <div className="mt-8 bg-blue-50/50 rounded-3xl border border-blue-200 overflow-hidden shadow-sm">
-                <div className="p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-blue-200 bg-white">
-                    <div className="flex items-center gap-3 w-full sm:w-auto">
-                        <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 shadow-sm shrink-0">
-                            <IconUserPlus className="w-5 h-5" stroke={2} />
-                        </div>
-                        <div>
-                            <h2 className="text-lg font-extrabold text-gray-900">Pending Member Requests</h2>
-                            <p className="text-xs font-bold text-gray-500 mt-0.5">Review and approve new member registrations.</p>
-                        </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-3 w-full sm:w-auto justify-end flex-wrap">
-                        <div className="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border border-blue-200">
-                            <IconClock size={14} /> {pendingMembers.length} Pending
-                        </div>
-                    </div>
-                </div>
-                
-                <div className="bg-white overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-50/50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                <th className="p-4 w-12">#</th>
-                                <th className="p-4">Name</th>
-                                <th className="p-4">Email Address</th>
-                                <th className="p-4">Phone Number</th>
-                                <th className="p-4">Status</th>
-                                <th className="p-4 text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {isLoading ? (
-                                <tr>
-                                    <td colSpan={6} className="p-8 text-center text-gray-400 font-bold">Loading...</td>
-                                </tr>
-                            ) : pendingMembers.length === 0 ? (
-                                <tr>
-                                    <td colSpan={6} className="p-8 text-center text-gray-400 font-bold">No pending member requests.</td>
-                                </tr>
-                            ) : pendingMembers.map((user, idx) => (
-                                <tr key={user.id} className="hover:bg-blue-50/30 transition-colors group">
-                                    <td className="p-4 text-sm font-bold text-gray-500">{idx + 1}</td>
-                                    <td className="p-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
-                                                {user.name?.charAt(0) || 'M'}
-                                            </div>
-                                            <span className="font-extrabold text-gray-900 text-sm">{user.name || 'Member'}</span>
-                                        </div>
-                                    </td>
-                                    <td className="p-4">
-                                        <div className="flex items-center gap-1.5 text-sm font-bold text-gray-700">
-                                            <IconMail size={16} className="text-gray-400" />
-                                            {user.email}
-                                        </div>
-                                    </td>
-                                    <td className="p-4">
-                                        <div className="flex items-center gap-1.5 text-sm font-bold text-gray-500">
-                                            <IconPhone size={16} className="text-gray-400" />
-                                            {user.phone || 'N/A'}
-                                        </div>
-                                    </td>
-                                    <td className="p-4">
-                                        <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-md text-xs font-bold border border-amber-200">
-                                            Pending
-                                        </span>
-                                    </td>
-                                    <td className="p-4">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <button onClick={() => handleMemberApproval(user.id, 'approve')} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm transition-colors">
-                                                <IconCheck size={14} stroke={3} /> Approve
-                                            </button>
-                                            <button onClick={() => handleMemberApproval(user.id, 'reject')} className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm transition-colors">
-                                                <IconX size={14} stroke={3} /> Reject
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+
 
             {/* ─── Top Stats ─── */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
