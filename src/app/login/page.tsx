@@ -5,11 +5,12 @@ import { signIn, getSession } from "next-auth/react";
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { IconBrandGoogle, IconMail, IconLock, IconEye, IconLogin } from "@tabler/icons-react";
+import { IconBrandGoogle, IconMail, IconLock, IconEye, IconEyeOff, IconLogin } from "@tabler/icons-react";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
     const router = useRouter();
 
@@ -125,16 +126,16 @@ export default function LoginPage() {
                                     <IconLock className="h-5 w-5 text-orange-600" stroke={2} />
                                 </div>
                                     <input
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="••••••••"
                                         className="w-full pl-14 pr-12 py-3 sm:py-3.5 bg-white/40 border border-white/50 rounded-xl outline-none focus:bg-white/60 focus:ring-2 focus:ring-orange-400 transition-all placeholder-gray-400 text-base text-gray-900 font-normal shadow-inner [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_#fff] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
                                         required
                                     />
-                                <div className="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer group">
-                                    <IconEye className="h-5 w-5 text-gray-700 group-hover:text-orange-600 transition-colors" stroke={2} />
-                                </div>
+                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-700 hover:text-orange-600 transition-colors">
+                                    {showPassword ? <IconEyeOff className="h-5 w-5" stroke={2} /> : <IconEye className="h-5 w-5" stroke={2} />}
+                                </button>
                             </div>
                         </div>
 
