@@ -21,12 +21,25 @@ export async function GET() {
       },
     });
 
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
     // 2. Total mess expenses (Approved expenses)
-    const expenseAgg = await prisma.expense.aggregate({
+    const expenseAggThisMonth = await prisma.expense.aggregate({
+      _sum: { amount: true },
+      where: { 
+        status: "Approved",
+        date: { gte: startOfMonth, lte: endOfMonth }
+      },
+    });
+    const totalFoodCostThisMonth = expenseAggThisMonth._sum.amount || 0;
+
+    const expenseAggAllTime = await prisma.expense.aggregate({
       _sum: { amount: true },
       where: { status: "Approved" },
     });
-    const totalFoodCost = expenseAgg._sum.amount || 0;
+    const totalFoodCostAllTime = expenseAggAllTime._sum.amount || 0;
 
     // 3. Total mess meals
     const allMeals = await prisma.mealLog.findMany();
@@ -36,7 +49,7 @@ export async function GET() {
     );
 
     // 4. Live meal rate
-    const liveMealRate = totalMessMeals > 0 ? totalFoodCost / totalMessMeals : 0;
+    const liveMealRate = totalMessMeals > 0 ? totalFoodCostAllTime / totalMessMeals : 0;
 
     // 5. Total deposited money
     const depositAgg = await prisma.deposit.aggregate({
@@ -46,7 +59,10 @@ export async function GET() {
     const totalDeposits = depositAgg._sum.amount || 0;
 
     // 6. Mess fund (Total deposit - Total expense)
-    const messFund = totalDeposits - totalFoodCost;
+    const messFund = totalDeposits - totalFoodCostAllTime;
+    
+    // Calculate approved users count
+    const approvedUsersCount = users.filter(u => ["member", "manager", "admin"].includes(u.role)).length;
 
     // 7. Calculate each user's deposit, meal and balance
     const formattedUsers = users.map((u) => {
@@ -76,8 +92,8 @@ export async function GET() {
       {
         users: formattedUsers,
         stats: {
-          totalMembers: users.length,
-          totalFoodCost: Math.round(totalFoodCost * 100) / 100,
+          totalMembers: approvedUsersCount,
+          totalFoodCost: Math.round(totalFoodCostThisMonth * 100) / 100,
           messFund: Math.round(messFund * 100) / 100,
           totalMessMeals: Math.round(totalMessMeals * 10) / 10,
           liveMealRate: Math.round(liveMealRate * 100) / 100,
@@ -177,6 +193,35 @@ export async function POST(req: Request) {
     );
   } catch (error) {
     console.error("Admin Users POST Error:", error);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}
+
+// To delete a user
+export async function DELETE(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get("userId");
+
+    if (!userId) {
+      return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+    }
+
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+
+    return NextResponse.json(
+      { message: "User deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Admin Users DELETE Error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
