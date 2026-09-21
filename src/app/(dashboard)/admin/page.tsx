@@ -379,9 +379,9 @@ export default function AdminDashboardPage() {
                 </div>
 
                 {/* Table Content */}
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-[800px]">
-                        <thead>
+                <div className="bg-gray-50/30 md:bg-white overflow-x-hidden p-4 md:p-0 rounded-b-3xl">
+                    <table className="w-full text-left border-collapse block md:table min-w-0 md:min-w-[800px]">
+                        <thead className="hidden md:table-header-group">
                             <tr className="bg-[#F8FAFC] border-b border-gray-100">
                                 <th className="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">#</th>
                                 <th className="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Name</th>
@@ -390,32 +390,34 @@ export default function AdminDashboardPage() {
                                 <th className="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider text-right whitespace-nowrap">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="block md:table-row-group space-y-4 md:space-y-0 md:divide-y md:divide-gray-100">
                             
                             {isLoading ? (
-                                <tr>
-                                    <td colSpan={5} className="text-center text-gray-400 font-bold py-10">Loading members...</td>
+                                <tr className="block md:table-row">
+                                    <td colSpan={5} className="block md:table-cell text-center text-gray-400 font-bold py-10">Loading members...</td>
                                 </tr>
                             ) : users.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} className="text-center text-gray-400 font-bold py-10">No members found.</td>
+                                <tr className="block md:table-row">
+                                    <td colSpan={5} className="block md:table-cell text-center text-gray-400 font-bold py-10">No members found.</td>
                                 </tr>
                             ) : (
                                 users.map((user, index) => (
-                                    <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
-                                        <td className="py-4 px-6 text-sm font-medium text-gray-500 whitespace-nowrap">{index + 1}</td>
-                                        <td className="py-4 px-6 whitespace-nowrap">
+                                    <tr key={user.id} className="block md:table-row bg-white border border-gray-200 md:border-0 rounded-2xl md:rounded-none p-5 md:p-0 hover:bg-gray-50/50 transition-colors group shadow-sm md:shadow-none">
+                                        <td className="hidden md:table-cell py-4 px-6 text-sm font-medium text-gray-500 whitespace-nowrap">{index + 1}</td>
+                                        
+                                        <td className="block md:table-cell p-0 md:py-4 md:px-6 md:whitespace-nowrap mb-4 md:mb-0">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-sm shrink-0 uppercase">
+                                                <div className="w-12 h-12 md:w-9 md:h-9 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-base md:text-sm shrink-0 uppercase">
                                                     {user.name ? user.name.charAt(0) : "U"}
                                                 </div>
-                                                <div>
-                                                    <span className="font-extrabold text-gray-900 block">{user.name || "Unnamed"}</span>
-                                                    <span className="text-xs text-gray-500 font-medium">{user.email}</span>
+                                                <div className="min-w-0">
+                                                    <span className="font-extrabold text-gray-900 block text-base md:text-sm truncate">{user.name || "Unnamed"}</span>
+                                                    <span className="text-sm md:text-xs text-gray-500 font-medium truncate block">{user.email}</span>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="py-4 px-6 whitespace-nowrap">
+                                        
+                                        <td className="inline-block md:table-cell p-0 md:py-4 md:px-6 md:whitespace-nowrap mr-4 md:mr-0 align-middle">
                                             {/* 💡 Dynamic role selector */}
                                             <select 
                                                 value={user.role} 
@@ -433,7 +435,8 @@ export default function AdminDashboardPage() {
                                                 {user.role === 'suspended' && <option value="suspended">Suspended</option>}
                                             </select>
                                         </td>
-                                        <td className="py-4 px-6 whitespace-nowrap">
+                                        
+                                        <td className="inline-block md:table-cell p-0 md:py-4 md:px-6 md:whitespace-nowrap align-middle">
                                             {user.role === 'suspended' ? (
                                                 <span className="flex items-center gap-1.5">
                                                     <span className="w-2 h-2 rounded-full bg-red-500 shrink-0"></span>
@@ -446,21 +449,22 @@ export default function AdminDashboardPage() {
                                                 </span>
                                             )}
                                         </td>
-                                        <td className="py-4 px-6 text-right whitespace-nowrap">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button onClick={() => handleEditClick(user)} className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors">
-                                                    <IconEdit className="w-4 h-4" stroke={2} /> Edit
+                                        
+                                        <td className="block md:table-cell p-0 md:py-4 md:px-6 md:whitespace-nowrap mt-4 md:mt-0 pt-4 md:pt-0 border-t border-gray-100 md:border-0">
+                                            <div className="flex items-center justify-between md:justify-end gap-2 relative">
+                                                <button onClick={() => handleEditClick(user)} className="flex items-center justify-center gap-1.5 flex-1 md:flex-none px-3 py-2 md:py-1.5 border border-gray-200 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors">
+                                                    <IconEdit className="w-4 h-4 md:w-4 md:h-4" stroke={2} /> Edit Member
                                                 </button>
                                                 <div className="relative">
-                                                    <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(activeDropdown === user.id ? null : user.id); }} className="p-1.5 border border-gray-200 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer">
-                                                        <IconDotsVertical className="w-5 h-5" stroke={2} />
+                                                    <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(activeDropdown === user.id ? null : user.id); }} className="p-2 md:p-1.5 border border-gray-200 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer">
+                                                        <IconDotsVertical className="w-5 h-5 md:w-5 md:h-5" stroke={2} />
                                                     </button>
                                                     {activeDropdown === user.id && (
-                                                        <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
-                                                            <button onClick={() => { setActiveDropdown(null); handleRoleChange(user.id, user.role === 'suspended' ? 'member' : 'suspended'); }} className="w-full text-left px-4 py-2 text-sm font-bold text-orange-600 hover:bg-orange-50 transition-colors cursor-pointer border-b border-gray-50">
+                                                        <div className="absolute right-0 bottom-full md:bottom-auto mt-0 md:mt-2 mb-2 md:mb-0 w-40 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-[60]">
+                                                            <button onClick={() => { setActiveDropdown(null); handleRoleChange(user.id, user.role === 'suspended' ? 'member' : 'suspended'); }} className="w-full text-left px-4 py-3 md:py-2 text-sm font-bold text-orange-600 hover:bg-orange-50 transition-colors cursor-pointer border-b border-gray-50">
                                                                 {user.role === 'suspended' ? "Unsuspend" : "Suspend User"}
                                                             </button>
-                                                            <button onClick={() => { setActiveDropdown(null); handleDeleteUser(user.id); }} className="w-full text-left px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors cursor-pointer">
+                                                            <button onClick={() => { setActiveDropdown(null); handleDeleteUser(user.id); }} className="w-full text-left px-4 py-3 md:py-2 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors cursor-pointer">
                                                                 Delete User
                                                             </button>
                                                         </div>
