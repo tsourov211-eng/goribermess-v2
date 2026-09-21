@@ -93,10 +93,10 @@ export default function MembersListPage() {
     });
 
     return (
-        <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
+        <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300 pb-12 md:pb-20">
             
             {/* ─── Header Section ─── */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
                 <div>
                     <h1 className="text-2xl font-extrabold text-[#0B132B]">Mess Members</h1>
                     <p className="text-sm text-gray-500 font-medium mt-1">Manage all members and their deposit information.</p>
@@ -128,56 +128,55 @@ export default function MembersListPage() {
             </div>
 
             {/* ─── Members Table Section ─── */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
+            <div className="bg-gray-50/30 md:bg-white rounded-2xl md:shadow-sm md:border md:border-gray-100 overflow-x-hidden md:overflow-x-auto p-4 md:p-0">
+                <table className="w-full text-left border-collapse block md:table min-w-0 md:min-w-[800px]">
+                    <thead className="hidden md:table-header-group">
                             <tr className="bg-gray-50 border-b border-gray-100">
-                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Member Info</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Phone</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Deposit</th>
+                                <th className="px-6 py-4 md:py-5 text-xs font-bold text-gray-500 uppercase tracking-wider">Member Info</th>
+                                <th className="px-6 py-4 md:py-5 text-xs font-bold text-gray-500 uppercase tracking-wider">Phone</th>
+                                <th className="px-6 py-4 md:py-5 text-xs font-bold text-gray-500 uppercase tracking-wider">Deposit</th>
                                 
                                 {/* 💡 Balance and Action columns are only visible to Admin or Manager */}
                                 {(currentUserRole === "admin" || currentUserRole === "manager") && (
                                     <>
-                                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Balance</th>
+                                        <th className="px-6 py-4 md:py-5 text-xs font-bold text-gray-500 uppercase tracking-wider">Balance</th>
                                         {currentUserRole === "admin" && (
-                                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                                            <th className="px-6 py-4 md:py-5 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                                         )}
                                     </>
                                 )}
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                    <tbody className="block md:table-row-group space-y-4 md:space-y-0 md:divide-y md:divide-gray-100">
                             {isLoading ? (
-                                <tr>
-                                    <td colSpan={5} className="py-10 text-center font-bold text-gray-400">
+                                <tr className="block md:table-row">
+                                    <td colSpan={5} className="block md:table-cell py-10 md:py-16 text-center font-bold text-gray-400">
                                         Loading members...
                                     </td>
                                 </tr>
                             ) : filteredMembers.map((member) => {
                                 const isEditing = editingMemberId === member.id;
                                 return (
-                                    <tr key={member.id} className="hover:bg-gray-50/50 transition-colors">
+                                    <tr key={member.id} className="flex flex-wrap md:table-row bg-white md:even:bg-gray-50/50 border border-gray-200 md:border-0 md:border-b md:border-orange-100/60 last:md:border-b-0 rounded-2xl md:rounded-none p-5 md:p-0 hover:bg-gray-50/80 transition-colors shadow-sm md:shadow-none">
                                         
                                         {/* Name & Role */}
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0 font-bold">
+                                        <td className="w-full md:w-auto block md:table-cell p-0 md:py-7 md:px-6 mb-4 md:mb-0 border-b border-gray-100 md:border-0 pb-4 md:pb-0">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 md:w-10 md:h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0 font-bold">
                                                     {member.name ? member.name.charAt(0).toUpperCase() : <IconUserCircle size={24} stroke={1.5} />}
                                                 </div>
-                                                <div>
+                                                <div className="min-w-0">
                                                     {isEditing ? (
                                                         <input 
                                                             type="text" 
                                                             value={editForm.name} 
                                                             onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                                                            className="text-sm font-extrabold border border-orange-300 rounded px-2 py-0.5" 
+                                                            className="text-sm font-extrabold border border-orange-300 rounded px-2 py-0.5 w-full max-w-[150px]" 
                                                         />
                                                     ) : (
-                                                        <p className="font-extrabold text-[#0B132B] text-sm">{member.name}</p>
+                                                        <p className="font-extrabold text-[#0B132B] text-base md:text-sm truncate">{member.name}</p>
                                                     )}
-                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                    <div className="flex items-center flex-wrap gap-2 mt-1 md:mt-0.5">
                                                         {isEditing ? (
                                                             <select 
                                                                 value={editForm.role} 
@@ -191,7 +190,7 @@ export default function MembersListPage() {
                                                         ) : (
                                                             <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 text-gray-600 capitalize">{member.role}</span>
                                                         )}
-                                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${member.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${member.status === 'Active' ? 'bg-green-100 text-green-700' : member.status === 'Pending' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
                                                             {member.status}
                                                         </span>
                                                     </div>
@@ -200,34 +199,41 @@ export default function MembersListPage() {
                                         </td>
                                         
                                         {/* Phone Number */}
-                                        <td className="px-6 py-4">
-                                            {isEditing ? (
-                                                <input 
-                                                    type="text" 
-                                                    value={editForm.phone} 
-                                                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                                                    className="text-sm font-bold border border-orange-300 rounded px-2 py-0.5" 
-                                                />
-                                            ) : (
-                                                <p className="text-sm font-bold text-gray-600">{member.phone}</p>
-                                            )}
+                                        <td className="w-full md:w-auto flex justify-between items-center md:table-cell p-0 md:py-7 md:px-6 mb-3 md:mb-0">
+                                            <span className="md:hidden text-xs font-bold text-gray-400 uppercase tracking-wider">Phone</span>
+                                            <div className="text-right md:text-left">
+                                                {isEditing ? (
+                                                    <input 
+                                                        type="text" 
+                                                        value={editForm.phone} 
+                                                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                                                        className="text-sm font-bold border border-orange-300 rounded px-2 py-0.5 w-full max-w-[150px]" 
+                                                    />
+                                                ) : (
+                                                    <p className="text-sm font-bold text-gray-600">{member.phone}</p>
+                                                )}
+                                            </div>
                                         </td>
                                         
                                         {/* Deposit Amount */}
-                                        <td className="px-6 py-4">
-                                            <p className="text-sm font-extrabold text-[#0B132B]">Tk {member.deposit.toLocaleString()}</p>
+                                        <td className="w-full md:w-auto flex justify-between items-center md:table-cell p-0 md:py-7 md:px-6 mb-4 md:mb-0 border-b border-gray-100 md:border-0 pb-4 md:pb-0">
+                                            <span className="md:hidden text-xs font-bold text-gray-400 uppercase tracking-wider">Deposit</span>
+                                            <div className="text-right md:text-left">
+                                                <p className="text-sm font-extrabold text-[#0B132B]">Tk {member.deposit.toLocaleString()}</p>
+                                            </div>
                                         </td>
                                         
                                         {/* Balance & Actions */}
                                         {(currentUserRole === "admin" || currentUserRole === "manager") && (
                                             <>
-                                                <td className="px-6 py-4">
+                                                <td className="flex-1 md:flex-none w-1/2 md:w-auto flex flex-col justify-center md:table-cell p-0 md:py-7 md:px-6 pt-2 md:pt-0">
+                                                    <span className="md:hidden text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Balance</span>
                                                     <p className={`text-sm font-extrabold ${member.balance < 0 ? "text-red-500" : "text-green-600"}`}>
                                                         {member.balance < 0 ? "-" : "+"} Tk {Math.abs(member.balance).toLocaleString()}
                                                     </p>
                                                 </td>
                                                 {currentUserRole === "admin" && (
-                                                    <td className="px-6 py-4 text-right">
+                                                    <td className="w-1/2 md:w-auto flex items-center justify-end md:table-cell p-0 md:py-7 md:px-6 pt-2 md:pt-0 text-right">
                                                         <div className="flex items-center justify-end gap-2">
                                                             {isEditing ? (
                                                                 <>
@@ -281,7 +287,6 @@ export default function MembersListPage() {
                             <p className="text-gray-500 font-medium">No members found.</p>
                         </div>
                     )}
-                </div>
             </div>
         </div>
     );

@@ -84,7 +84,7 @@ export async function GET() {
         deposit: Math.round(userDeposit * 100) / 100,
         totalMeals: Math.round(userMeals * 10) / 10,
         balance: Math.round(userBalance * 100) / 100,
-        status: "Active",
+        status: u.role === "pending" ? "Pending" : u.role === "suspended" ? "Suspended" : "Active",
       };
     });
 
