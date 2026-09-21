@@ -68,9 +68,12 @@ export async function GET(req: Request) {
       take: 3,
     });
 
-    // 8. Notice Board
+    // 8. Notice Board (Exclude cleared notices)
     const notices = await prisma.notice.findMany({
-      where: { isActive: true },
+      where: { 
+        isActive: true,
+        id: { notIn: user.clearedNotices || [] }
+      },
       orderBy: { createdAt: "desc" },
     });
 

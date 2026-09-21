@@ -102,16 +102,16 @@ export default function MembersListPage() {
                     <p className="text-sm text-gray-500 font-medium mt-1">Manage all members and their deposit information.</p>
                 </div>
                 
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2 w-full sm:w-auto mt-4 sm:mt-0">
                     {/* Search Box */}
-                    <div className="relative">
-                        <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <div className="relative flex-1 sm:flex-none">
+                        <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
                         <input 
                             type="text" 
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Search members..." 
-                            className="pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium transition-all w-full sm:w-64"
+                            className="pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-xs sm:text-sm font-medium transition-all w-full sm:w-64"
                         />
                     </div>
                     
@@ -119,9 +119,9 @@ export default function MembersListPage() {
                     {currentUserRole === "admin" && (
                         <Link 
                             href="/admin/add-member"
-                            className="flex items-center gap-2 bg-[#FF6B00] hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-orange-500/20 transition-all cursor-pointer"
+                            className="flex items-center justify-center gap-1.5 sm:gap-2 bg-[#FF6B00] hover:bg-orange-600 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-orange-500/20 transition-all cursor-pointer whitespace-nowrap shrink-0"
                         >
-                            <IconPlus size={18} stroke={2.5} /> Add Member
+                            <IconPlus className="w-4 h-4 sm:w-[18px] sm:h-[18px]" stroke={2.5} /> <span className="hidden sm:inline">Add Member</span><span className="sm:hidden">Add</span>
                         </Link>
                     )}
                 </div>
@@ -157,7 +157,7 @@ export default function MembersListPage() {
                             ) : filteredMembers.map((member) => {
                                 const isEditing = editingMemberId === member.id;
                                 return (
-                                    <tr key={member.id} className="flex flex-wrap md:table-row bg-white md:even:bg-gray-50/50 border border-gray-200 md:border-0 md:border-b md:border-orange-100/60 last:md:border-b-0 rounded-2xl md:rounded-none p-5 md:p-0 hover:bg-gray-50/80 transition-colors shadow-sm md:shadow-none">
+                                    <tr key={member.id} className="flex flex-wrap md:table-row bg-white md:even:bg-gray-50/50 border border-gray-100 md:border-0 md:border-b md:border-orange-100/60 last:md:border-b-0 rounded-3xl md:rounded-none p-4 md:p-0 hover:bg-gray-50/80 transition-colors shadow-sm md:shadow-none">
                                         
                                         {/* Name & Role */}
                                         <td className="w-full md:w-auto block md:table-cell p-0 md:py-7 md:px-6 mb-4 md:mb-0 border-b border-gray-100 md:border-0 pb-4 md:pb-0">

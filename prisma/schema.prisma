@@ -57,6 +57,8 @@ model User {
   defaultLunch     Float @default(1.0)
   defaultDinner    Float @default(1.0)
 
+  clearedNotices   String[] @db.ObjectId
+
   accounts      Account[]
   sessions      Session[]
 

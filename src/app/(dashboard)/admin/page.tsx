@@ -19,8 +19,14 @@ import {
     IconMail,
     IconPhone,
     IconChevronUp,
-    IconChevronDown
+    IconChevronDown,
+    IconShoppingBag,
+    IconReceipt2,
+    IconCalculator,
+    IconArrowUpRight,
+    IconArrowDownRight
 } from "@tabler/icons-react";
+import Link from "next/link";
 
 export default function AdminDashboardPage() {
     const [users, setUsers] = useState<any[]>([]);
@@ -31,7 +37,12 @@ export default function AdminDashboardPage() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<any>(null);
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-    const [isPendingExpanded, setIsPendingExpanded] = useState(true);
+    const [isPendingExpanded, setIsPendingExpanded] = useState(false);
+
+    // Mobile specific states
+    const [todayBazaarTotal, setTodayBazaarTotal] = useState(0);
+    const [bazaarSchedules, setBazaarSchedules] = useState<any[]>([]);
+    const [todayExpenses, setTodayExpenses] = useState<any[]>([]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -47,7 +58,23 @@ export default function AdminDashboardPage() {
 
     useEffect(() => {
         fetchUsers();
+        // Detect if mobile (roughly) or just fetch for all to be safe
+        fetchMobileDashboardData();
     }, []);
+
+    const fetchMobileDashboardData = async () => {
+        try {
+            const res = await fetch("/api/bazaar");
+            if (res.ok) {
+                const data = await res.json();
+                setBazaarSchedules(data.schedules?.slice(0, 4) || []);
+                setTodayExpenses(data.expenses || []);
+                setTodayBazaarTotal(data.todayTotal || 0);
+            }
+        } catch (e) {
+            console.error("Error fetching mobile dashboard data:", e);
+        }
+    };
 
     const fetchUsers = async () => {
         try {
@@ -161,10 +188,10 @@ export default function AdminDashboardPage() {
     };
 
     return (
-        <div className="max-w-7xl mx-auto space-y-8">
+        <div className="flex flex-col max-w-7xl mx-auto gap-5 md:gap-8 pb-6 md:pb-0 animate-in fade-in zoom-in-95 duration-300">
             
-            {/* ─── Header Section ─── */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 animate-in fade-in zoom-in-95 duration-300">
+            {/* ─── Header Section (Desktop) ─── */}
+            <div className="hidden md:flex flex-col md:flex-row md:items-center justify-between gap-5 order-none">
                 <div>
                     <p className="text-[#450705] text-base font-medium mb-1">Welcome back,</p>
                     <h1 className="text-3xl sm:text-[32px] font-extrabold text-[#450705] tracking-tight">Admin Dashboard</h1>
@@ -183,8 +210,8 @@ export default function AdminDashboardPage() {
                 </div>
             </div>
 
-            {/* ─── Stats Grid ─── */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {/* ─── Stats Grid (Desktop) ─── */}
+            <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 order-none">
                 
                 {/* Card 1: Total Members */}
                 <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[144px]">
@@ -261,13 +288,73 @@ export default function AdminDashboardPage() {
 
             </div>
 
-            {/* ─── Pending Member Requests Section ─── */}
-            <div className="bg-blue-50/50 rounded-3xl border border-blue-200 overflow-hidden shadow-sm">
-                <div 
-                    onClick={() => setIsPendingExpanded(!isPendingExpanded)}
-                    className="p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-blue-200 bg-white cursor-pointer hover:bg-blue-50/20 transition-colors"
-                >
-                    <div className="flex items-center gap-3 w-full sm:w-auto">
+            {/* ─── Pending Requests Accordion (Mobile) ─── */}
+            <div className="md:hidden mx-5 order-4">
+                <div className="bg-blue-50/60 rounded-3xl border border-blue-100 shadow-sm overflow-hidden transition-all duration-300">
+                    <div 
+                        onClick={() => setIsPendingExpanded(!isPendingExpanded)}
+                        className="p-4 flex items-center justify-between gap-4 cursor-pointer"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-2xl bg-blue-100/70 flex items-center justify-center text-blue-600 shrink-0">
+                                <IconUserPlus className="w-6 h-6" stroke={2} />
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-extrabold text-gray-900 leading-tight">Pending Member Requests</h3>
+                                <p className="text-[11px] text-gray-500 font-medium leading-tight mt-1 pr-4">Review and approve new member registrations.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Collapsed Badge Row */}
+                    <div className="px-4 pb-4 flex justify-between items-center" onClick={() => setIsPendingExpanded(!isPendingExpanded)}>
+                        <span className="bg-blue-200/50 text-blue-700 px-3 py-1.5 rounded-[10px] text-xs font-bold border border-blue-200/50 flex items-center gap-1.5">
+                            <IconClock size={16} stroke={2.5} /> {pendingMembers.length} Pending
+                        </span>
+                        <div className="w-9 h-9 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center text-gray-600 cursor-pointer">
+                            <IconChevronDown size={20} stroke={2.5} className={`transition-transform duration-300 ${isPendingExpanded ? "rotate-180" : ""}`} />
+                        </div>
+                    </div>
+
+                    {isPendingExpanded && (
+                        <div className="px-4 pb-4 space-y-3 border-t border-blue-100/60 pt-3 animate-in slide-in-from-top-2 fade-in duration-200">
+                            {isLoading ? (
+                                <p className="text-center text-gray-400 font-bold py-4 text-xs">Loading...</p>
+                            ) : pendingMembers.length === 0 ? (
+                                <p className="text-center text-gray-400 font-bold py-4 text-xs">No pending member requests.</p>
+                            ) : (
+                                pendingMembers.map((user: any, idx: number) => (
+                                    <div key={user.id} className="flex justify-between items-center bg-white border border-blue-100 rounded-2xl p-3 shadow-sm">
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <span className="text-xs font-bold text-gray-400 w-3">{idx + 1}</span>
+                                            <div className="w-9 h-9 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+                                                {user.name?.charAt(0) || 'M'}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="font-extrabold text-gray-900 text-sm truncate">{user.name || 'Member'}</p>
+                                                <p className="text-[11px] font-bold text-gray-500 truncate">{user.email}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                                            <button onClick={() => handleMemberApproval(user.id, 'approve')} className="bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-colors">
+                                                Approve
+                                            </button>
+                                            <button onClick={() => handleMemberApproval(user.id, 'reject')} className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-colors">
+                                                Reject
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* ─── Pending Member Requests Section (Desktop) ─── */}
+            <div className="hidden md:block bg-blue-50/50 rounded-3xl border border-blue-200 overflow-hidden shadow-sm mx-0">
+                <div className="p-6 flex items-center justify-between gap-4 border-b border-blue-200 bg-white">
+                    <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 shadow-sm shrink-0">
                             <IconUserPlus className="w-5 h-5" stroke={2} />
                         </div>
@@ -276,21 +363,13 @@ export default function AdminDashboardPage() {
                             <p className="text-xs font-bold text-gray-500 mt-0.5">Review and approve new member registrations.</p>
                         </div>
                     </div>
-                    
-                    <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end flex-wrap">
-                        <div className="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border border-blue-200">
-                            <IconClock size={14} /> {pendingMembers.length} Pending
-                        </div>
-                        <div className="text-gray-400 bg-gray-50 p-1.5 rounded-lg border border-gray-100 hover:text-gray-600 transition-colors">
-                            {isPendingExpanded ? <IconChevronUp size={20} stroke={2} /> : <IconChevronDown size={20} stroke={2} />}
-                        </div>
+                    <div className="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border border-blue-200">
+                        <IconClock size={14} /> {pendingMembers.length} Pending
                     </div>
                 </div>
-                
-                {isPendingExpanded && (
-                    <div className="bg-gray-50/30 md:bg-white overflow-x-hidden p-4 md:p-0 animate-in slide-in-from-top-2 fade-in duration-200">
-                    <table className="w-full text-left border-collapse block md:table">
-                        <thead className="hidden md:table-header-group">
+                <div className="bg-white overflow-x-hidden p-0">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
                                 <th className="p-4 w-12">#</th>
                                 <th className="p-4">Name</th>
@@ -300,62 +379,50 @@ export default function AdminDashboardPage() {
                                 <th className="p-4 text-center">Action</th>
                             </tr>
                         </thead>
-                        <tbody className="block md:table-row-group space-y-4 md:space-y-0 md:divide-y md:divide-gray-100">
+                        <tbody className="divide-y divide-gray-100">
                             {isLoading ? (
-                                <tr className="block md:table-row">
-                                    <td colSpan={6} className="block md:table-cell p-8 text-center text-gray-400 font-bold">Loading...</td>
+                                <tr>
+                                    <td colSpan={6} className="p-8 text-center text-gray-400 font-bold">Loading...</td>
                                 </tr>
                             ) : pendingMembers.length === 0 ? (
-                                <tr className="block md:table-row">
-                                    <td colSpan={6} className="block md:table-cell p-8 text-center text-gray-400 font-bold">No pending member requests.</td>
+                                <tr>
+                                    <td colSpan={6} className="p-8 text-center text-gray-400 font-bold">No pending member requests.</td>
                                 </tr>
                             ) : pendingMembers.map((user: any, idx: number) => (
-                                <tr key={user.id} className="block md:table-row bg-white border border-blue-100 md:border-0 rounded-2xl md:rounded-none p-4 md:p-0 hover:bg-blue-50/30 transition-colors group shadow-sm md:shadow-none">
-                                    <td className="hidden md:table-cell p-4 text-sm font-bold text-gray-500">{idx + 1}</td>
-                                    
-                                    <td className="block md:table-cell p-0 md:p-4 mb-3 md:mb-0">
+                                <tr key={user.id} className="hover:bg-blue-50/30 transition-colors group">
+                                    <td className="p-4 text-sm font-bold text-gray-500">{idx + 1}</td>
+                                    <td className="p-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 md:w-8 md:h-8 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
+                                            <div className="w-8 h-8 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
                                                 {user.name?.charAt(0) || 'M'}
                                             </div>
-                                            <div className="flex-1">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="font-extrabold text-gray-900 text-base md:text-sm">{user.name || 'Member'}</span>
-                                                    <span className="md:hidden bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-[10px] font-bold border border-amber-200">
-                                                        Pending
-                                                    </span>
-                                                </div>
-                                            </div>
+                                            <span className="font-extrabold text-gray-900 text-sm">{user.name || 'Member'}</span>
                                         </div>
                                     </td>
-
-                                    <td className="block md:table-cell p-0 md:p-4 mb-2 md:mb-0 mt-3 md:mt-0">
-                                        <div className="flex items-center gap-2 md:gap-1.5 text-sm font-bold text-gray-700">
+                                    <td className="p-4">
+                                        <div className="flex items-center gap-1.5 text-sm font-bold text-gray-700">
                                             <IconMail size={16} className="text-gray-400 shrink-0" />
                                             <span className="truncate">{user.email}</span>
                                         </div>
                                     </td>
-                                    
-                                    <td className="block md:table-cell p-0 md:p-4 mb-4 md:mb-0 mt-2 md:mt-0">
-                                        <div className="flex items-center gap-2 md:gap-1.5 text-sm font-bold text-gray-500">
+                                    <td className="p-4">
+                                        <div className="flex items-center gap-1.5 text-sm font-bold text-gray-500">
                                             <IconPhone size={16} className="text-gray-400 shrink-0" />
                                             <span>{user.phone || 'N/A'}</span>
                                         </div>
                                     </td>
-
-                                    <td className="hidden md:table-cell p-4">
+                                    <td className="p-4">
                                         <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-md text-xs font-bold border border-amber-200">
                                             Pending
                                         </span>
                                     </td>
-
-                                    <td className="block md:table-cell p-0 md:p-4 pt-4 md:pt-0 border-t border-gray-100 md:border-0 mt-4 md:mt-0">
-                                        <div className="flex items-center justify-center gap-3 md:gap-2">
-                                            <button onClick={() => handleMemberApproval(user.id, 'approve')} className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 md:px-3 md:py-1.5 rounded-xl md:rounded-lg text-sm md:text-xs font-bold flex items-center justify-center gap-1.5 md:gap-1 shadow-sm transition-colors">
-                                                <IconCheck size={18} className="md:w-3.5 md:h-3.5" stroke={3} /> Approve
+                                    <td className="p-4">
+                                        <div className="flex items-center justify-center gap-2">
+                                            <button onClick={() => handleMemberApproval(user.id, 'approve')} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm transition-colors">
+                                                <IconCheck size={14} stroke={3} /> Approve
                                             </button>
-                                            <button onClick={() => handleMemberApproval(user.id, 'reject')} className="flex-1 md:flex-none bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-4 py-2.5 md:px-3 md:py-1.5 rounded-xl md:rounded-lg text-sm md:text-xs font-bold flex items-center justify-center gap-1.5 md:gap-1 shadow-sm transition-colors">
-                                                <IconX size={18} className="md:w-3.5 md:h-3.5" stroke={3} /> Reject
+                                            <button onClick={() => handleMemberApproval(user.id, 'reject')} className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm transition-colors">
+                                                <IconX size={14} stroke={3} /> Reject
                                             </button>
                                         </div>
                                     </td>
@@ -364,28 +431,72 @@ export default function AdminDashboardPage() {
                         </tbody>
                     </table>
                 </div>
-                )}
             </div>
 
-            {/* ─── Data Table Section ─── */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            {/* ─── Data Table Section (Shared) ─── */}
+            <div className="bg-orange-50/40 md:bg-white rounded-3xl border border-orange-100/50 md:border-gray-100 shadow-sm overflow-hidden mx-5 md:mx-0 order-5 md:order-none">
                 
                 {/* Table Header */}
-                <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+                <div className="p-5 md:p-6 border-b border-orange-100/60 md:border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600 shrink-0">
-                            <IconUsersGroup className="w-5 h-5" stroke={2} />
+                        <div className="w-12 h-12 md:w-10 md:h-10 rounded-2xl md:rounded-xl bg-orange-100 md:bg-orange-50 flex items-center justify-center text-orange-600 shrink-0">
+                            <IconUsersGroup className="w-6 h-6 md:w-5 md:h-5" stroke={2} />
                         </div>
                         <div>
-                            <h2 className="text-lg font-extrabold text-gray-900">Mess Members</h2>
-                            <p className="text-sm font-medium text-gray-500 mt-0.5">View and manage all mess members and roles</p>
+                            <h2 className="text-[15px] md:text-lg font-extrabold text-gray-900">Mess Members</h2>
+                            <p className="text-[11px] md:text-sm font-medium text-gray-500 mt-1 md:mt-0.5 pr-4">View and manage all mess members and roles.</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Table Content */}
                 <div className="bg-gray-50/30 md:bg-white overflow-x-hidden p-4 md:p-0 rounded-b-3xl">
-                    <table className="w-full text-left border-collapse block md:table min-w-0 md:min-w-[800px]">
+                    
+                    {/* ─── MOBILE VIEW: Mess Members ─── */}
+                    <div className="md:hidden space-y-3">
+                        {isLoading ? (
+                            <p className="text-center text-gray-400 font-bold py-10">Loading members...</p>
+                        ) : users.length === 0 ? (
+                            <p className="text-center text-gray-400 font-bold py-10">No members found.</p>
+                        ) : (
+                            users.map((user, index) => (
+                                <div key={user.id} className="flex justify-between items-center bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
+                                    {/* Left Side: User Info */}
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <span className="text-sm font-bold text-gray-400 w-3">{index + 1}</span>
+                                        <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-base shrink-0 uppercase shadow-sm">
+                                            {user.name ? user.name.charAt(0) : "U"}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="font-extrabold text-gray-900 text-base truncate">{user.name || "Unnamed"}</p>
+                                            <p className="text-xs font-bold text-gray-500 truncate">{user.email}</p>
+                                        </div>
+                                    </div>
+                                    {/* Right Side: Status & Actions */}
+                                    <div className="flex flex-col justify-center gap-2 shrink-0 ml-2 w-24">
+                                        <span className={`flex items-center justify-center gap-1.5 w-full text-[10px] font-extrabold uppercase tracking-widest py-1.5 rounded-lg border ${
+                                            user.role === 'admin' ? 'bg-purple-50 text-purple-600 border-purple-200' :
+                                            user.role === 'manager' ? 'bg-blue-50 text-blue-600 border-blue-200' :
+                                            user.role === 'suspended' ? 'bg-red-50 text-red-600 border-red-200' :
+                                            'bg-gray-50 text-gray-600 border-gray-200'
+                                        }`}>
+                                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${user.role === 'suspended' ? 'bg-red-500' : 'bg-emerald-500'}`}></span>
+                                            {user.role}
+                                        </span>
+                                        <button 
+                                            onClick={() => { setEditingUser(user); setIsEditModalOpen(true); setActiveDropdown(null); }}
+                                            className="w-full flex items-center justify-center bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm"
+                                        >
+                                            Edit
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+
+                    {/* ─── DESKTOP VIEW: Mess Members ─── */}
+                    <table className="hidden md:table w-full text-left border-collapse min-w-0 md:min-w-[800px]">
                         <thead className="hidden md:table-header-group">
                             <tr className="bg-[#F8FAFC] border-b border-gray-100">
                                 <th className="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">#</th>
@@ -486,8 +597,206 @@ export default function AdminDashboardPage() {
                 </div>
             </div>
 
-            {/* ─── Edit Modal ─── */}
-            {isEditModalOpen && editingUser && (
+            {/* ─── MOBILE EXCLUSIVES ─── */}
+            {/* ─── Welcome Header (Mobile) ─── */}
+            <div className="md:hidden mx-5 mt-4 order-1 flex justify-between items-start">
+                <div>
+                    <p className="text-gray-500 text-sm font-medium">Welcome Back,</p>
+                    <h1 className="text-2xl sm:text-[28px] font-extrabold text-gray-900 flex items-center gap-1.5 mt-0.5">
+                        Super Admin 👋
+                    </h1>
+                    <p className="text-gray-500 text-[11px] sm:text-xs mt-1.5 font-medium italic">"Good Food Brings Great People Together"</p>
+                </div>
+                <div className="bg-white px-3 py-2.5 rounded-[20px] flex items-center gap-2 shadow-sm border border-gray-100 shrink-0">
+                    <IconCalendar className="w-5 h-5 text-gray-500" stroke={1.5} />
+                    <div className="flex flex-col">
+                        <span className="text-[10px] font-bold text-gray-500 leading-tight">Monday</span>
+                        <span className="text-[11px] sm:text-xs font-extrabold text-gray-900 leading-tight mt-0.5">Sep 21, 2026</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* ─── Quick Stats Grid (Mobile) ─── */}
+            <div className="md:hidden grid grid-cols-3 gap-2.5 mx-5 order-2">
+                {/* Food Cost */}
+                <div className="bg-orange-50/80 p-3.5 rounded-[24px] border border-orange-100 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[130px]">
+                    <div className="w-9 h-9 rounded-full bg-orange-200/50 flex items-center justify-center text-orange-600 shrink-0">
+                        <IconReceipt2 className="w-5 h-5" stroke={2} />
+                    </div>
+                    <div className="mt-3">
+                        <p className="text-gray-500 text-[10px] font-bold leading-tight">Total Food Cost</p>
+                        <h3 className="text-sm sm:text-base font-extrabold text-gray-900 mt-1 truncate">Tk {stats.totalFoodCost.toLocaleString()}</h3>
+                    </div>
+                    <div className="flex items-center gap-1 mt-1.5">
+                        <IconArrowUpRight className="w-3.5 h-3.5 text-orange-600" stroke={3} />
+                        <span className="text-[10px] font-extrabold text-orange-600">+12%</span>
+                    </div>
+                </div>
+
+                {/* Bazaar */}
+                <div className="bg-emerald-50/80 p-3.5 rounded-[24px] border border-emerald-100 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[130px]">
+                    <div className="w-9 h-9 rounded-full bg-emerald-200/50 flex items-center justify-center text-emerald-600 shrink-0">
+                        <IconShoppingBag className="w-5 h-5" stroke={2} />
+                    </div>
+                    <div className="mt-3">
+                        <p className="text-gray-500 text-[10px] font-bold leading-tight">Today's Bazaar</p>
+                        <h3 className="text-sm sm:text-base font-extrabold text-gray-900 mt-1 truncate">Tk {todayBazaarTotal.toLocaleString()}</h3>
+                    </div>
+                    <div className="flex items-center gap-1 mt-1.5">
+                        <IconArrowDownRight className="w-3.5 h-3.5 text-emerald-600" stroke={3} />
+                        <span className="text-[10px] font-extrabold text-emerald-600">-8%</span>
+                    </div>
+                </div>
+
+                {/* Mess Fund */}
+                <div className="bg-purple-50/80 p-3.5 rounded-[24px] border border-purple-100 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[130px]">
+                    <div className="w-9 h-9 rounded-full bg-purple-200/50 flex items-center justify-center text-purple-600 shrink-0">
+                        <IconWallet className="w-5 h-5" stroke={2} />
+                    </div>
+                    <div className="mt-3">
+                        <p className="text-gray-500 text-[10px] font-bold leading-tight">Mess Fund</p>
+                        <h3 className="text-sm sm:text-base font-extrabold text-gray-900 mt-1 truncate">Tk {stats.messFund.toLocaleString()}</h3>
+                    </div>
+                    <div className="flex items-center gap-1 mt-1.5">
+                        <IconArrowUpRight className="w-3.5 h-3.5 text-purple-600" stroke={3} />
+                        <span className="text-[10px] font-extrabold text-purple-600">+5%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="hidden">
+                {/* Bazaar Schedule List Card */}
+                <div className="bg-white rounded-3xl shadow-sm p-4 border border-gray-50">
+                    <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-50">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 shrink-0">
+                                <IconCalendarEvent stroke={2} size={20} />
+                            </div>
+                            <div>
+                                <h3 className="font-extrabold text-sm text-gray-900">Bazaar Schedule</h3>
+                                <p className="text-[10px] font-semibold text-gray-400 mt-0.5">Upcoming bazaar and responsibility</p>
+                            </div>
+                        </div>
+                        <Link href="/bazaar" className="bg-orange-50 text-orange-600 font-bold text-[10px] px-3 py-1.5 rounded-full flex items-center gap-1">
+                            View All <IconChevronRight size={12} stroke={3} />
+                        </Link>
+                    </div>
+
+                    <div className="space-y-3">
+                        {bazaarSchedules.length === 0 ? (
+                            <p className="text-center text-xs text-gray-400 font-medium py-2">No upcoming schedules.</p>
+                        ) : (
+                            bazaarSchedules.map((schedule, idx) => {
+                                const d = new Date(schedule.date);
+                                const dayStr = d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+                                const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                                const uInitial = schedule.user?.name ? schedule.user.name.charAt(0).toUpperCase() : "M";
+
+                                return (
+                                    <div key={schedule.id} className="grid grid-cols-[auto_1fr_auto_minmax(90px,auto)] items-center gap-3 py-2 border-b border-gray-50/70 last:border-0 last:pb-0">
+                                        <div className="text-center w-[45px] shrink-0">
+                                            <p className="text-[10px] font-extrabold text-gray-400">{dayStr}</p>
+                                            <p className="text-xs font-bold text-gray-700">{dateStr}</p>
+                                        </div>
+                                        <div className="pl-3 border-l border-gray-100">
+                                            <p className="text-[13px] font-extrabold text-gray-900 leading-tight">{idx === 0 ? "Tomorrow" : "Next"}</p>
+                                            <p className="text-[10px] font-semibold text-gray-400 flex items-center gap-1 mt-0.5">
+                                                <IconReceipt2 size={10} /> Monthly Bazaar
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <span className="bg-emerald-50 text-emerald-600 font-bold text-[9px] px-2 py-1 rounded-md">Approved</span>
+                                        </div>
+                                        <div className="flex items-center justify-end gap-1.5">
+                                            <div className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-[10px] shrink-0">
+                                                {uInitial}
+                                            </div>
+                                            <span className="text-[11px] font-extrabold text-gray-900 truncate max-w-[65px]">{schedule.user?.name?.split(" ")[0]}</span>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                </div>
+
+                {/* Today's Expenses List Card */}
+                <div className="bg-white rounded-3xl shadow-sm p-4 border border-gray-50">
+                    <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-50">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-500 shrink-0">
+                                <IconReceipt2 stroke={2} size={20} />
+                            </div>
+                            <div>
+                                <h3 className="font-extrabold text-sm text-gray-900">Today's Expenses</h3>
+                                <p className="text-[10px] font-semibold text-gray-400 mt-0.5">History of market purchases for today</p>
+                            </div>
+                        </div>
+                        <Link href="/bazaar" className="bg-orange-50 text-orange-600 font-bold text-[10px] px-3 py-1.5 rounded-full flex items-center gap-1">
+                            Monthly History <IconChevronRight size={12} stroke={3} />
+                        </Link>
+                    </div>
+
+                    <div className="space-y-3">
+                        {/* Table Header pseudo */}
+                        <div className="flex items-center justify-between text-[10px] font-extrabold text-gray-400 px-1 mb-1">
+                            <span className="w-1/2">ITEM</span>
+                            <span className="w-1/4 text-center">AMOUNT</span>
+                            <span className="w-1/4 text-right">STATUS</span>
+                        </div>
+
+                        {todayExpenses.length === 0 ? (
+                            <p className="text-center text-xs text-gray-400 font-medium py-3">No expenses today.</p>
+                        ) : (
+                            todayExpenses.map((expense) => {
+                                const uInitial = expense.user?.name ? expense.user.name.charAt(0).toUpperCase() : "E";
+                                return (
+                                    <div key={expense.id} className="flex items-center justify-between py-2 border-b border-gray-50/70 last:border-0 last:pb-0">
+                                        <div className="flex items-center gap-3 w-1/2">
+                                            <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs shrink-0">
+                                                {uInitial}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-[13px] font-extrabold text-gray-900 truncate">{expense.user?.name || "Member"}</p>
+                                                <p className="text-[10px] font-semibold text-gray-400 truncate">{expense.description}</p>
+                                            </div>
+                                        </div>
+                                        <div className="w-1/4 text-center">
+                                            <p className="text-xs font-extrabold text-red-600">Tk {expense.amount}</p>
+                                        </div>
+                                        <div className="w-1/4 flex justify-end">
+                                            <span className="bg-emerald-50 text-emerald-600 font-bold text-[9px] px-2 py-1 rounded-md">Approved</span>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* ─── Monthly Expense Setup (Mobile) ─── */}
+            <div className="md:hidden mx-5 order-3">
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 flex items-center justify-between gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500 shrink-0">
+                        <IconCalculator className="w-6 h-6" stroke={2} />
+                    </div>
+                    <div className="flex-1 pr-1">
+                        <h3 className="text-[13px] font-extrabold text-gray-900 leading-tight">Set Monthly Expense</h3>
+                        <p className="text-[10px] text-gray-500 font-medium leading-tight mt-1">Update room, utility, internet, maid charge and monthly meal charge.</p>
+                    </div>
+                    <Link href="/admin/monthly-expense" className="bg-[#FF6B00] hover:bg-orange-600 text-white pl-3.5 pr-2 py-3 rounded-2xl flex items-center gap-0.5 shadow-md shadow-orange-500/30 shrink-0 transition-transform active:scale-95">
+                        <div className="flex flex-col text-left mr-0.5">
+                            <span className="text-[10px] font-extrabold leading-tight">Configure</span>
+                            <span className="text-[10px] font-extrabold leading-tight">Monthly Expense</span>
+                        </div>
+                        <IconChevronRight size={18} stroke={3} />
+                    </Link>
+                </div>
+            </div>
+
+        {/* ─── Shared Modals ─── */}
+        {isEditModalOpen && editingUser && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in duration-200">
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
                         <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-[#F8FAFC]">
@@ -547,7 +856,6 @@ export default function AdminDashboardPage() {
                     </div>
                 </div>
             )}
-
         </div>
     );
 }

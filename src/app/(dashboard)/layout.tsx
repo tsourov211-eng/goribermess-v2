@@ -19,7 +19,9 @@ import {
     IconBell,
     IconChevronDown,
     IconUser,
-    IconCalendarEvent
+    IconCalendarEvent,
+    IconPlus,
+    IconBellOff
 } from "@tabler/icons-react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -49,6 +51,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             fetchNotices();
         }
     }, [status]);
+
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (!target.closest('.notif-wrapper')) {
+                setIsNotifOpen(false);
+            }
+            if (!target.closest('.profile-wrapper')) {
+                setIsProfileOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const handleClearNotifications = async () => {
+        setNotices([]);
+        try {
+            await fetch("/api/members/clear-notices", { method: "POST" });
+        } catch (error) {
+            console.error("Failed to clear notices:", error);
+        }
+    };
 
     // 💡 Proper role detection for user (from session, fallback pathname)
     const sessionRole = (session?.user as { role?: string })?.role;
@@ -110,7 +136,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const userInitial = displayName.charAt(0);
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] bg-[url('/admin_dashboard_mobile_bg.png')] lg:bg-[url('/admin_dashboard_desktop_bg.png')] bg-cover bg-center bg-no-repeat bg-fixed flex font-sans">
+        <div className="min-h-screen md:bg-[#F8FAFC] bg-gradient-to-br from-[#FFF5F0] to-[#FFF0EB] md:bg-[url('/admin_dashboard_mobile_bg.png')] lg:bg-[url('/admin_dashboard_desktop_bg.png')] bg-cover bg-center bg-no-repeat bg-fixed flex font-sans pb-[72px] md:pb-0">
             
             {/* ─── Mobile Sidebar Overlay ─── */}
             {isSidebarOpen && (
@@ -121,9 +147,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             )}
 
             {/* ─── Sidebar ─── */}
-            <aside className={`fixed inset-y-0 left-0 z-50 w-[260px] bg-white bg-[url('/sidebar_bg.png')] bg-no-repeat bg-cover bg-center border-r border-gray-100 flex flex-col transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen shrink-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+            <aside className={`fixed inset-y-0 left-0 z-50 w-[260px] bg-white border-r border-gray-100 flex flex-col transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen shrink-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
                 
-                <div className="pt-8 pb-6 flex items-center justify-center relative">
+                {/* ─── Decorative Background ─── */}
+                <div className="absolute inset-0 bg-[url('/sidebar_bg.png')] bg-no-repeat bg-cover bg-center z-0 pointer-events-none"></div>
+
+                <div className="pt-8 pb-6 flex items-center justify-center relative z-10">
                     <Link href={`/${basePath}`} className="flex flex-col items-center justify-center transition-transform hover:scale-105 cursor-pointer">
                         <Image src="/logo.png" alt="Amader Mess" width={160} height={160} className="w-32 h-auto object-contain drop-shadow-sm" priority />
                     </Link>
@@ -132,27 +161,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </button>
                 </div>
 
-                <nav className="flex-1 px-3 py-2 space-y-2 overflow-y-auto">
-                    {sidebarLinks.map((link) => {
-                        const isActive = link.name === "Dashboard" 
-                            ? pathname === link.href 
-                            : pathname === link.href || pathname.startsWith(`${link.href}/`);
-                            
-                        const Icon = link.icon;
-                        return (
-                            <Link 
-                                key={link.name} 
-                                href={link.href}
-                                className={`flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all font-bold text-[15px] cursor-pointer ${isActive ? "bg-[#FF6B00] text-white shadow-md shadow-orange-500/20" : "text-gray-600 hover:bg-orange-50 hover:text-orange-600"}`}
-                            >
-                                <Icon size={26} stroke={isActive ? 2.5 : 2} />
-                                {link.name}
-                            </Link>
-                        );
-                    })}
-                </nav>
+                <div className="flex-1 overflow-y-auto pb-32 relative z-10 flex flex-col">
+                    <nav className="px-3 py-2 space-y-2">
+                        {sidebarLinks.map((link) => {
+                            const isActive = link.name === "Dashboard" 
+                                ? pathname === link.href 
+                                : pathname === link.href || pathname.startsWith(`${link.href}/`);
+                                
+                            const Icon = link.icon;
+                            return (
+                                <Link 
+                                    key={link.name} 
+                                    href={link.href}
+                                    className={`flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all font-bold text-[15px] cursor-pointer ${isActive ? "bg-[#FF6B00] text-white shadow-md shadow-orange-500/20" : "text-gray-600 hover:bg-orange-50 hover:text-orange-600"}`}
+                                >
+                                    <Icon size={26} stroke={isActive ? 2.5 : 2} />
+                                    {link.name}
+                                </Link>
+                            );
+                        })}
+                    </nav>
 
-                <div className="p-5 mt-auto relative z-10">
+                    <div className="p-5 mt-auto">
                     <div className="text-center mb-8">
                         <div className="flex justify-center mb-2 text-[#D98A6C]">
                            <IconToolsKitchen2 size={36} stroke={1.5} />
@@ -183,13 +213,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         Log Out
                     </button>
                 </div>
+                </div>
             </aside>
 
             {/* ─── Main Content Area ─── */}
             <div className="flex-1 flex flex-col min-w-0 relative">
                 
-                {/* ─── Top Navbar ─── */}
-                <header className="h-20 bg-white/40 backdrop-blur-md border-b border-white/40 flex items-center justify-between px-4 sm:px-6 lg:px-10 z-30 sticky top-0">
+                {/* ─── Top Navbar (Desktop) ─── */}
+                <header className="hidden md:flex h-20 bg-white/40 backdrop-blur-md border-b border-white/40 items-center justify-between px-4 sm:px-6 lg:px-10 z-30 sticky top-0">
                     <div className="flex items-center gap-4">
                         <button 
                             className="lg:hidden p-2 text-gray-600 bg-white/60 hover:bg-white hover:shadow-sm rounded-lg transition-all backdrop-blur-sm cursor-pointer"
@@ -210,7 +241,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         </div>
                         
                         {/* ─── Notification Dropdown ─── */}
-                        <div className="relative">
+                        <div className="relative notif-wrapper">
                             <button 
                                 onClick={() => { setIsNotifOpen(!isNotifOpen); setIsProfileOpen(false); }}
                                 className="relative p-2.5 text-gray-600 bg-white/80 backdrop-blur-md hover:bg-white rounded-full transition-all border border-white/80 shadow-md shadow-gray-200/50 hover:shadow-lg cursor-pointer"
@@ -227,11 +258,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50">
                                     <div className="p-4 border-b border-gray-50 bg-[#F8FAFC] flex justify-between items-center">
                                         <span className="font-extrabold text-sm text-gray-800">Notifications</span>
-                                        <span className="text-[10px] text-orange-600 font-bold">{notices.length} New</span>
+                                        <div className="flex items-center gap-3">
+                                            {notices.length > 0 && (
+                                                <button onClick={handleClearNotifications} className="text-[10px] text-gray-500 hover:text-red-500 transition-colors cursor-pointer font-bold">Clear All</button>
+                                            )}
+                                            <span className="text-[10px] text-orange-600 font-bold bg-orange-100 px-2 py-0.5 rounded-full">{notices.length} New</span>
+                                        </div>
                                     </div>
                                     <div className="max-h-72 overflow-y-auto p-2 space-y-1">
                                         {notices.length === 0 ? (
-                                            <p className="text-center text-xs text-gray-400 py-6 font-medium">No new notifications</p>
+                                            <div className="flex flex-col items-center justify-center py-8 opacity-60">
+                                                <IconBellOff size={32} className="text-gray-400 mb-2" stroke={1.5} />
+                                                <p className="text-center text-xs text-gray-400 font-medium">No new notifications</p>
+                                            </div>
                                         ) : (
                                             notices.map((n, idx) => (
                                                 <div key={idx} className="p-3 hover:bg-orange-50 rounded-xl cursor-pointer transition-colors border-b border-gray-50 last:border-0">
@@ -249,7 +288,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         </div>
                         
                         {/* ─── Profile Dropdown ─── */}
-                        <div className="relative">
+                        <div className="relative profile-wrapper">
                             <div 
                                 onClick={() => { setIsProfileOpen(!isProfileOpen); setIsNotifOpen(false); }}
                                 className="flex items-center gap-2 sm:gap-3 cursor-pointer p-1.5 sm:pr-3.5 rounded-full bg-white/80 backdrop-blur-md hover:bg-white transition-all border border-white/80 shadow-md shadow-gray-200/50 hover:shadow-lg"
@@ -305,11 +344,161 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                     </div>
                 </header>
+
+                {/* ─── Mobile App Header ─── */}
+                <header className="md:hidden flex items-center justify-between px-5 pt-6 pb-2 sticky top-0 z-30 backdrop-blur-sm bg-white/30">
+                    <button 
+                        className="w-11 h-11 bg-white/60 backdrop-blur-sm rounded-[20px] flex items-center justify-center text-gray-700 shadow-sm border border-white/50"
+                        onClick={() => setIsSidebarOpen(true)}
+                    >
+                        <IconMenu2 stroke={2} size={22} />
+                    </button>
+                    
+                    <div className="flex flex-col items-center justify-center">
+                        <div className="flex items-center justify-center mb-0.5">
+                            <IconToolsKitchen2 className="w-5 h-5 text-[#450705] mr-1" stroke={2} />
+                            <h2 className="text-lg font-extrabold text-[#450705] tracking-tight leading-none">Good Food</h2>
+                        </div>
+                        <p className="text-orange-600 font-bold text-xs leading-none">Brighter Days</p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        {/* Mobile Notification Dropdown */}
+                        <div className="relative notif-wrapper">
+                            <button 
+                                onClick={() => { setIsNotifOpen(!isNotifOpen); setIsProfileOpen(false); }}
+                                className="relative w-11 h-11 bg-white/60 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 shadow-sm border border-white/50 cursor-pointer"
+                            >
+                                <IconBell stroke={2} size={22} />
+                                {notices.length > 0 && (
+                                    <span className="absolute top-1.5 right-1.5 min-w-4 h-4 px-1 bg-red-500 border-2 border-white rounded-full flex items-center justify-center text-[9px] text-white font-bold shadow-sm">
+                                        {notices.length}
+                                    </span>
+                                )}
+                            </button>
+
+                            {isNotifOpen && (
+                                <div className="absolute right-0 top-12 mt-1 w-64 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
+                                    <div className="p-3 border-b border-gray-50 bg-[#F8FAFC] flex justify-between items-center">
+                                        <span className="font-extrabold text-sm text-gray-800">Notifications</span>
+                                        <div className="flex items-center gap-2">
+                                            {notices.length > 0 && (
+                                                <button onClick={handleClearNotifications} className="text-[10px] text-gray-500 hover:text-red-500 transition-colors cursor-pointer font-bold">Clear All</button>
+                                            )}
+                                            <span className="text-[10px] text-orange-600 font-bold bg-orange-100 px-1.5 py-0.5 rounded-full">{notices.length} New</span>
+                                        </div>
+                                    </div>
+                                    <div className="max-h-60 overflow-y-auto p-1.5 space-y-1">
+                                        {notices.length === 0 ? (
+                                            <div className="flex flex-col items-center justify-center py-6 opacity-60">
+                                                <IconBellOff size={28} className="text-gray-400 mb-2" stroke={1.5} />
+                                                <p className="text-center text-xs text-gray-400 font-medium">No new notifications</p>
+                                            </div>
+                                        ) : (
+                                            notices.map((n, idx) => (
+                                                <div key={idx} className="p-2 hover:bg-orange-50 rounded-lg cursor-pointer transition-colors border-b border-gray-50 last:border-0">
+                                                    <p className="text-[11px] font-bold text-gray-800">{n.title}</p>
+                                                    <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-1">{n.description}</p>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                    <div className="p-1 border-t border-gray-50 text-center">
+                                        <button onClick={() => setIsNotifOpen(false)} className="text-xs font-bold text-orange-600 hover:underline cursor-pointer w-full py-1">Close</button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        
+                        {/* Mobile Profile Dropdown */}
+                        <div className="relative profile-wrapper">
+                            <div 
+                                onClick={() => { setIsProfileOpen(!isProfileOpen); setIsNotifOpen(false); }}
+                                className="w-11 h-11 rounded-full bg-[#1e293b] flex items-center justify-center text-white font-bold text-sm shadow-md shrink-0 cursor-pointer border-2 border-white/80 overflow-hidden"
+                            >
+                                {session?.user?.image ? (
+                                    <img src={session.user.image} alt="Profile" className="w-full h-full object-cover" />
+                                ) : userInitial}
+                            </div>
+
+                            {isProfileOpen && (
+                                <div className="absolute right-0 top-12 mt-1 w-48 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
+                                    <div className="p-3 border-b border-gray-50 bg-[#F8FAFC]">
+                                        <p className="text-sm font-extrabold text-gray-900 truncate">{displayName}</p>
+                                        <p className="text-[10px] font-medium text-gray-500 truncate mt-0.5">{session?.user?.email || "Member"}</p>
+                                    </div>
+                                    <div className="p-1 space-y-1">
+                                        <Link 
+                                            href={`/${basePath}/profile`} 
+                                            onClick={() => setIsProfileOpen(false)}
+                                            className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-gray-600 hover:bg-orange-50 hover:text-orange-600 rounded-lg cursor-pointer transition-colors"
+                                        >
+                                            <IconUser size={16} stroke={2} /> My Profile
+                                        </Link>
+                                        <Link 
+                                            href={`/${basePath}`} 
+                                            onClick={() => setIsProfileOpen(false)}
+                                            className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-gray-600 hover:bg-orange-50 hover:text-orange-600 rounded-lg cursor-pointer transition-colors"
+                                        >
+                                            <IconSettings size={16} stroke={2} /> Settings
+                                        </Link>
+                                    </div>
+                                    <div className="p-1 border-t border-gray-50">
+                                        <button 
+                                            onClick={() => signOut({ callbackUrl: "/" })}
+                                            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition-colors cursor-pointer"
+                                        >
+                                            <IconLogout size={16} stroke={2} /> Log Out
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </header>
                 
                 {/* ─── Page Content ─── */}
                 <main className="flex-1 p-4 sm:p-6 lg:px-10 lg:pb-10 overflow-y-auto">
                     {children}
                 </main>
+            </div>
+
+            {/* ─── Fixed Bottom Navigation (Mobile Only) ─── */}
+            <div className="md:hidden fixed bottom-0 w-full bg-white rounded-t-[32px] shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)] pb-safe z-40">
+                <div className="grid grid-cols-5 items-center justify-items-center py-2 px-2 relative">
+                    
+                    {/* FAB Button */}
+                    <div className="absolute left-1/2 -translate-x-1/2 -top-6">
+                        <button className="w-14 h-14 bg-[#FF6B00] text-white rounded-full shadow-[0_8px_16px_rgba(255,107,0,0.3)] flex items-center justify-center border-4 border-[#FFF5F0] hover:scale-105 transition-transform active:scale-95">
+                            <IconPlus stroke={3} size={28} />
+                        </button>
+                    </div>
+
+                    <Link href={`/${basePath}`} className="flex flex-col items-center gap-1 py-2 w-full">
+                        <IconHome stroke={pathname === `/${basePath}` ? 2.5 : 2} className={pathname === `/${basePath}` ? "text-[#FF6B00]" : "text-gray-400"} size={24} />
+                        <span className={`text-[10px] font-bold ${pathname === `/${basePath}` ? "text-[#FF6B00]" : "text-gray-400"}`}>Dashboard</span>
+                        {pathname === `/${basePath}` && <div className="w-6 h-1 bg-[#FF6B00] rounded-full mt-0.5 absolute bottom-1" />}
+                    </Link>
+
+                    <Link href="/bazaar" className="flex flex-col items-center gap-1 py-2 w-full">
+                        <IconReceipt stroke={pathname.includes("/bazaar") ? 2.5 : 2} className={pathname.includes("/bazaar") ? "text-[#FF6B00]" : "text-gray-400"} size={24} />
+                        <span className={`text-[10px] font-bold ${pathname.includes("/bazaar") ? "text-[#FF6B00]" : "text-gray-400"}`}>Expenses</span>
+                    </Link>
+
+                    {/* Empty Space for FAB */}
+                    <div className="w-full"></div>
+
+                    <Link href="/members-list" className="flex flex-col items-center gap-1 py-2 w-full">
+                        <IconUsers stroke={pathname.includes("/members-list") ? 2.5 : 2} className={pathname.includes("/members-list") ? "text-[#FF6B00]" : "text-gray-400"} size={24} />
+                        <span className={`text-[10px] font-bold ${pathname.includes("/members-list") ? "text-[#FF6B00]" : "text-gray-400"}`}>Members</span>
+                    </Link>
+
+                    <Link href="/reports" className="flex flex-col items-center gap-1 py-2 w-full">
+                        <IconChartBar stroke={pathname.includes("/reports") ? 2.5 : 2} className={pathname.includes("/reports") ? "text-[#FF6B00]" : "text-gray-400"} size={24} />
+                        <span className={`text-[10px] font-bold ${pathname.includes("/reports") ? "text-[#FF6B00]" : "text-gray-400"}`}>Reports</span>
+                    </Link>
+
+                </div>
             </div>
         </div>
     );

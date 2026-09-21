@@ -117,51 +117,41 @@ export default function FoodManagementPage() {
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-[#450705] tracking-tight">Food Management</h1>
                     <p className="text-gray-500 text-sm mt-1.5 font-medium">Manage daily meals, track consumption and calculate meal rates.</p>
                 </div>
-
-                {/* Save Button */}
-                <button 
-                    onClick={handleSaveMeals}
-                    disabled={isSaving}
-                    className="flex items-center justify-center gap-2 bg-[#FF6B00] hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-orange-500/20 transition-all w-full sm:w-auto cursor-pointer disabled:opacity-50"
-                >
-                    <IconDeviceFloppy className="w-5 h-5" stroke={2.5} />
-                    {isSaving ? "Saving..." : "Save Today's Meals"}
-                </button>
             </div>
 
             {/* ─── Quick Stats Grid ─── */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-3 gap-2 sm:gap-6">
                 
                 {/* Stat 1 */}
-                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 shrink-0">
-                        <IconToolsKitchen2 className="w-6 h-6" stroke={2} />
+                <div className="bg-white p-2 sm:p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-4 text-center sm:text-left">
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 shrink-0 mx-auto sm:mx-0">
+                        <IconToolsKitchen2 className="w-4 h-4 sm:w-6 sm:h-6" stroke={2} />
                     </div>
                     <div>
-                        <p className="text-gray-500 text-xs font-bold mb-0.5">Total Meals (Today)</p>
-                        <h3 className="text-2xl font-extrabold text-gray-900">{stats.totalMealsToday}</h3>
+                        <p className="text-gray-500 text-[10px] sm:text-xs font-bold mb-0.5 truncate max-w-[80px] sm:max-w-none">Total Meals</p>
+                        <h3 className="text-sm sm:text-2xl font-extrabold text-gray-900">{stats.totalMealsToday}</h3>
                     </div>
                 </div>
 
                 {/* Stat 2 */}
-                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500 shrink-0">
-                        <IconChartPie className="w-6 h-6" stroke={2} />
+                <div className="bg-white p-2 sm:p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-4 text-center sm:text-left">
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500 shrink-0 mx-auto sm:mx-0">
+                        <IconChartPie className="w-4 h-4 sm:w-6 sm:h-6" stroke={2} />
                     </div>
                     <div>
-                        <p className="text-gray-500 text-xs font-bold mb-0.5">Current Meal Rate</p>
-                        <h3 className="text-2xl font-extrabold text-gray-900">Tk {stats.currentMealRate.toFixed(2)}</h3>
+                        <p className="text-gray-500 text-[10px] sm:text-xs font-bold mb-0.5 truncate max-w-[80px] sm:max-w-none">Meal Rate</p>
+                        <h3 className="text-sm sm:text-2xl font-extrabold text-gray-900">Tk {stats.currentMealRate.toFixed(2)}</h3>
                     </div>
                 </div>
 
                 {/* Stat 3 */}
-                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center text-green-500 shrink-0">
-                        <IconReceipt2 className="w-6 h-6" stroke={2} />
+                <div className="bg-white p-2 sm:p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-4 text-center sm:text-left">
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-green-50 flex items-center justify-center text-green-500 shrink-0 mx-auto sm:mx-0">
+                        <IconReceipt2 className="w-4 h-4 sm:w-6 sm:h-6" stroke={2} />
                     </div>
                     <div>
-                        <p className="text-gray-500 text-xs font-bold mb-0.5">Today's Bazaar</p>
-                        <h3 className="text-2xl font-extrabold text-gray-900">Tk {stats.todayBazaar}</h3>
+                        <p className="text-gray-500 text-[10px] sm:text-xs font-bold mb-0.5 truncate max-w-[80px] sm:max-w-none">Bazaar</p>
+                        <h3 className="text-sm sm:text-2xl font-extrabold text-gray-900">Tk {stats.todayBazaar}</h3>
                     </div>
                 </div>
             </div>
@@ -203,26 +193,26 @@ export default function FoodManagementPage() {
 
                 {/* Table Content */}
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-[600px]">
+                    <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="border-b border-gray-100">
-                                <th className="py-4 px-6 text-xs font-extrabold text-gray-500 uppercase tracking-wider">Member Name</th>
-                                <th className="py-4 px-6 text-xs font-extrabold text-gray-500 uppercase tracking-wider text-center">Breakfast</th>
-                                <th className="py-4 px-6 text-xs font-extrabold text-gray-500 uppercase tracking-wider text-center">Lunch</th>
-                                <th className="py-4 px-6 text-xs font-extrabold text-gray-500 uppercase tracking-wider text-center">Dinner</th>
-                                <th className="py-4 px-6 text-xs font-extrabold text-[#FF6B00] uppercase tracking-wider text-center bg-orange-50/50">Total</th>
+                                <th className="py-3 px-2 sm:py-4 sm:px-6 text-[10px] sm:text-xs font-extrabold text-gray-500 uppercase tracking-wider">Member</th>
+                                <th className="py-3 px-1 sm:py-4 sm:px-6 text-[10px] sm:text-xs font-extrabold text-gray-500 uppercase tracking-wider text-center">Break.</th>
+                                <th className="py-3 px-1 sm:py-4 sm:px-6 text-[10px] sm:text-xs font-extrabold text-gray-500 uppercase tracking-wider text-center">Lunch</th>
+                                <th className="py-3 px-1 sm:py-4 sm:px-6 text-[10px] sm:text-xs font-extrabold text-gray-500 uppercase tracking-wider text-center">Dinner</th>
+                                <th className="py-3 px-2 sm:py-4 sm:px-6 text-[10px] sm:text-xs font-extrabold text-[#FF6B00] uppercase tracking-wider text-center bg-orange-50/50">Total</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {isLoading ? (
                                 <tr>
-                                    <td colSpan={5} className="py-12 text-center text-gray-400 font-bold">
+                                    <td colSpan={5} className="py-12 text-center text-gray-400 font-bold text-sm">
                                         Loading meals...
                                     </td>
                                 </tr>
                             ) : members.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="py-12 text-center text-gray-400 font-bold">
+                                    <td colSpan={5} className="py-12 text-center text-gray-400 font-bold text-sm">
                                         No members registered yet.
                                     </td>
                                 </tr>
@@ -232,46 +222,46 @@ export default function FoodManagementPage() {
 
                                 return (
                                     <tr key={member.userId} className="hover:bg-gray-50/50 transition-colors">
-                                        <td className="py-4 px-6">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs shrink-0">
+                                        <td className="py-2 px-2 sm:py-4 sm:px-6">
+                                            <div className="flex items-center gap-1.5 sm:gap-3">
+                                                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-[10px] sm:text-xs shrink-0">
                                                     {initial}
                                                 </div>
-                                                <span className="font-extrabold text-gray-900 text-sm">{member.name}</span>
+                                                <span className="font-extrabold text-gray-900 text-[10px] sm:text-sm truncate max-w-[50px] sm:max-w-none">{member.name.split(' ')[0]}</span>
                                             </div>
                                         </td>
-                                        <td className="py-4 px-6 text-center">
+                                        <td className="py-2 px-1 sm:py-4 sm:px-6 text-center">
                                             <input 
                                                 type="number" 
                                                 value={member.breakfast} 
                                                 onChange={(e) => handleMealChange(idx, "breakfast", e.target.value)}
                                                 step="0.5" 
                                                 min="0" 
-                                                className="w-16 text-center py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all" 
+                                                className="w-10 sm:w-16 text-center py-1 sm:py-1.5 bg-gray-50 border border-gray-200 rounded-md sm:rounded-lg text-xs sm:text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all mx-auto" 
                                             />
                                         </td>
-                                        <td className="py-4 px-6 text-center">
+                                        <td className="py-2 px-1 sm:py-4 sm:px-6 text-center">
                                             <input 
                                                 type="number" 
                                                 value={member.lunch} 
                                                 onChange={(e) => handleMealChange(idx, "lunch", e.target.value)}
                                                 step="0.5" 
                                                 min="0" 
-                                                className="w-16 text-center py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all" 
+                                                className="w-10 sm:w-16 text-center py-1 sm:py-1.5 bg-gray-50 border border-gray-200 rounded-md sm:rounded-lg text-xs sm:text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all mx-auto" 
                                             />
                                         </td>
-                                        <td className="py-4 px-6 text-center">
+                                        <td className="py-2 px-1 sm:py-4 sm:px-6 text-center">
                                             <input 
                                                 type="number" 
                                                 value={member.dinner} 
                                                 onChange={(e) => handleMealChange(idx, "dinner", e.target.value)}
                                                 step="0.5" 
                                                 min="0" 
-                                                className="w-16 text-center py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all" 
+                                                className="w-10 sm:w-16 text-center py-1 sm:py-1.5 bg-gray-50 border border-gray-200 rounded-md sm:rounded-lg text-xs sm:text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all mx-auto" 
                                             />
                                         </td>
-                                        <td className="py-4 px-6 text-center bg-orange-50/50 border-l border-orange-100/50">
-                                            <span className="font-extrabold text-gray-900 text-base">{rowTotal.toFixed(1)}</span>
+                                        <td className="py-2 px-2 sm:py-4 sm:px-6 text-center bg-orange-50/50 border-l border-orange-100/50">
+                                            <span className="font-extrabold text-gray-900 text-xs sm:text-base">{rowTotal.toFixed(1)}</span>
                                         </td>
                                     </tr>
                                 );
@@ -286,6 +276,18 @@ export default function FoodManagementPage() {
                         Total Meals Added: <span className="text-lg font-extrabold text-[#FF6B00] ml-2">{totalMealsAdded.toFixed(1)}</span>
                     </p>
                 </div>
+            </div>
+
+            {/* Save Button (Moved to Bottom) */}
+            <div className="pt-2 pb-6">
+                <button 
+                    onClick={handleSaveMeals}
+                    disabled={isSaving}
+                    className="flex items-center justify-center gap-2 bg-[#FF6B00] hover:bg-orange-600 text-white px-6 py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-orange-500/30 transition-all w-full cursor-pointer disabled:opacity-50"
+                >
+                    <IconDeviceFloppy className="w-5 h-5" stroke={2.5} />
+                    {isSaving ? "Saving..." : "Save Today's Meals"}
+                </button>
             </div>
 
         </div>
