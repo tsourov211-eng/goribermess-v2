@@ -25,7 +25,7 @@ import {
 export default function AdminDashboardPage() {
     const [users, setUsers] = useState<any[]>([]);
     const [pendingMembers, setPendingMembers] = useState<any[]>([]);
-    const [stats, setStats] = useState({ totalFoodCost: 0, messFund: 0, totalMembers: 0, totalMessMeals: 0 });
+    const [stats, setStats] = useState({ totalFoodCost: 0, messFund: 0, totalMembers: 0, totalMessMeals: 0, liveMealRate: 0 });
     const [isLoading, setIsLoading] = useState(true);
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -210,7 +210,12 @@ export default function AdminDashboardPage() {
                         <div className="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-600 shrink-0">
                             <IconWallet className="w-6 h-6" stroke={2} />
                         </div>
-                        <p className="text-gray-500 text-xs font-semibold text-right">Total Food Cost (This Month)</p>
+                        <div className="flex flex-col items-end gap-1.5">
+                            <span className="text-[10px] sm:text-xs font-bold text-orange-600 bg-orange-50 px-2.5 py-1 rounded-md border border-orange-100">
+                                Meal Rate: ৳ {isLoading ? "..." : stats.liveMealRate}
+                            </span>
+                            <p className="text-gray-500 text-xs font-semibold text-right">Total Food Cost (This Month)</p>
+                        </div>
                     </div>
                     <div className="flex items-end gap-3 z-10 mt-3">
                         <h3 className="text-3xl font-extrabold text-gray-900">{isLoading ? "..." : `Tk ${stats.totalFoodCost.toLocaleString()}`}</h3>
