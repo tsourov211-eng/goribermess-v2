@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { 
     IconReceipt2, 
     IconWallet, 
@@ -8,18 +9,33 @@ import {
     IconCalendarEvent, 
     IconCalendarUser, 
     IconCheck, 
-    IconChevronRight 
+    IconChevronRight,
+    IconX
 } from "@tabler/icons-react";
 
 export default function BazaarManagementPage() {
+    const { data: session } = useSession();
+    const currentUserEmail = session?.user?.email;
+
     const [amount, setAmount] = useState("");
     const [description, setDescription] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [todayAssigned, setTodayAssigned] = useState<any>(null);
+    const [todayScheduleStatus, setTodayScheduleStatus] = useState<string | null>(null);
     const [schedules, setSchedules] = useState<any[]>([]);
     const [expenses, setExpenses] = useState<any[]>([]);
     const [todayTotal, setTodayTotal] = useState(0);
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [fullMonthSchedules, setFullMonthSchedules] = useState<any[]>([]);
+    const [isLoadingMonth, setIsLoadingMonth] = useState(false);
+
+    const [isMonthlyModalOpen, setIsMonthlyModalOpen] = useState(false);
+    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [monthlySummary, setMonthlySummary] = useState<any[]>([]);
+    const [isLoadingMonthly, setIsLoadingMonthly] = useState(false);
 
     const [stats, setStats] = useState({
         totalExpense: 0,
@@ -43,6 +59,7 @@ export default function BazaarManagementPage() {
             if (res.ok) {
                 const data = await res.json();
                 setTodayAssigned(data.todayAssigned);
+                setTodayScheduleStatus(data.todayScheduleStatus);
                 setSchedules(data.schedules || []);
                 setExpenses(data.todayExpenses || []);
                 setTodayTotal(data.todayTotal || 0);
@@ -52,6 +69,47 @@ export default function BazaarManagementPage() {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const fetchMonthlySummary = async (month: number, year: number) => {
+        setIsLoadingMonthly(true);
+        try {
+            const res = await fetch(`/api/bazaar/monthly-summary?month=${month}&year=${year}`);
+            if (res.ok) {
+                const data = await res.json();
+                setMonthlySummary(data.data || []);
+            }
+        } catch (error) {
+            console.error("Error fetching monthly summary:", error);
+        } finally {
+            setIsLoadingMonthly(false);
+        }
+    };
+
+    useEffect(() => {
+        if (isMonthlyModalOpen) {
+            fetchMonthlySummary(selectedMonth, selectedYear);
+        }
+    }, [isMonthlyModalOpen, selectedMonth, selectedYear]);
+
+    const fetchFullMonthSchedules = async () => {
+        setIsLoadingMonth(true);
+        try {
+            const res = await fetch("/api/bazaar/month");
+            if (res.ok) {
+                const data = await res.json();
+                setFullMonthSchedules(data.schedules || []);
+            }
+        } catch (error) {
+            console.error("Error fetching full month schedule:", error);
+        } finally {
+            setIsLoadingMonth(false);
+        }
+    };
+
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
+        fetchFullMonthSchedules();
     };
 
     const fetchGlobalStats = async () => {
@@ -126,6 +184,12 @@ export default function BazaarManagementPage() {
     const assignedName = todayAssigned?.name || "None Assigned";
     const assignedInitial = assignedName ? assignedName.charAt(0).toUpperCase() : "T";
 
+    // Check if the current user is assigned for today AND the schedule is approved
+    const isTodayShopper = 
+        currentUserEmail && 
+        todayAssigned?.email === currentUserEmail && 
+        todayScheduleStatus === "approved";
+
     return (
         <div className="max-w-7xl mx-auto space-y-6 lg:space-y-8">
             
@@ -141,49 +205,51 @@ export default function BazaarManagementPage() {
             <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 lg:gap-8">
                 
                 {/* ─── 1. Today's Responsibility (Mobile: Order 1, Desktop: Order 2) ─── */}
-                <div className="order-1 lg:order-2 lg:col-span-2">
-                    <div className="bg-white rounded-3xl border border-orange-100 shadow-sm overflow-hidden relative">
-                        <div className="absolute top-0 left-0 w-1.5 h-full bg-orange-500"></div>
-                        <div className="p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 pl-8">
-                            
-                            {/* Who is assigned */}
-                            <div>
-                                <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Today's Responsibility</p>
-                                <div className="flex items-center gap-3 mt-2">
-                                    <div className="w-12 h-12 rounded-full bg-[#1e293b] flex items-center justify-center text-white font-bold text-lg shadow-sm shrink-0">
-                                        {assignedInitial}
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-extrabold text-gray-900">{assignedName}</h3>
-                                        <p className="text-sm font-bold text-orange-600">{formattedToday}</p>
+                {isTodayShopper && (
+                    <div className="order-1 lg:order-2 lg:col-span-2">
+                        <div className="bg-white rounded-3xl border border-orange-100 shadow-sm overflow-hidden relative">
+                            <div className="absolute top-0 left-0 w-1.5 h-full bg-orange-500"></div>
+                            <div className="p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 pl-8">
+                                
+                                {/* Who is assigned */}
+                                <div>
+                                    <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Today's Responsibility</p>
+                                    <div className="flex items-center gap-3 mt-2">
+                                        <div className="w-12 h-12 rounded-full bg-[#1e293b] flex items-center justify-center text-white font-bold text-lg shadow-sm shrink-0">
+                                            {assignedInitial}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-extrabold text-gray-900">{assignedName}</h3>
+                                            <p className="text-sm font-bold text-orange-600">{formattedToday}</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* Cost Input for the assigned member */}
-                            <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-                                <div className="relative w-full sm:w-48">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-extrabold text-gray-400">Tk </span>
-                                    <input 
-                                        type="number" 
-                                        value={amount}
-                                        onChange={(e) => setAmount(e.target.value)}
-                                        placeholder="Enter amount..." 
-                                        className="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm text-gray-900 font-bold transition-all"
-                                    />
+                                {/* Cost Input for the assigned member */}
+                                <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                                    <div className="relative w-full sm:w-48">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-extrabold text-gray-400">Tk </span>
+                                        <input 
+                                            type="number" 
+                                            value={amount}
+                                            onChange={(e) => setAmount(e.target.value)}
+                                            placeholder="Enter amount..." 
+                                            className="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm text-gray-900 font-bold transition-all"
+                                        />
+                                    </div>
+                                    <button 
+                                        onClick={handleSubmitExpense}
+                                        disabled={isSubmitting}
+                                        className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#FF6B00] hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-bold text-sm shadow-md shadow-orange-500/20 transition-all cursor-pointer disabled:opacity-50"
+                                    >
+                                        <IconCheck className="w-5 h-5" stroke={3} />
+                                        {isSubmitting ? "Submitting..." : "Submit"}
+                                    </button>
                                 </div>
-                                <button 
-                                    onClick={handleSubmitExpense}
-                                    disabled={isSubmitting}
-                                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#FF6B00] hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-bold text-sm shadow-md shadow-orange-500/20 transition-all cursor-pointer disabled:opacity-50"
-                                >
-                                    <IconCheck className="w-5 h-5" stroke={3} />
-                                    {isSubmitting ? "Submitting..." : "Submit"}
-                                </button>
                             </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 {/* ─── 2. Bazaar Schedule (Mobile: Order 2, Desktop: Order 3) ─── */}
                 <div className="order-2 lg:order-3 lg:col-span-1 lg:row-span-2">
@@ -193,6 +259,12 @@ export default function BazaarManagementPage() {
                                 <IconCalendarUser className="w-5 h-5 text-gray-600" stroke={2} />
                                 <h3 className="font-extrabold text-gray-900">Bazaar Schedule</h3>
                             </div>
+                            <button
+                                onClick={handleOpenModal}
+                                className="text-xs font-bold text-orange-600 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                            >
+                                View All
+                            </button>
                         </div>
                         
                         <div className="divide-y divide-gray-50 p-2">
@@ -207,30 +279,32 @@ export default function BazaarManagementPage() {
                                 const uInitial = item.user?.name ? item.user.name.charAt(0).toUpperCase() : "M";
 
                                 return (
-                                    <div key={item.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl transition-colors">
-                                        <div>
-                                            <p className="text-sm font-bold text-gray-900">{label}</p>
-                                            <p className="text-xs font-medium text-gray-500">{dateFormatted}</p>
+                                    <div key={item.id} className="grid grid-cols-[1fr_auto_minmax(110px,1fr)] sm:grid-cols-[1fr_auto_minmax(140px,1fr)] items-center gap-2 sm:gap-4 p-3 hover:bg-gray-50 rounded-xl transition-colors">
+                                        <div className="text-left overflow-hidden">
+                                            <p className="text-sm font-bold text-gray-900 truncate">{label}</p>
+                                            <p className="text-xs font-medium text-gray-500 truncate">{dateFormatted}</p>
                                         </div>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex justify-center min-w-[65px]">
                                             {item.status === "pending" ? (
                                                 <button
                                                     type="button"
                                                     onClick={() => handleApproveSchedule(item.id)}
-                                                    className="text-[11px] font-bold bg-amber-50 hover:bg-emerald-50 text-amber-700 hover:text-emerald-700 px-2 py-0.5 rounded-md border border-amber-200 hover:border-emerald-300 transition-all cursor-pointer"
+                                                    className="text-[11px] font-bold bg-amber-50 hover:bg-emerald-50 text-amber-700 hover:text-emerald-700 px-2 py-0.5 rounded-md border border-amber-200 hover:border-emerald-300 transition-all cursor-pointer whitespace-nowrap"
                                                     title="Click to approve member schedule"
                                                 >
-                                                    Pending (Approve)
+                                                    Pending
                                                 </button>
                                             ) : (
-                                                <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-100">
+                                                <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-100 whitespace-nowrap">
                                                     Approved
                                                 </span>
                                             )}
-                                            <div className="w-7 h-7 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs">
+                                        </div>
+                                        <div className="flex items-center justify-start gap-2 overflow-hidden pl-1 sm:pl-2 border-l border-gray-100/50">
+                                            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-[10px] sm:text-xs shrink-0">
                                                 {uInitial}
                                             </div>
-                                            <span className="text-sm font-extrabold text-gray-800">{item.user?.name || "Member"}</span>
+                                            <span className="text-xs sm:text-sm font-extrabold text-gray-800 truncate">{item.user?.name || "Member"}</span>
                                         </div>
                                     </div>
                                 );
@@ -252,6 +326,12 @@ export default function BazaarManagementPage() {
                                     <p className="text-xs font-bold text-gray-500 mt-0.5">History of market purchases for today</p>
                                 </div>
                             </div>
+                            <button
+                                onClick={() => setIsMonthlyModalOpen(true)}
+                                className="text-xs font-bold text-orange-600 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-lg transition-colors cursor-pointer whitespace-nowrap self-end sm:self-auto"
+                            >
+                                Monthly History
+                            </button>
                         </div>
 
                         <div className="overflow-x-auto">
@@ -340,6 +420,130 @@ export default function BazaarManagementPage() {
                 </div>
 
             </div>
+
+            {/* ─── Modal ─── */}
+            {isModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-[#F8FAFC]">
+                            <div className="flex items-center gap-2">
+                                <IconCalendarEvent className="w-5 h-5 text-gray-600" stroke={2} />
+                                <h3 className="font-extrabold text-gray-900">Full Month Schedule</h3>
+                            </div>
+                            <button 
+                                onClick={() => setIsModalOpen(false)}
+                                className="p-1.5 rounded-xl hover:bg-gray-200 text-gray-500 transition-colors cursor-pointer"
+                            >
+                                <IconX size={20} stroke={2} />
+                            </button>
+                        </div>
+                        
+                        <div className="p-2 max-h-[60vh] overflow-y-auto divide-y divide-gray-50">
+                            {isLoadingMonth ? (
+                                <div className="p-8 text-center text-sm font-bold text-gray-500 animate-pulse">
+                                    Loading schedule...
+                                </div>
+                            ) : fullMonthSchedules.length === 0 ? (
+                                <div className="p-8 text-center text-sm font-bold text-gray-400">
+                                    No schedules found for this month.
+                                </div>
+                            ) : (
+                                fullMonthSchedules.map((item) => {
+                                    const d = new Date(item.date);
+                                    const dateFormatted = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', weekday: 'short' });
+                                    const uInitial = item.user?.name ? item.user.name.charAt(0).toUpperCase() : "M";
+
+                                    return (
+                                        <div key={item.id} className="grid grid-cols-[100px_1fr] sm:grid-cols-[120px_1fr] items-center gap-2 sm:gap-4 p-3 hover:bg-gray-50 rounded-xl transition-colors">
+                                            <div className="text-left overflow-hidden">
+                                                <p className="text-sm font-bold text-gray-900 truncate">{dateFormatted}</p>
+                                            </div>
+                                            <div className="flex items-center justify-start gap-3 pl-2 sm:pl-4 border-l border-gray-100/70 overflow-hidden">
+                                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-[10px] sm:text-xs shrink-0">
+                                                    {uInitial}
+                                                </div>
+                                                <span className="text-sm font-extrabold text-gray-800 truncate">{item.user?.name || "Member"}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ─── Monthly Summary Modal ─── */}
+            {isMonthlyModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-[#F8FAFC]">
+                            <div className="flex items-center gap-2">
+                                <IconReceipt2 className="w-5 h-5 text-gray-600" stroke={2} />
+                                <h3 className="font-extrabold text-gray-900">Monthly Expenses</h3>
+                            </div>
+                            <button 
+                                onClick={() => setIsMonthlyModalOpen(false)}
+                                className="p-1.5 rounded-xl hover:bg-gray-200 text-gray-500 transition-colors cursor-pointer"
+                            >
+                                <IconX size={20} stroke={2} />
+                            </button>
+                        </div>
+                        
+                        <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex gap-3">
+                            <select 
+                                value={selectedMonth} 
+                                onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                                className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold text-gray-700 outline-none focus:border-orange-500"
+                            >
+                                {Array.from({ length: 12 }, (_, i) => {
+                                    const d = new Date(2000, i, 1);
+                                    return <option key={i} value={i}>{d.toLocaleString('default', { month: 'long' })}</option>;
+                                })}
+                            </select>
+                            <select 
+                                value={selectedYear} 
+                                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                                className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold text-gray-700 outline-none focus:border-orange-500"
+                            >
+                                {Array.from({ length: 5 }, (_, i) => {
+                                    const year = new Date().getFullYear() - 2 + i;
+                                    return <option key={year} value={year}>{year}</option>;
+                                })}
+                            </select>
+                        </div>
+
+                        <div className="p-2 max-h-[50vh] overflow-y-auto divide-y divide-gray-50">
+                            {isLoadingMonthly ? (
+                                <div className="p-8 text-center text-sm font-bold text-gray-500 animate-pulse">
+                                    Loading expenses...
+                                </div>
+                            ) : monthlySummary.length === 0 ? (
+                                <div className="p-8 text-center text-sm font-bold text-gray-400">
+                                    No expenses found for this month.
+                                </div>
+                            ) : (
+                                monthlySummary.map((item) => {
+                                    const uInitial = item.name ? item.name.charAt(0).toUpperCase() : "M";
+                                    return (
+                                        <div key={item.userId} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl transition-colors">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs shrink-0">
+                                                    {uInitial}
+                                                </div>
+                                                <span className="text-sm font-extrabold text-gray-800">{item.name}</span>
+                                            </div>
+                                            <div>
+                                                <span className="font-extrabold text-red-600 text-sm">Tk {item.total.toLocaleString()}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

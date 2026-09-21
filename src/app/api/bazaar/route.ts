@@ -70,6 +70,7 @@ export async function GET() {
     return NextResponse.json(
       {
         todayAssigned: todaySchedule?.user || null,
+        todayScheduleStatus: todaySchedule?.status || null,
         schedules: upcomingSchedules,
         todayExpenses,
         todayTotal,

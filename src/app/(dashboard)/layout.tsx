@@ -18,7 +18,8 @@ import {
     IconSearch,
     IconBell,
     IconChevronDown,
-    IconUser 
+    IconUser,
+    IconCalendarEvent
 } from "@tabler/icons-react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -62,6 +63,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         if (basePath === "admin") {
             return [
                 { name: "Dashboard", href: "/admin", icon: IconHome },
+                { name: "Monthly Expense", href: "/admin/monthly-expense", icon: IconCalendarEvent },
                 { name: "Members", href: "/members-list", icon: IconUsers },
                 { name: "Food Management", href: "/meals", icon: IconToolsKitchen2 },
                 { name: "Expenses", href: "/bazaar", icon: IconReceipt },

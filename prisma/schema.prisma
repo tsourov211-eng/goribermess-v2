@@ -143,3 +143,17 @@ model GuestMealRequest {
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+// 8. Monthly expense configuration table
+model MonthlyExpense {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  month          String   @unique
+  seatRent       Float    @default(0)
+  electricityGas Float    @default(0)
+  internet       Float    @default(0)
+  maid           Float    @default(0)
+  additional     Float    @default(0)
+  mealCharge     Float    @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
