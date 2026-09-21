@@ -17,7 +17,9 @@ import {
     IconCheck,
     IconX,
     IconMail,
-    IconPhone
+    IconPhone,
+    IconChevronUp,
+    IconChevronDown
 } from "@tabler/icons-react";
 
 export default function AdminDashboardPage() {
@@ -29,6 +31,7 @@ export default function AdminDashboardPage() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<any>(null);
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+    const [isPendingExpanded, setIsPendingExpanded] = useState(true);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -255,7 +258,10 @@ export default function AdminDashboardPage() {
 
             {/* ─── Pending Member Requests Section ─── */}
             <div className="bg-blue-50/50 rounded-3xl border border-blue-200 overflow-hidden shadow-sm">
-                <div className="p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-blue-200 bg-white">
+                <div 
+                    onClick={() => setIsPendingExpanded(!isPendingExpanded)}
+                    className="p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-blue-200 bg-white cursor-pointer hover:bg-blue-50/20 transition-colors"
+                >
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                         <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 shadow-sm shrink-0">
                             <IconUserPlus className="w-5 h-5" stroke={2} />
@@ -266,16 +272,20 @@ export default function AdminDashboardPage() {
                         </div>
                     </div>
                     
-                    <div className="flex items-center gap-3 w-full sm:w-auto justify-end flex-wrap">
+                    <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end flex-wrap">
                         <div className="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border border-blue-200">
                             <IconClock size={14} /> {pendingMembers.length} Pending
+                        </div>
+                        <div className="text-gray-400 bg-gray-50 p-1.5 rounded-lg border border-gray-100 hover:text-gray-600 transition-colors">
+                            {isPendingExpanded ? <IconChevronUp size={20} stroke={2} /> : <IconChevronDown size={20} stroke={2} />}
                         </div>
                     </div>
                 </div>
                 
-                <div className="bg-white overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
+                {isPendingExpanded && (
+                    <div className="bg-gray-50/30 md:bg-white overflow-x-hidden p-4 md:p-0 animate-in slide-in-from-top-2 fade-in duration-200">
+                    <table className="w-full text-left border-collapse block md:table">
+                        <thead className="hidden md:table-header-group">
                             <tr className="bg-gray-50/50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
                                 <th className="p-4 w-12">#</th>
                                 <th className="p-4">Name</th>
@@ -285,50 +295,62 @@ export default function AdminDashboardPage() {
                                 <th className="p-4 text-center">Action</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="block md:table-row-group space-y-4 md:space-y-0 md:divide-y md:divide-gray-100">
                             {isLoading ? (
-                                <tr>
-                                    <td colSpan={6} className="p-8 text-center text-gray-400 font-bold">Loading...</td>
+                                <tr className="block md:table-row">
+                                    <td colSpan={6} className="block md:table-cell p-8 text-center text-gray-400 font-bold">Loading...</td>
                                 </tr>
                             ) : pendingMembers.length === 0 ? (
-                                <tr>
-                                    <td colSpan={6} className="p-8 text-center text-gray-400 font-bold">No pending member requests.</td>
+                                <tr className="block md:table-row">
+                                    <td colSpan={6} className="block md:table-cell p-8 text-center text-gray-400 font-bold">No pending member requests.</td>
                                 </tr>
                             ) : pendingMembers.map((user: any, idx: number) => (
-                                <tr key={user.id} className="hover:bg-blue-50/30 transition-colors group">
-                                    <td className="p-4 text-sm font-bold text-gray-500">{idx + 1}</td>
-                                    <td className="p-4">
+                                <tr key={user.id} className="block md:table-row bg-white border border-blue-100 md:border-0 rounded-2xl md:rounded-none p-4 md:p-0 hover:bg-blue-50/30 transition-colors group shadow-sm md:shadow-none">
+                                    <td className="hidden md:table-cell p-4 text-sm font-bold text-gray-500">{idx + 1}</td>
+                                    
+                                    <td className="block md:table-cell p-0 md:p-4 mb-3 md:mb-0">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+                                            <div className="w-10 h-10 md:w-8 md:h-8 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
                                                 {user.name?.charAt(0) || 'M'}
                                             </div>
-                                            <span className="font-extrabold text-gray-900 text-sm">{user.name || 'Member'}</span>
+                                            <div className="flex-1">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="font-extrabold text-gray-900 text-base md:text-sm">{user.name || 'Member'}</span>
+                                                    <span className="md:hidden bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-[10px] font-bold border border-amber-200">
+                                                        Pending
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </td>
-                                    <td className="p-4">
-                                        <div className="flex items-center gap-1.5 text-sm font-bold text-gray-700">
-                                            <IconMail size={16} className="text-gray-400" />
-                                            {user.email}
+
+                                    <td className="block md:table-cell p-0 md:p-4 mb-2 md:mb-0 mt-3 md:mt-0">
+                                        <div className="flex items-center gap-2 md:gap-1.5 text-sm font-bold text-gray-700">
+                                            <IconMail size={16} className="text-gray-400 shrink-0" />
+                                            <span className="truncate">{user.email}</span>
                                         </div>
                                     </td>
-                                    <td className="p-4">
-                                        <div className="flex items-center gap-1.5 text-sm font-bold text-gray-500">
-                                            <IconPhone size={16} className="text-gray-400" />
-                                            {user.phone || 'N/A'}
+                                    
+                                    <td className="block md:table-cell p-0 md:p-4 mb-4 md:mb-0 mt-2 md:mt-0">
+                                        <div className="flex items-center gap-2 md:gap-1.5 text-sm font-bold text-gray-500">
+                                            <IconPhone size={16} className="text-gray-400 shrink-0" />
+                                            <span>{user.phone || 'N/A'}</span>
                                         </div>
                                     </td>
-                                    <td className="p-4">
+
+                                    <td className="hidden md:table-cell p-4">
                                         <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-md text-xs font-bold border border-amber-200">
                                             Pending
                                         </span>
                                     </td>
-                                    <td className="p-4">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <button onClick={() => handleMemberApproval(user.id, 'approve')} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm transition-colors">
-                                                <IconCheck size={14} stroke={3} /> Approve
+
+                                    <td className="block md:table-cell p-0 md:p-4 pt-4 md:pt-0 border-t border-gray-100 md:border-0 mt-4 md:mt-0">
+                                        <div className="flex items-center justify-center gap-3 md:gap-2">
+                                            <button onClick={() => handleMemberApproval(user.id, 'approve')} className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 md:px-3 md:py-1.5 rounded-xl md:rounded-lg text-sm md:text-xs font-bold flex items-center justify-center gap-1.5 md:gap-1 shadow-sm transition-colors">
+                                                <IconCheck size={18} className="md:w-3.5 md:h-3.5" stroke={3} /> Approve
                                             </button>
-                                            <button onClick={() => handleMemberApproval(user.id, 'reject')} className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm transition-colors">
-                                                <IconX size={14} stroke={3} /> Reject
+                                            <button onClick={() => handleMemberApproval(user.id, 'reject')} className="flex-1 md:flex-none bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-4 py-2.5 md:px-3 md:py-1.5 rounded-xl md:rounded-lg text-sm md:text-xs font-bold flex items-center justify-center gap-1.5 md:gap-1 shadow-sm transition-colors">
+                                                <IconX size={18} className="md:w-3.5 md:h-3.5" stroke={3} /> Reject
                                             </button>
                                         </div>
                                     </td>
@@ -337,6 +359,7 @@ export default function AdminDashboardPage() {
                         </tbody>
                     </table>
                 </div>
+                )}
             </div>
 
             {/* ─── Data Table Section ─── */}
