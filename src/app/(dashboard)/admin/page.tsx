@@ -26,7 +26,7 @@ export default function AdminDashboardPage() {
     const [stats, setStats] = useState({ totalFoodCost: 0, messFund: 0, totalMembers: 0, totalMessMeals: 0 });
     const [isLoading, setIsLoading] = useState(true);
 
-    // আজকের তারিখ ডাইনামিকভাবে দেখানোর জন্য
+    // To show today's date dynamically
     const today = new Date();
     const formattedDate = today.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
     const currentMonth = today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -54,7 +54,7 @@ export default function AdminDashboardPage() {
         }
     };
 
-    // ইউজারের রোল আপডেট করার ফাংশন
+    // Function to update user role
     const handleRoleChange = async (userId: string, newRole: string) => {
         if (!confirm(`Are you sure you want to change this user's role to ${newRole.toUpperCase()}?`)) return;
 
@@ -67,7 +67,7 @@ export default function AdminDashboardPage() {
 
             if (res.ok) {
                 alert(`✅ User role updated successfully!`);
-                fetchUsers(); // ডাটা রিফ্রেশ করা
+                fetchUsers(); // Refresh data
             } else {
                 alert("❌ Failed to update role.");
             }
@@ -236,7 +236,7 @@ export default function AdminDashboardPage() {
                         <p className="text-gray-500 text-xs font-semibold text-right">Total Food Cost (This Month)</p>
                     </div>
                     <div className="flex items-end gap-3 z-10 mt-3">
-                        <h3 className="text-3xl font-extrabold text-gray-900">{isLoading ? "..." : `৳ ${stats.totalFoodCost.toLocaleString()}`}</h3>
+                        <h3 className="text-3xl font-extrabold text-gray-900">{isLoading ? "..." : `Tk ${stats.totalFoodCost.toLocaleString()}`}</h3>
                     </div>
                     <p className="text-gray-500 text-xs font-medium z-10 mt-1">Total expense on food</p>
                     <div className="absolute bottom-2 right-4 flex items-end gap-1 opacity-20">
@@ -255,7 +255,7 @@ export default function AdminDashboardPage() {
                         <p className="text-gray-500 text-xs font-semibold text-right">Mess Fund</p>
                     </div>
                     <div className="flex items-end gap-3 z-10 mt-3">
-                        <h3 className="text-3xl font-extrabold text-gray-900">{isLoading ? "..." : `৳ ${stats.messFund.toLocaleString()}`}</h3>
+                        <h3 className="text-3xl font-extrabold text-gray-900">{isLoading ? "..." : `Tk ${stats.messFund.toLocaleString()}`}</h3>
                     </div>
                     <div className="flex items-center justify-between z-10 mt-1">
                         <p className="text-gray-500 text-xs font-medium">{stats.messFund >= 0 ? "Surplus in fund" : "Deficit in fund"}</p>
@@ -333,7 +333,7 @@ export default function AdminDashboardPage() {
                                             </div>
                                         </td>
                                         <td className="py-4 px-6 whitespace-nowrap">
-                                            {/* 💡 ডাইনামিক রোল সিলেক্টর */}
+                                            {/* 💡 Dynamic role selector */}
                                             <select 
                                                 value={user.role} 
                                                 onChange={(e) => handleRoleChange(user.id, e.target.value)}

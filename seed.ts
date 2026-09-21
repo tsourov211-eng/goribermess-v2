@@ -5,11 +5,11 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-    // পাসওয়ার্ড এনক্রিপ্ট করা (যাতে ডাটাবেসে হ্যাশ হয়ে থাকে)
+    // Password encrypted (so it stays hashed in db)
     const adminPassword = await bcrypt.hash("Tanvir@#", 10);
     const memberPassword = await bcrypt.hash("123456", 10);
 
-    // ১. সুপার অ্যাডমিন ইউজার তৈরি/আপডেট করা
+    // 1. Create/Update super admin user
     const admin = await prisma.user.upsert({
         where: { email: "ourmess001@gmail.com" },
         update: {
@@ -30,9 +30,9 @@ async function main() {
         },
     });
 
-    console.log("✅ ডাটাবেসে সুপার অ্যাডমিন সফলভাবে কনফিগার হয়েছে:", admin.email);
+    console.log("✅ Super admin configured successfully in database:", admin.email);
 
-    // ২. ডিফল্ট টেস্ট ম্যানেজার তৈরি (যদি না থাকে)
+    // 2. Create default test manager (if not exists)
     const manager = await prisma.user.upsert({
         where: { email: "manager@gmail.com" },
         update: {
@@ -51,9 +51,9 @@ async function main() {
         },
     });
 
-    console.log("✅ ডাটাবেসে ম্যানেজার ইউজার তৈরি হয়েছে:", manager.email);
+    console.log("✅ Manager user created in database:", manager.email);
 
-    // ৩. ডিফল্ট টেস্ট মেম্বার তৈরি (যদি না থাকে)
+    // 3. Create default test member (if not exists)
     const member = await prisma.user.upsert({
         where: { email: "member@gmail.com" },
         update: {
@@ -72,12 +72,12 @@ async function main() {
         },
     });
 
-    console.log("✅ ডাটাবেসে মেম্বার ইউজার তৈরি হয়েছে:", member.email);
+    console.log("✅ Member user created in database:", member.email);
 }
 
 main()
     .catch((e) => {
-        console.error("❌ এরর:", e);
+        console.error("❌ Error:", e);
         process.exit(1);
     })
     .finally(async () => {

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
-// ১. কোনো নির্দিষ্ট তারিখের মেম্বার ও মিলের তালিকা আনার জন্য GET রিকোয়েস্ট
+// 1. GET request to fetch members and meal list for a specific date
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -12,7 +12,7 @@ export async function GET(req: Request) {
     }
 
     const { searchParams } = new URL(req.url);
-    const dateStr = searchParams.get("date"); // যেমন: 2026-09-19
+    const dateStr = searchParams.get("date"); // e.g.: 2026-09-19
 
     const targetDate = dateStr ? new Date(dateStr) : new Date();
     targetDate.setUTCHours(0, 0, 0, 0);
@@ -20,7 +20,7 @@ export async function GET(req: Request) {
     const nextDate = new Date(targetDate);
     nextDate.setDate(nextDate.getDate() + 1);
 
-    // সব মেম্বারদের আনা
+    // Fetch all members
     const users = await prisma.user.findMany({
       orderBy: { name: "asc" },
       select: {
@@ -35,7 +35,7 @@ export async function GET(req: Request) {
       },
     });
 
-    // ওই নির্দিষ্ট দিনের মিল লগস আনা
+    // Fetch meal logs for that specific day
     const mealLogs = await prisma.mealLog.findMany({
       where: {
         date: {
@@ -50,7 +50,7 @@ export async function GET(req: Request) {
       mealMap.set(log.userId, log);
     });
 
-    // প্রতিটি ইউজারের মিল সেট করা (লগ থাকলে লগ, না থাকলে ডিফল্ট)
+    // Set meal for each user (log if exists, otherwise default)
     const membersWithMeals = users.map((user) => {
       const existingLog = mealMap.get(user.id);
       return {
@@ -65,7 +65,7 @@ export async function GET(req: Request) {
       };
     });
 
-    // আজকের কুইক স্ট্যাটাস হিসাব
+    // Today's quick status calculation
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
@@ -84,7 +84,7 @@ export async function GET(req: Request) {
     });
     const todayBazaar = todayExpenses.reduce((acc, e) => acc + e.amount, 0);
 
-    // লাইভ মিল রেট
+    // Live meal rate
     const allExpenses = await prisma.expense.aggregate({
       _sum: { amount: true },
       where: { status: "Approved" },
@@ -112,13 +112,13 @@ export async function GET(req: Request) {
   } catch (error) {
     console.error("Meals GET Error:", error);
     return NextResponse.json(
-      { message: "মিল ডেটা আনতে সমস্যা হয়েছে!" },
+      { message: "Failed to fetch meal data!" },
       { status: 500 }
     );
   }
 }
 
-// ২. মিল সেভ বা আপডেট করার জন্য POST রিকোয়েস্ট (একক অথবা ব্যাচ)
+// 2. POST request to save or update meals (single or batch)
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -131,7 +131,7 @@ export async function POST(req: Request) {
 
     if (!date) {
       return NextResponse.json(
-        { message: "তারিখ প্রদান করা জরুরি!" },
+        { message: "Date is required!" },
         { status: 400 }
       );
     }
@@ -139,7 +139,7 @@ export async function POST(req: Request) {
     const mealDate = new Date(date);
     mealDate.setUTCHours(0, 0, 0, 0);
 
-    // যদি পুরো ব্যাচ পাঠানো হয়
+    // If full batch is sent
     if (Array.isArray(meals)) {
       const operations = meals.map((m) => {
         return prisma.mealLog.upsert({
@@ -169,15 +169,15 @@ export async function POST(req: Request) {
       await Promise.all(operations);
 
       return NextResponse.json(
-        { message: "সকল মিলের হিসাব সফলভাবে সংরক্ষিত হয়েছে!" },
+        { message: "All meal data saved successfully!" },
         { status: 200 }
       );
     }
 
-    // একক এন্ট্রি থাকলে
+    // If single entry exists
     const { userId, breakfast, lunch, dinner, guest } = body;
     if (!userId) {
-      return NextResponse.json({ message: "ইউজার আইডি জরুরি!" }, { status: 400 });
+      return NextResponse.json({ message: "User ID is required!" }, { status: 400 });
     }
 
     const savedMeal = await prisma.mealLog.upsert({
@@ -204,13 +204,13 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(
-      { message: "মিলের হিসাব সংরক্ষিত হয়েছে!", meal: savedMeal },
+      { message: "Meal data saved!", meal: savedMeal },
       { status: 200 }
     );
   } catch (error) {
     console.error("Meals POST Error:", error);
     return NextResponse.json(
-      { message: "সার্ভারে কোনো সমস্যা হয়েছে!" },
+      { message: "Server error occurred!" },
       { status: 500 }
     );
   }

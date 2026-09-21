@@ -17,7 +17,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // ১. 💡 Total Deposit (শুধুমাত্র "Approved" স্ট্যাটাস গুলো যোগ হবে)
+    // 1. 💡 Total Deposit (Only "Approved" status will be added)
     const depositAgg = await prisma.deposit.aggregate({
       _sum: { amount: true },
       where: {
@@ -27,7 +27,7 @@ export async function GET(req: Request) {
     });
     const totalDeposit = depositAgg._sum.amount || 0;
 
-    // ২. ইউজারের মোট মিল (Breakfast + Lunch + Dinner + Guest)
+    // 2. User's total meals (Breakfast + Lunch + Dinner + Guest)
     const userMeals = await prisma.mealLog.findMany({
       where: { userId: user.id },
     });
@@ -36,21 +36,21 @@ export async function GET(req: Request) {
       0
     );
 
-    // ৩. মেসের মোট খরচ (শুধুমাত্র Approved হওয়া Expense গুলো)
+    // 3. Mess total expenses (Only Approved expenses)
     const expenseAgg = await prisma.expense.aggregate({
       _sum: { amount: true },
       where: { status: "Approved" },
     });
     const totalMessExpense = expenseAgg._sum.amount || 0;
 
-    // ৪. মেসের মোট মিল
+    // 4. Mess total meals
     const allMeals = await prisma.mealLog.findMany();
     const totalMessMeals = allMeals.reduce(
       (acc, meal) => acc + meal.breakfast + meal.lunch + meal.dinner + meal.guest,
       0
     );
 
-    // ৫. Live Meal Rate বের করা
+    // 5. Calculate Live Meal Rate
     let liveMealRate = 0;
     if (totalMessMeals > 0) {
       liveMealRate = totalMessExpense / totalMessMeals;
@@ -58,17 +58,17 @@ export async function GET(req: Request) {
       liveMealRate = totalMessExpense;
     }
 
-    // ৬. Current Balance হিসাব (জমা টাকা - মোট মিলের খরচ)
+    // 6. Current Balance calculation (Deposit - Total meal cost)
     const currentBalance = totalDeposit - totalMeals * liveMealRate;
 
-    // ৭. Recent Meals (শেষ ৩ দিনের)
+    // 7. Recent Meals (Last 3 days)
     const recentMeals = await prisma.mealLog.findMany({
       where: { userId: user.id },
       orderBy: { date: "desc" },
       take: 3,
     });
 
-    // ৮. Notice Board
+    // 8. Notice Board
     const notices = await prisma.notice.findMany({
       where: { isActive: true },
       orderBy: { createdAt: "desc" },

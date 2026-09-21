@@ -47,7 +47,7 @@ export default function MyMealsView() {
     useEffect(() => {
         fetchMealsData();
         fetchDefaultMeals();
-    }, [selectedMonthYear]); // 💡 মাস পরিবর্তন হলে আবার ডাটা আনবে
+    }, [selectedMonthYear]); // 💡 Fetch data again on month change
 
     const fetchMealsData = async () => {
         setIsHistoryLoading(true);
@@ -58,7 +58,7 @@ export default function MyMealsView() {
                 const data = await res.json();
                 if (data.todayStatus) setTodayStatus(data.todayStatus);
                 if (data.guestRequests) setHistory(data.guestRequests);
-                if (data.monthlyMeals) setMonthlyMeals(data.monthlyMeals); // 💡 নতুন ডাটা
+                if (data.monthlyMeals) setMonthlyMeals(data.monthlyMeals); // 💡 New data
             }
         } catch (error) {
             console.error("Error fetching meals data:", error);
@@ -144,7 +144,7 @@ export default function MyMealsView() {
         }
     };
 
-    // 💡 মাসের টোটাল হিসাব করার লজিক
+    // 💡 Monthly total calculation logic
     const totalMonthlyBfast = monthlyMeals.reduce((sum, meal) => sum + (meal.breakfast || 0), 0);
     const totalMonthlyLunch = monthlyMeals.reduce((sum, meal) => sum + (meal.lunch || 0), 0);
     const totalMonthlyDinner = monthlyMeals.reduce((sum, meal) => sum + (meal.dinner || 0), 0);

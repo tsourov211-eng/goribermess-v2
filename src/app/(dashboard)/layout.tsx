@@ -49,7 +49,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }
     }, [status]);
 
-    // 💡 ইউজারের সঠিক রোল ডিটেকশন (সেশন থেকে, ফলব্যাক পাথনেম)
+    // 💡 Proper role detection for user (from session, fallback pathname)
     const sessionRole = (session?.user as { role?: string })?.role;
     let basePath = sessionRole || "member";
     if (!sessionRole) {
@@ -78,6 +78,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 { name: "Food Management", href: "/meals", icon: IconToolsKitchen2 },
                 { name: "Expenses", href: "/bazaar", icon: IconReceipt },
                 { name: "Reports", href: "/reports", icon: IconChartBar },
+                { name: "My Meals", href: "/member/my-meals", icon: IconToolsKitchen2 },
                 { name: "My Profile", href: `/${basePath}/profile`, icon: IconUser }, 
             ];
         }

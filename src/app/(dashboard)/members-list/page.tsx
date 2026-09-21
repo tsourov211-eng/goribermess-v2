@@ -115,7 +115,7 @@ export default function MembersListPage() {
                         />
                     </div>
                     
-                    {/* 💡 শুধুমাত্র অ্যাডমিন নতুন মেম্বার অ্যাড করতে পারবে */}
+                    {/* 💡 Only admin can add new members */}
                     {currentUserRole === "admin" && (
                         <Link 
                             href="/admin/add-member"
@@ -137,7 +137,7 @@ export default function MembersListPage() {
                                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Phone</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Deposit</th>
                                 
-                                {/* 💡 ব্যালেন্স এবং অ্যাকশন কলাম শুধুমাত্র অ্যাডমিন বা ম্যানেজার দেখতে পারবে */}
+                                {/* 💡 Balance and Action columns are only visible to Admin or Manager */}
                                 {(currentUserRole === "admin" || currentUserRole === "manager") && (
                                     <>
                                         <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Balance</th>
@@ -215,7 +215,7 @@ export default function MembersListPage() {
                                         
                                         {/* Deposit Amount */}
                                         <td className="px-6 py-4">
-                                            <p className="text-sm font-extrabold text-[#0B132B]">৳ {member.deposit.toLocaleString()}</p>
+                                            <p className="text-sm font-extrabold text-[#0B132B]">Tk {member.deposit.toLocaleString()}</p>
                                         </td>
                                         
                                         {/* Balance & Actions */}
@@ -223,7 +223,7 @@ export default function MembersListPage() {
                                             <>
                                                 <td className="px-6 py-4">
                                                     <p className={`text-sm font-extrabold ${member.balance < 0 ? "text-red-500" : "text-green-600"}`}>
-                                                        {member.balance < 0 ? "-" : "+"} ৳ {Math.abs(member.balance).toLocaleString()}
+                                                        {member.balance < 0 ? "-" : "+"} Tk {Math.abs(member.balance).toLocaleString()}
                                                     </p>
                                                 </td>
                                                 {currentUserRole === "admin" && (

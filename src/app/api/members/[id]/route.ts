@@ -30,13 +30,13 @@ export async function PATCH(
     });
 
     return NextResponse.json(
-      { message: "মেম্বারের তথ্য সফলভাবে আপডেট হয়েছে!", user: updatedUser },
+      { message: "Member info updated successfully!", user: updatedUser },
       { status: 200 }
     );
   } catch (error) {
     console.error("Update Error:", error);
     return NextResponse.json(
-      { message: "আপডেট করতে কোনো সমস্যা হয়েছে!" },
+      { message: "Failed to update member info!" },
       { status: 500 }
     );
   }
@@ -60,13 +60,13 @@ export async function DELETE(
     });
 
     return NextResponse.json(
-      { message: "মেম্বার সফলভাবে রিমুভ হয়েছে!" },
+      { message: "Member removed successfully!" },
       { status: 200 }
     );
   } catch (error) {
     console.error("Delete Error:", error);
     return NextResponse.json(
-      { message: "ডিলিট করতে কোনো সমস্যা হয়েছে!" },
+      { message: "Failed to delete member!" },
       { status: 500 }
     );
   }

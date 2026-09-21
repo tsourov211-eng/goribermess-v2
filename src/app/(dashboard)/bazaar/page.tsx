@@ -73,7 +73,7 @@ export default function BazaarManagementPage() {
 
     const handleSubmitExpense = async () => {
         if (!amount || Number(amount) <= 0) {
-            alert("দয়া করে সঠিক টাকার পরিমাণ লিখুন!");
+            alert("Please enter a valid amount!");
             return;
         }
 
@@ -89,13 +89,13 @@ export default function BazaarManagementPage() {
             });
 
             if (res.ok) {
-                alert("✅ বাজারের খরচ সফলভাবে যোগ হয়েছে!");
+                alert("✅ Bazaar expense added successfully!");
                 setAmount("");
                 setDescription("");
                 fetchBazaarData();
                 fetchGlobalStats();
             } else {
-                alert("❌ খরচ যোগ করতে সমস্যা হয়েছে!");
+                alert("❌ Failed to add expense!");
             }
         } catch (error) {
             console.error("Bazaar submit error:", error);
@@ -112,14 +112,14 @@ export default function BazaarManagementPage() {
                 body: JSON.stringify({ scheduleId, status: "approved" }),
             });
             if (res.ok) {
-                alert("✅ বাজার শিডিউল সফলভাবে অনুমোদিত হয়েছে!");
+                alert("✅ Bazaar schedule approved successfully!");
                 fetchBazaarData();
             } else {
-                alert("❌ অনুমোদন করতে সমস্যা হয়েছে!");
+                alert("❌ Failed to approve!");
             }
         } catch (error) {
             console.error("Schedule approve error:", error);
-            alert("❌ এরর হয়েছে!");
+            alert("❌ Error occurred!");
         }
     };
 
@@ -163,7 +163,7 @@ export default function BazaarManagementPage() {
                             {/* Cost Input for the assigned member */}
                             <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
                                 <div className="relative w-full sm:w-48">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-extrabold text-gray-400">৳</span>
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-extrabold text-gray-400">Tk </span>
                                     <input 
                                         type="number" 
                                         value={amount}
@@ -282,7 +282,7 @@ export default function BazaarManagementPage() {
                                                 </div>
                                             </td>
                                             <td className="py-4 px-6 whitespace-nowrap text-right">
-                                                <span className="font-extrabold text-red-600 text-base">৳ {exp.amount}</span>
+                                                <span className="font-extrabold text-red-600 text-base">Tk {exp.amount}</span>
                                             </td>
                                             <td className="py-4 px-6 whitespace-nowrap text-right">
                                                 <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${exp.status === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
@@ -307,7 +307,7 @@ export default function BazaarManagementPage() {
                             <p className="text-gray-500 text-xs font-semibold text-right">Total Food Cost</p>
                         </div>
                         <div className="flex items-end gap-3 z-10 mt-3">
-                            <h3 className="text-3xl font-extrabold text-gray-900">৳ {stats.totalExpense.toLocaleString()}</h3>
+                            <h3 className="text-3xl font-extrabold text-gray-900">Tk {stats.totalExpense.toLocaleString()}</h3>
                         </div>
                         <IconReceipt2 className="absolute -bottom-4 -right-4 w-24 h-24 text-orange-50/50" stroke={1} />
                     </div>
@@ -320,7 +320,7 @@ export default function BazaarManagementPage() {
                             <p className="text-gray-500 text-xs font-semibold text-right">Today's Bazaar</p>
                         </div>
                         <div className="flex items-end gap-3 z-10 mt-3">
-                            <h3 className="text-3xl font-extrabold text-gray-900">৳ {todayTotal.toLocaleString()}</h3>
+                            <h3 className="text-3xl font-extrabold text-gray-900">Tk {todayTotal.toLocaleString()}</h3>
                         </div>
                         <p className="text-gray-500 text-xs font-medium z-10 mt-1">{todayTotal > 0 ? "Logged for today" : "No bazaar yet"}</p>
                     </div>
@@ -333,7 +333,7 @@ export default function BazaarManagementPage() {
                             <p className="text-gray-500 text-xs font-semibold text-right">Mess Fund</p>
                         </div>
                         <div className="flex items-end gap-3 z-10 mt-3">
-                            <h3 className="text-3xl font-extrabold text-gray-900">৳ {stats.availableBalance.toLocaleString()}</h3>
+                            <h3 className="text-3xl font-extrabold text-gray-900">Tk {stats.availableBalance.toLocaleString()}</h3>
                         </div>
                         <p className="text-gray-500 text-xs font-medium z-10 mt-1">{stats.availableBalance >= 0 ? "Surplus fund" : "Deficit fund"}</p>
                     </div>

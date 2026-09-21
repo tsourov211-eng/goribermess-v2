@@ -147,7 +147,7 @@ export default function SettingsPage() {
                                 <div>
                                     <label className="block text-sm font-bold text-gray-900 mb-2 ml-1">Currency Symbol</label>
                                     <select className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm text-gray-900 font-bold appearance-none cursor-pointer">
-                                        <option value="BDT">৳ (BDT)</option>
+                                        <option value="BDT">Tk (BDT)</option>
                                         <option value="USD">$ (USD)</option>
                                     </select>
                                 </div>

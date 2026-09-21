@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-// ১. ইউজারের এবং মেসের বাজার শিডিউল আনার জন্য GET রিকোয়েস্ট
+// 1. GET request to fetch user's and mess bazaar schedule
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -30,7 +30,7 @@ export async function GET(req: Request) {
     const startOfMonth = new Date(Date.UTC(currentYear, currentMonth, 1));
     const endOfMonth = new Date(Date.UTC(currentYear, currentMonth + 1, 0, 23, 59, 59, 999));
 
-    // ইউজারের নিজস্ব বাজার শিডিউল
+    // User's own bazaar schedule
     const mySchedules = await prisma.bazaarSchedule.findMany({
       where: {
         userId: user.id,
@@ -39,7 +39,7 @@ export async function GET(req: Request) {
       orderBy: { date: "asc" },
     });
 
-    // মেসের সকলের বাজার শিডিউল (ক্যালেন্ডারে অন্যান্যদের তারিখও দেখার জন্য)
+    // All mess members' bazaar schedule (to see others' dates on calendar)
     const allSchedules = await prisma.bazaarSchedule.findMany({
       where: {
         date: { gte: startOfMonth, lte: endOfMonth },
@@ -63,7 +63,7 @@ export async function GET(req: Request) {
   }
 }
 
-// ২. মেম্বার কর্তৃক বাজার ডেট সিলেক্ট ও সাবমিট করার জন্য POST রিকোয়েস্ট
+// 2. POST request for member to select and submit bazaar date
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -86,8 +86,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No dates provided" }, { status: 400 });
     }
 
-    // তারিখগুলোকে ফরম্যাট করা ও ডুপ্লিকেট এড়ানো
+    // Format dates, avoid duplicates, and reject already-approved dates
     const createdItems = [];
+    const conflictDates: string[] = [];
+
     for (const dateStr of dates) {
       const [y, m, d] = dateStr.split("-").map(Number);
       const parsedDate = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
@@ -95,6 +97,20 @@ export async function POST(req: Request) {
       const startOfDay = new Date(Date.UTC(y, m - 1, d, 0, 0, 0));
       const endOfDay = new Date(Date.UTC(y, m - 1, d, 23, 59, 59, 999));
 
+      // Check if this date already has an approved schedule from ANY user
+      const approvedOnDate = await prisma.bazaarSchedule.findFirst({
+        where: {
+          date: { gte: startOfDay, lte: endOfDay },
+          status: "approved",
+        },
+      });
+
+      if (approvedOnDate) {
+        conflictDates.push(dateStr);
+        continue; // Skip — date already booked
+      }
+
+      // Check if user already has a schedule on this date
       const existing = await prisma.bazaarSchedule.findFirst({
         where: {
           userId: user.id,
@@ -106,9 +122,17 @@ export async function POST(req: Request) {
         createdItems.push({
           userId: user.id,
           date: parsedDate,
-          status: "pending", // ম্যানেজারের অনুমোদনের জন্য পেন্ডিং থাকবে
+          status: "pending", // Will stay pending for manager's approval
         });
       }
+    }
+
+    // If ALL dates were conflicts, return an error
+    if (createdItems.length === 0 && conflictDates.length > 0) {
+      return NextResponse.json(
+        { error: `The following dates are already booked: ${conflictDates.join(", ")}` },
+        { status: 409 }
+      );
     }
 
     if (createdItems.length > 0) {
@@ -119,8 +143,11 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       { 
-        message: "Bazaar dates submitted successfully for manager approval!",
-        count: createdItems.length
+        message: conflictDates.length > 0
+          ? `${createdItems.length} date(s) submitted. Skipped already booked: ${conflictDates.join(", ")}`
+          : "Bazaar dates submitted successfully for manager approval!",
+        count: createdItems.length,
+        conflicts: conflictDates,
       },
       { status: 200 }
     );
@@ -133,7 +160,7 @@ export async function POST(req: Request) {
   }
 }
 
-// ৩. ম্যানেজার কর্তৃক বাজার শিডিউল অনুমোদন বা বাতিল করার জন্য PATCH রিকোয়েস্ট
+// 3. PATCH request for manager to approve or reject bazaar schedule
 export async function PATCH(req: Request) {
   try {
     const session = await getServerSession(authOptions);

@@ -24,7 +24,7 @@ export default function ReportsView() {
     useEffect(() => {
         const fetchReportData = async () => {
             try {
-                // আমরা ড্যাশবোর্ডের API টাই ব্যবহার করছি, কারণ সেখানে সব হিসাব করাই আছে
+                // Using Dashboard API, because all calculations are there
                 const res = await fetch("/api/members/dashboard-data");
                 if (res.ok) {
                     const data = await res.json();
@@ -71,7 +71,7 @@ export default function ReportsView() {
                         <p className="text-xs font-extrabold text-gray-500 uppercase tracking-wider">Total Deposit</p>
                     </div>
                     <h3 className="text-2xl font-extrabold text-gray-900 ml-11">
-                        ৳{isLoading ? "..." : stats.totalDeposit}
+                        Tk {isLoading ? "..." : stats.totalDeposit}
                     </h3>
                 </div>
 
@@ -97,7 +97,7 @@ export default function ReportsView() {
                         <p className="text-xs font-extrabold text-gray-500 uppercase tracking-wider">Live Meal Rate</p>
                     </div>
                     <h3 className="text-2xl font-extrabold text-gray-900 ml-11">
-                        ৳{isLoading ? "..." : stats.liveMealRate.toFixed(2)}
+                        Tk {isLoading ? "..." : stats.liveMealRate.toFixed(2)}
                     </h3>
                 </div>
 
@@ -110,7 +110,7 @@ export default function ReportsView() {
                         <p className="text-xs font-extrabold text-gray-500 uppercase tracking-wider">Current Balance</p>
                     </div>
                     <h3 className={`text-2xl font-extrabold ml-11 ${stats.currentBalance < 0 ? 'text-red-600' : 'text-emerald-600'}`}>
-                        {isLoading ? "..." : `${stats.currentBalance >= 0 ? "+" : "-"} ৳${Math.abs(stats.currentBalance)}`}
+                        {isLoading ? "..." : `${stats.currentBalance >= 0 ? "+" : "-"} Tk ${Math.abs(stats.currentBalance)}`}
                     </h3>
                 </div>
             </div>
@@ -130,7 +130,7 @@ export default function ReportsView() {
                             
                             <div className="flex justify-between items-center py-3 border-b border-dashed border-gray-200">
                                 <span className="font-bold text-gray-600">Total Approved Deposit</span>
-                                <span className="font-extrabold text-gray-900 text-lg">৳ {stats.totalDeposit.toFixed(2)}</span>
+                                <span className="font-extrabold text-gray-900 text-lg">Tk {stats.totalDeposit.toFixed(2)}</span>
                             </div>
                             
                             <div className="flex justify-between items-center py-3 border-b border-dashed border-gray-200">
@@ -140,25 +140,25 @@ export default function ReportsView() {
 
                             <div className="flex justify-between items-center py-3 border-b border-dashed border-gray-200">
                                 <span className="font-bold text-gray-600">Current Meal Rate</span>
-                                <span className="font-extrabold text-gray-900 text-lg">× ৳ {stats.liveMealRate.toFixed(2)}</span>
+                                <span className="font-extrabold text-gray-900 text-lg">× Tk {stats.liveMealRate.toFixed(2)}</span>
                             </div>
 
                             <div className="flex justify-between items-center py-3 border-b-2 border-gray-800">
                                 <span className="font-bold text-gray-800">Total Meal Cost</span>
-                                <span className="font-extrabold text-red-500 text-xl">- ৳ {totalCost.toFixed(2)}</span>
+                                <span className="font-extrabold text-red-500 text-xl">- Tk {totalCost.toFixed(2)}</span>
                             </div>
 
                             <div className="flex justify-between items-center pt-4">
                                 <span className="font-extrabold text-gray-900 text-lg uppercase tracking-wide">Final Balance</span>
                                 <span className={`font-black text-3xl ${stats.currentBalance < 0 ? 'text-red-600' : 'text-emerald-600'}`}>
-                                    {stats.currentBalance >= 0 ? "+" : "-"} ৳ {Math.abs(stats.currentBalance).toFixed(2)}
+                                    {stats.currentBalance >= 0 ? "+" : "-"} Tk {Math.abs(stats.currentBalance).toFixed(2)}
                                 </span>
                             </div>
                             
                             {stats.currentBalance < 0 && (
                                 <div className="mt-6 bg-red-50 border border-red-100 rounded-xl p-4 text-center">
                                     <p className="text-sm font-bold text-red-600">
-                                        ⚠️ You have a due of ৳{Math.abs(stats.currentBalance).toFixed(2)}. Please clear your payment to avoid interruption.
+                                        ⚠️ You have a due of Tk {Math.abs(stats.currentBalance).toFixed(2)}. Please clear your payment to avoid interruption.
                                     </p>
                                 </div>
                             )}

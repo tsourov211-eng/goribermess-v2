@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
-// সব ইউজারদের লিস্ট ও ড্যাশবোর্ড স্ট্যাটাস আনার জন্য
+// To fetch list of all users and dashboard stats
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -12,7 +12,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // ১. সকল ইউজার ও তাদের অনুমোদিত ডিপোজিট ও মিল লগ আনা
+    // 1. Fetch all users along with their approved deposits and meal logs
     const users = await prisma.user.findMany({
       orderBy: { role: "asc" },
       include: {
@@ -21,34 +21,34 @@ export async function GET() {
       },
     });
 
-    // ২. মোট মেসের খরচ (Approved expenses)
+    // 2. Total mess expenses (Approved expenses)
     const expenseAgg = await prisma.expense.aggregate({
       _sum: { amount: true },
       where: { status: "Approved" },
     });
     const totalFoodCost = expenseAgg._sum.amount || 0;
 
-    // ৩. মোট মেসের মিল
+    // 3. Total mess meals
     const allMeals = await prisma.mealLog.findMany();
     const totalMessMeals = allMeals.reduce(
       (acc, m) => acc + m.breakfast + m.lunch + m.dinner + m.guest,
       0
     );
 
-    // ৪. লাইভ মিল রেট
+    // 4. Live meal rate
     const liveMealRate = totalMessMeals > 0 ? totalFoodCost / totalMessMeals : 0;
 
-    // ৫. মোট জমা টাকা
+    // 5. Total deposited money
     const depositAgg = await prisma.deposit.aggregate({
       _sum: { amount: true },
       where: { status: "Approved" },
     });
     const totalDeposits = depositAgg._sum.amount || 0;
 
-    // ৬. মেস ফান্ড (মোট জমা - মোট খরচ)
+    // 6. Mess fund (Total deposit - Total expense)
     const messFund = totalDeposits - totalFoodCost;
 
-    // ৭. প্রতিটি ইউজারের ডিপোজিট, মিল ও ব্যালেন্স হিসাব করা
+    // 7. Calculate each user's deposit, meal and balance
     const formattedUsers = users.map((u) => {
       const userDeposit = u.deposits.reduce((acc, d) => acc + d.amount, 0);
       const userMeals = u.meals.reduce(
@@ -91,7 +91,7 @@ export async function GET() {
   }
 }
 
-// ইউজারের রোল অথবা তথ্য আপডেট করার জন্য
+// To update user's role or info
 export async function PATCH(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -125,7 +125,7 @@ export async function PATCH(req: Request) {
   }
 }
 
-// অ্যাডমিন কর্তৃক নতুন মেম্বার অ্যাড করার জন্য
+// For admin to add a new member
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);

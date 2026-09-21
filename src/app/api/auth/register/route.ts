@@ -59,7 +59,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Registration error:", error);
     return NextResponse.json(
-      { error: "রেজিস্ট্রেশন করতে সমস্যা হয়েছে! আবার চেষ্টা করুন।" },
+      { error: "Registration failed! Please try again." },
       { status: 500 }
     );
   }

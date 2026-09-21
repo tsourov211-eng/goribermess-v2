@@ -95,15 +95,15 @@ export default function RegisterPage() {
 
                 {/* ─── Right Side: Registration Card ─── */}
                 <div className="w-full max-w-lg mx-auto lg:ml-auto">
-                    <div className="bg-[#FAF7F2] rounded-[2rem] shadow-xl shadow-orange-900/5 p-6 sm:p-10 border border-white relative overflow-hidden">
+                    <div className="bg-white/30 backdrop-blur-xl rounded-3xl sm:rounded-[2.5rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] p-6 sm:p-8 border border-white/50 relative overflow-hidden">
                         
                         <div className="flex items-center gap-4 mb-8">
-                            <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 shrink-0">
-                                <IconUserPlus size={32} stroke={2} />
+                            <div className="w-14 h-14 rounded-2xl bg-white/50 flex items-center justify-center text-orange-600 shrink-0 shadow-sm">
+                                <IconUserPlus size={28} stroke={2} />
                             </div>
                             <div>
-                                <h2 className="text-2xl font-extrabold text-[#450705]">Join as New Member</h2>
-                                <p className="text-sm font-bold text-gray-500 mt-1">Create your account and join your mess community</p>
+                                <h2 className="text-2xl font-extrabold text-[#5e2818] drop-shadow-sm">Join as New Member</h2>
+                                <p className="text-sm font-bold text-gray-600 mt-1 drop-shadow-sm">Create your account and join your mess community</p>
                             </div>
                         </div>
 
@@ -124,23 +124,23 @@ export default function RegisterPage() {
                             )}
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-5">
+                        <form onSubmit={handleSubmit} className="space-y-4">
                             
                             {/* Full Name */}
                             <div>
-                                <label className="block text-sm font-extrabold text-gray-900 mb-2">
+                                <label className="block text-sm font-bold text-gray-900 mb-2.5 ml-1 drop-shadow-sm">
                                     Full Name <span className="text-red-500">*</span>
                                 </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <IconUser className="h-5 w-5 text-orange-500" stroke={2} />
+                                <div className="relative flex items-center">
+                                    <div className="absolute left-1.5 w-10 h-10 bg-white/50 rounded-lg flex items-center justify-center shadow-sm">
+                                        <IconUser className="h-5 w-5 text-orange-600" stroke={2} />
                                     </div>
                                     <input
                                         type="text"
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
                                         placeholder="e.g. Tanvir Sourov"
-                                        className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all placeholder-gray-400 text-sm font-bold text-gray-900 shadow-sm [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_#fff] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
+                                        className="w-full pl-14 pr-4 py-3 sm:py-3.5 bg-white/40 border border-white/50 rounded-xl outline-none focus:bg-white/60 focus:ring-2 focus:ring-orange-400 transition-all placeholder-gray-400 text-base text-gray-900 font-normal shadow-inner [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_#fff] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
                                         required
                                     />
                                 </div>
@@ -148,19 +148,19 @@ export default function RegisterPage() {
 
                             {/* Email Address */}
                             <div>
-                                <label className="block text-sm font-extrabold text-gray-900 mb-2">
+                                <label className="block text-sm font-bold text-gray-900 mb-2.5 ml-1 drop-shadow-sm">
                                     Email Address <span className="text-red-500">*</span>
                                 </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <IconMail className="h-5 w-5 text-orange-500" stroke={2} />
+                                <div className="relative flex items-center">
+                                    <div className="absolute left-1.5 w-10 h-10 bg-white/50 rounded-lg flex items-center justify-center shadow-sm">
+                                        <IconMail className="h-5 w-5 text-orange-600" stroke={2} />
                                     </div>
                                     <input
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="e.g. tanvir@gmail.com"
-                                        className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all placeholder-gray-400 text-sm font-bold text-gray-900 shadow-sm [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_#fff] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
+                                        className="w-full pl-14 pr-4 py-3 sm:py-3.5 bg-white/40 border border-white/50 rounded-xl outline-none focus:bg-white/60 focus:ring-2 focus:ring-orange-400 transition-all placeholder-gray-400 text-base text-gray-900 font-normal shadow-inner [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_#fff] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
                                         required
                                     />
                                 </div>
@@ -168,19 +168,19 @@ export default function RegisterPage() {
 
                             {/* Phone Number */}
                             <div>
-                                <label className="block text-sm font-extrabold text-gray-900 mb-2">
+                                <label className="block text-sm font-bold text-gray-900 mb-2.5 ml-1 drop-shadow-sm">
                                     Phone Number <span className="text-red-500">*</span>
                                 </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <IconPhone className="h-5 w-5 text-orange-500" stroke={2} />
+                                <div className="relative flex items-center">
+                                    <div className="absolute left-1.5 w-10 h-10 bg-white/50 rounded-lg flex items-center justify-center shadow-sm">
+                                        <IconPhone className="h-5 w-5 text-orange-600" stroke={2} />
                                     </div>
                                     <input
                                         type="tel"
                                         value={phone}
                                         onChange={(e) => setPhone(e.target.value)}
                                         placeholder="e.g. 01903626256"
-                                        className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all placeholder-gray-400 text-sm font-bold text-gray-900 shadow-sm [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_#fff] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
+                                        className="w-full pl-14 pr-4 py-3 sm:py-3.5 bg-white/40 border border-white/50 rounded-xl outline-none focus:bg-white/60 focus:ring-2 focus:ring-orange-400 transition-all placeholder-gray-400 text-base text-gray-900 font-normal shadow-inner [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_#fff] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
                                         required
                                     />
                                 </div>
@@ -188,80 +188,80 @@ export default function RegisterPage() {
 
                             {/* Password */}
                             <div>
-                                <label className="block text-sm font-extrabold text-gray-900 mb-2">
+                                <label className="block text-sm font-bold text-gray-900 mb-2.5 ml-1 drop-shadow-sm">
                                     Password <span className="text-red-500">*</span>
                                 </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <IconLock className="h-5 w-5 text-orange-500" stroke={2} />
+                                <div className="relative flex items-center">
+                                    <div className="absolute left-1.5 w-10 h-10 bg-white/50 rounded-lg flex items-center justify-center shadow-sm">
+                                        <IconLock className="h-5 w-5 text-orange-600" stroke={2} />
                                     </div>
                                     <input
                                         type={showPassword ? "text" : "password"}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Create a password"
-                                        className="w-full pl-12 pr-12 py-3.5 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all placeholder-gray-400 text-sm font-bold text-gray-900 shadow-sm [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_#fff] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
+                                        className="w-full pl-14 pr-12 py-3 sm:py-3.5 bg-white/40 border border-white/50 rounded-xl outline-none focus:bg-white/60 focus:ring-2 focus:ring-orange-400 transition-all placeholder-gray-400 text-base text-gray-900 font-normal shadow-inner [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_#fff] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
                                         required
                                     />
                                     <button 
                                         type="button" 
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-orange-500 transition-colors"
+                                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-700 hover:text-orange-600 transition-colors"
                                     >
-                                        {showPassword ? <IconEyeOff size={20} /> : <IconEye size={20} />}
+                                        {showPassword ? <IconEyeOff className="h-5 w-5" stroke={2} /> : <IconEye className="h-5 w-5" stroke={2} />}
                                     </button>
                                 </div>
                             </div>
 
                             {/* Confirm Password */}
                             <div>
-                                <label className="block text-sm font-extrabold text-gray-900 mb-2">
+                                <label className="block text-sm font-bold text-gray-900 mb-2.5 ml-1 drop-shadow-sm">
                                     Confirm Password <span className="text-red-500">*</span>
                                 </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <IconLock className="h-5 w-5 text-orange-500" stroke={2} />
+                                <div className="relative flex items-center">
+                                    <div className="absolute left-1.5 w-10 h-10 bg-white/50 rounded-lg flex items-center justify-center shadow-sm">
+                                        <IconLock className="h-5 w-5 text-orange-600" stroke={2} />
                                     </div>
                                     <input
                                         type={showConfirmPassword ? "text" : "password"}
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                         placeholder="Confirm your password"
-                                        className="w-full pl-12 pr-12 py-3.5 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all placeholder-gray-400 text-sm font-bold text-gray-900 shadow-sm [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_#fff] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
+                                        className="w-full pl-14 pr-12 py-3 sm:py-3.5 bg-white/40 border border-white/50 rounded-xl outline-none focus:bg-white/60 focus:ring-2 focus:ring-orange-400 transition-all placeholder-gray-400 text-base text-gray-900 font-normal shadow-inner [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_#fff] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
                                         required
                                     />
                                     <button 
                                         type="button" 
                                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-orange-500 transition-colors"
+                                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-700 hover:text-orange-600 transition-colors"
                                     >
-                                        {showConfirmPassword ? <IconEyeOff size={20} /> : <IconEye size={20} />}
+                                        {showConfirmPassword ? <IconEyeOff className="h-5 w-5" stroke={2} /> : <IconEye className="h-5 w-5" stroke={2} />}
                                     </button>
                                 </div>
                             </div>
 
                             {/* Buttons */}
-                            <div className="flex gap-4 pt-4">
+                            <div className="flex gap-3 pt-2">
                                 <button
                                     type="button"
                                     onClick={handleReset}
-                                    className="flex-1 sm:flex-[0.4] py-4 flex items-center justify-center gap-2 bg-orange-50 hover:bg-orange-100 text-orange-900 text-sm font-extrabold rounded-2xl transition-all border border-orange-100"
+                                    className="flex-1 sm:flex-[0.4] py-3.5 flex items-center justify-center gap-2 bg-white/40 backdrop-blur-sm hover:bg-white/60 text-gray-900 text-sm font-bold rounded-xl transition-all border border-white/50 shadow-sm"
                                 >
-                                    <IconRefresh size={20} stroke={2.5} />
+                                    <IconRefresh size={18} stroke={2.5} />
                                     Reset
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="flex-1 py-4 flex items-center justify-center gap-2 bg-[#FF5722] hover:bg-[#F4511E] text-white text-sm font-extrabold rounded-2xl shadow-lg shadow-orange-500/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                                    className="flex-1 py-3.5 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-lg font-bold rounded-xl shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:-translate-y-0.5 transition-all duration-300 tracking-wide cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                                 >
                                     <IconUserPlus size={20} stroke={2.5} />
-                                    {isSubmitting ? "Registering..." : "Register Member"}
+                                    {isSubmitting ? "Registering..." : "Register"}
                                 </button>
                             </div>
                         </form>
 
-                        <div className="mt-8 pt-6 border-t border-gray-200/50 flex items-center justify-center gap-3 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                        <div className="mt-6 pt-5 border-t border-white/30 flex items-center justify-center gap-3 text-xs font-bold text-gray-700 uppercase tracking-widest drop-shadow-sm">
                             <IconUsersGroup size={16} />
                             <span>Good People</span>
                             <span>•</span>

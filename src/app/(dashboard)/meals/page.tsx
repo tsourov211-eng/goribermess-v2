@@ -82,20 +82,20 @@ export default function FoodManagementPage() {
             });
 
             if (res.ok) {
-                alert("✅ মিলের হিসাব সফলভাবে সংরক্ষিত হয়েছে!");
+                alert("✅ Meal data saved successfully!");
                 fetchMeals();
             } else {
-                alert("❌ মিল সংরক্ষণ করতে সমস্যা হয়েছে!");
+                alert("❌ Failed to save meals!");
             }
         } catch (error) {
             console.error("Save meals error:", error);
-            alert("❌ সার্ভারে কোনো সমস্যা হয়েছে!");
+            alert("❌ Server error occurred!");
         } finally {
             setIsSaving(false);
         }
     };
 
-    // ফরম্যাটেড ডেট টেক্সট
+    // Formatted date text
     const targetDateObj = new Date(currentDate);
     const todayObj = new Date();
     const isToday = targetDateObj.toDateString() === todayObj.toDateString();
@@ -103,7 +103,7 @@ export default function FoodManagementPage() {
         ? `Today, ${targetDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
         : targetDateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 
-    // পেজের মোট মিল হিসাব
+    // Page total meal calculation
     const totalMealsAdded = members.reduce((acc, m) => {
         return acc + (Number(m.breakfast) || 0) + (Number(m.lunch) || 0) + (Number(m.dinner) || 0);
     }, 0);
@@ -150,7 +150,7 @@ export default function FoodManagementPage() {
                     </div>
                     <div>
                         <p className="text-gray-500 text-xs font-bold mb-0.5">Current Meal Rate</p>
-                        <h3 className="text-2xl font-extrabold text-gray-900">৳ {stats.currentMealRate.toFixed(2)}</h3>
+                        <h3 className="text-2xl font-extrabold text-gray-900">Tk {stats.currentMealRate.toFixed(2)}</h3>
                     </div>
                 </div>
 
@@ -161,7 +161,7 @@ export default function FoodManagementPage() {
                     </div>
                     <div>
                         <p className="text-gray-500 text-xs font-bold mb-0.5">Today's Bazaar</p>
-                        <h3 className="text-2xl font-extrabold text-gray-900">৳ {stats.todayBazaar}</h3>
+                        <h3 className="text-2xl font-extrabold text-gray-900">Tk {stats.todayBazaar}</h3>
                     </div>
                 </div>
             </div>

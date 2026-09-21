@@ -32,7 +32,7 @@ export async function POST(req: Request) {
           amount: Number(amount),
           note: note || "",
           method: "Cash",
-          status: "Pending", // ম্যানেজারের জন্য পেন্ডিং
+          status: "Pending", // Pending for manager
           date: new Date(),
         },
       });
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
           userId: user.id,
           amount: Number(amount),
           description: note || "Bazar Expense",
-          status: "Pending", // ম্যানেজারের জন্য পেন্ডিং
+          status: "Pending", // Pending for manager
           date: new Date(),
         },
       });

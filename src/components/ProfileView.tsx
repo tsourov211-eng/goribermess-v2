@@ -213,7 +213,7 @@ export default function ProfileView() {
                         </div>
                         <div>
                             <p className="text-xs font-extrabold text-gray-400 uppercase tracking-wider mb-1">Total Deposit</p>
-                            <p className="text-2xl font-extrabold text-gray-900">৳{stats.totalDeposit}</p>
+                            <p className="text-2xl font-extrabold text-gray-900">Tk {stats.totalDeposit}</p>
                         </div>
                     </div>
                     <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-5">

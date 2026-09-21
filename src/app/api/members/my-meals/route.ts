@@ -21,7 +21,7 @@ export async function GET(req: Request) {
     const month = searchParams.get("month");
     const year = searchParams.get("year");
 
-    // আজকের মিলের স্ট্যাটাস বের করা
+    // Determine today's meal status
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
@@ -39,7 +39,7 @@ export async function GET(req: Request) {
       dinner: todaysMeal && todaysMeal.dinner > 0 ? "ON" : "OFF",
     };
 
-    // মাসিক মিল ইতিহাস আনা
+    // Fetch monthly meal history
     const currentYear = year ? parseInt(year) : new Date().getFullYear();
     const currentMonth = month ? parseInt(month) - 1 : new Date().getMonth();
     const startOfMonth = new Date(Date.UTC(currentYear, currentMonth, 1));
@@ -53,7 +53,7 @@ export async function GET(req: Request) {
       orderBy: { date: "desc" },
     });
 
-    // ইউজারের আগের গেস্ট মিল রিকোয়েস্টগুলো আনা
+    // Fetch user's previous guest meal requests
     const guestRequests = await prisma.guestMealRequest.findMany({
       where: { userId: user.id },
       orderBy: { date: "desc" },

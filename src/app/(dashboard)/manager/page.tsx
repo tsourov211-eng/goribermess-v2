@@ -19,6 +19,7 @@ export default function ManagerDashboard() {
     const [pendingDeposits, setPendingDeposits] = useState<any[]>([]);
     const [pendingExpenses, setPendingExpenses] = useState<any[]>([]);
     const [pendingBazaarSchedules, setPendingBazaarSchedules] = useState<any[]>([]);
+    const [selectedSchedules, setSelectedSchedules] = useState<string[]>([]);
 
     const [isLoading, setIsLoading] = useState(true);
 
@@ -38,6 +39,7 @@ export default function ManagerDashboard() {
                 setPendingDeposits(data.pendingDeposits);
                 setPendingExpenses(data.pendingExpenses);
                 setPendingBazaarSchedules(data.pendingBazaarSchedules || []);
+                setSelectedSchedules([]);
 
             }
         } catch (error) {
@@ -47,7 +49,7 @@ export default function ManagerDashboard() {
         }
     };
 
-    // 💡 Approve বা Reject করার ফাংশন
+    // 💡 Function to Approve or Reject
     const handleAction = async (id: string, type: 'deposit' | 'expense', action: 'Approve' | 'Reject') => {
         if (!confirm(`Are you sure you want to ${action} this ${type}?`)) return;
 
@@ -60,7 +62,7 @@ export default function ManagerDashboard() {
 
             if (res.ok) {
                 alert(`✅ ${type} ${action.toLowerCase()}ed successfully!`);
-                fetchDashboardData(); // লিস্ট রিফ্রেশ করা
+                fetchDashboardData(); // Refresh list
             } else {
                 alert(`❌ Failed to ${action.toLowerCase()} ${type}.`);
             }
@@ -91,29 +93,41 @@ export default function ManagerDashboard() {
         }
     };
 
-    const handleApproveAllSchedules = async () => {
-        if (!confirm("Are you sure you want to approve all pending schedules?")) return;
-        
-        try {
-            const promises = pendingBazaarSchedules.map(schedule => 
-                fetch("/api/members/bazaar-schedule", {
-                    method: "PATCH",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ scheduleId: schedule.id, status: "approved" })
-                })
-            );
-            await Promise.all(promises);
-            alert("✅ All pending schedules approved successfully!");
-            fetchDashboardData();
-        } catch (error) {
-            console.error(error);
-            alert("❌ Failed to approve all schedules.");
+    const handleSelectAllSchedules = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.checked) {
+            setSelectedSchedules(pendingBazaarSchedules.map(s => s.id));
+        } else {
+            setSelectedSchedules([]);
         }
     };
 
+    const handleSelectSchedule = (id: string) => {
+        setSelectedSchedules(prev => 
+            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        );
+    };
 
-
-    return (
+    const handleApproveSelectedSchedules = async () => {
+        if (selectedSchedules.length === 0) return;
+        if (!confirm(`Are you sure you want to approve ${selectedSchedules.length} selected schedule(s)?`)) return;
+        
+        try {
+            const promises = selectedSchedules.map(id => 
+                fetch("/api/members/bazaar-schedule", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ scheduleId: id, status: "approved" })
+                })
+            );
+            await Promise.all(promises);
+            alert(`✅ ${selectedSchedules.length} schedule(s) approved successfully!`);
+            setSelectedSchedules([]);
+            fetchDashboardData();
+        } catch (error) {
+            console.error(error);
+            alert("❌ Failed to approve schedules.");
+        }
+    };    return (
         <div className="max-w-7xl mx-auto space-y-6 lg:space-y-8 p-4">
             
             {/* ─── Greeting Section ─── */}
@@ -161,7 +175,7 @@ export default function ManagerDashboard() {
                     </div>
                     <div className="mt-4 z-10">
                         <p className="text-gray-500 text-sm font-semibold mb-1">Today's Bazaar Cost</p>
-                        <h3 className="text-3xl font-extrabold text-gray-900">৳ {isLoading ? "..." : stats.totalBazaarToday}</h3>
+                        <h3 className="text-3xl font-extrabold text-gray-900">Tk {isLoading ? "..." : stats.totalBazaarToday}</h3>
                     </div>
                     <IconShoppingBag className="absolute -bottom-4 -right-4 w-24 h-24 text-orange-50/50 transform group-hover:scale-110 transition-transform" stroke={1} />
                 </div>
@@ -200,9 +214,9 @@ export default function ManagerDashboard() {
                         <button className="text-sm font-bold text-gray-700 hover:text-orange-600 transition-colors flex items-center gap-1 bg-white px-4 py-2 rounded-xl border border-gray-200 hover:border-orange-200 shadow-sm">
                             View All <IconArrowRight size={16} />
                         </button>
-                        {pendingBazaarSchedules.length > 0 && (
-                            <button onClick={handleApproveAllSchedules} className="bg-[#00B050] hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition-all">
-                                <IconCheck size={16} stroke={3} /> Approve All ({pendingBazaarSchedules.length})
+                        {selectedSchedules.length > 0 && (
+                            <button onClick={handleApproveSelectedSchedules} className="bg-[#00B050] hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition-all">
+                                <IconCheck size={16} stroke={3} /> Approve Selected ({selectedSchedules.length})
                             </button>
                         )}
                     </div>
@@ -213,7 +227,12 @@ export default function ManagerDashboard() {
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
                                 <th className="p-4 w-12 text-center">
-                                    <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500" />
+                                    <input 
+                                        type="checkbox" 
+                                        className="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500 cursor-pointer" 
+                                        checked={pendingBazaarSchedules.length > 0 && selectedSchedules.length === pendingBazaarSchedules.length}
+                                        onChange={handleSelectAllSchedules}
+                                    />
                                 </th>
                                 <th className="p-4 w-12">#</th>
                                 <th className="p-4">Member</th>
@@ -234,9 +253,14 @@ export default function ManagerDashboard() {
                                     <td colSpan={8} className="p-8 text-center text-gray-400 font-bold">No pending bazaar requests.</td>
                                 </tr>
                             ) : pendingBazaarSchedules.map((item, idx) => (
-                                <tr key={item.id} className="hover:bg-orange-50/30 transition-colors group">
+                                <tr key={item.id} className={`hover:bg-orange-50/30 transition-colors group ${selectedSchedules.includes(item.id) ? 'bg-orange-50/50' : ''}`}>
                                     <td className="p-4 text-center">
-                                        <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500" />
+                                        <input 
+                                            type="checkbox" 
+                                            className="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500 cursor-pointer" 
+                                            checked={selectedSchedules.includes(item.id)}
+                                            onChange={() => handleSelectSchedule(item.id)}
+                                        />
                                     </td>
                                     <td className="p-4 text-sm font-bold text-gray-500">{idx + 1}</td>
                                     <td className="p-4">
@@ -317,7 +341,7 @@ export default function ManagerDashboard() {
                                         </div>
                                         <div>
                                             <h4 className="font-extrabold text-gray-900 text-sm">{item.user.name}</h4>
-                                            <p className="text-xs font-bold text-gray-500 mt-0.5">৳ {item.amount} • {item.method}</p>
+                                            <p className="text-xs font-bold text-gray-500 mt-0.5">Tk {item.amount} • {item.method}</p>
                                         </div>
                                     </div>
                                     <div className="flex gap-2 w-full sm:w-auto">
@@ -365,7 +389,7 @@ export default function ManagerDashboard() {
                                         </div>
                                         <div>
                                             <h4 className="font-extrabold text-gray-900 text-sm">{item.user.name}</h4>
-                                            <p className="text-xs font-bold text-gray-500 mt-0.5">৳ {item.amount} • {new Date(item.date).toLocaleDateString()}</p>
+                                            <p className="text-xs font-bold text-gray-500 mt-0.5">Tk {item.amount} • {new Date(item.date).toLocaleDateString()}</p>
                                         </div>
                                     </div>
                                     <div className="flex gap-2 w-full sm:w-auto">

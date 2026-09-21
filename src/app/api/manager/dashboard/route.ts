@@ -10,28 +10,28 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // ১. পেন্ডিং পেমেন্ট রিকোয়েস্ট (Deposit)
+    // 1. Pending payment requests (Deposit)
     const pendingDeposits = await prisma.deposit.findMany({
       where: { status: "Pending" },
       include: { user: { select: { name: true, image: true } } },
       orderBy: { date: "desc" },
     });
 
-    // ২. পেন্ডিং বাজারের খরচ (Expense)
+    // 2. Pending bazaar expenses (Expense)
     const pendingExpenses = await prisma.expense.findMany({
       where: { status: "Pending" },
       include: { user: { select: { name: true, image: true } } },
       orderBy: { date: "desc" },
     });
 
-    // 2.5 পেন্ডিং বাজার শিডিউল
+    // 2.5 Pending bazaar schedules
     const pendingBazaarSchedules = await prisma.bazaarSchedule.findMany({
       where: { status: "pending" },
       include: { user: { select: { name: true, image: true } } },
       orderBy: { date: "asc" },
     });
 
-    // ৩. আজকের মোট মিল
+    // 3. Total meals today
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
@@ -46,7 +46,7 @@ export async function GET() {
       0
     );
 
-    // ৪. আজকের বাজারের খরচ (যেগুলো Approved)
+    // 4. Today's bazaar expenses (which are Approved)
     const todayExpenses = await prisma.expense.findMany({
       where: { date: { gte: today, lt: tomorrow }, status: "Approved" },
     });

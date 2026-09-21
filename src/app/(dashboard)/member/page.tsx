@@ -52,7 +52,7 @@ export default function MemberDashboard() {
     const [selectedDates, setSelectedDates] = useState<string[]>([]);
     const [isSubmittingBazarDates, setIsSubmittingBazarDates] = useState(false);
 
-    // 💡 Finance States (পেমেন্ট এবং বাজারের জন্য)
+    // 💡 Finance States (for payment and bazaar)
     const [paymentAmount, setPaymentAmount] = useState("");
     const [paymentNote, setPaymentNote] = useState("");
     const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
@@ -112,7 +112,7 @@ export default function MemberDashboard() {
         }
     }, [status, activeMonth, activeYear]);
 
-    // কার্ডের মাস পরিবর্তন
+    // Change card month
     const handlePrevActiveMonth = () => {
         if (activeMonth === 0) {
             setActiveMonth(11);
@@ -131,7 +131,7 @@ export default function MemberDashboard() {
         }
     };
 
-    // মডালের মাস পরিবর্তন
+    // Change modal month
     const handlePrevModalMonth = () => {
         if (modalMonth === 0) {
             setModalMonth(11);
@@ -150,13 +150,20 @@ export default function MemberDashboard() {
         }
     };
 
-    // তারিখ ফরম্যাট হেল্পার YYYY-MM-DD
+    // Date format helper YYYY-MM-DD
     const formatDateKey = (year: number, month: number, day: number) => {
         return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     };
 
-    // ক্যালেন্ডারে ডেট সিলেকশন বা আনসিলেকশন
-    const toggleDateSelection = (dateKey: string) => {
+    // Date selection or unselection on calendar (past dates & booked dates blocked)
+    const toggleDateSelection = (dateKey: string, isBookedByOther?: boolean) => {
+        if (isBookedByOther) return; // block already-booked dates
+
+        const selected = new Date(dateKey + "T00:00:00");
+        const todayZero = new Date();
+        todayZero.setHours(0, 0, 0, 0);
+        if (selected.getTime() < todayZero.getTime()) return; // block past dates
+
         setSelectedDates(prev =>
             prev.includes(dateKey)
                 ? prev.filter(d => d !== dateKey)
@@ -164,7 +171,7 @@ export default function MemberDashboard() {
         );
     };
 
-    // সিলেক্টেড ডেট ম্যানেজারের অনুমোদনের জন্য সাবমিট করা
+    // Submit selected dates for manager approval
     const handleConfirmBazarDates = async () => {
         if (selectedDates.length === 0) {
             alert("Please select at least one date for bazaar.");
@@ -201,7 +208,7 @@ export default function MemberDashboard() {
         "July", "August", "September", "October", "November", "December"
     ];
 
-    // ক্যালেন্ডার গ্রিডের হিসাব
+    // Calendar grid calculation
     const daysInModalMonth = new Date(modalYear, modalMonth + 1, 0).getDate();
     const firstDayOfModalMonth = new Date(modalYear, modalMonth, 1).getDay(); // 0 = Sun
     const daysInPrevModalMonth = new Date(modalYear, modalMonth, 0).getDate();
@@ -214,6 +221,8 @@ export default function MemberDashboard() {
     const totalCells = firstDayOfModalMonth + daysInModalMonth;
     const remainingCells = (7 - (totalCells % 7)) % 7;
     const nextMonthDays = Array.from({ length: remainingCells }, (_, i) => i + 1);
+
+    const currentUserId = (session?.user as any)?.id;
 
     const getDateStatus = (day: number) => {
         const key = formatDateKey(modalYear, modalMonth, day);
@@ -229,6 +238,15 @@ export default function MemberDashboard() {
             return d.getUTCFullYear() === modalYear && d.getUTCMonth() === modalMonth && d.getUTCDate() === day;
         });
 
+        // Check if another member has an approved schedule on this date
+        const approvedByOther = messSchedules.find(s => {
+            const d = new Date(s.date);
+            return d.getUTCFullYear() === modalYear && d.getUTCMonth() === modalMonth && d.getUTCDate() === day
+                && s.status === "approved" && s.user?.id !== currentUserId;
+        });
+        const isBookedByOther = !!approvedByOther;
+        const bookedByName = approvedByOther?.user?.name || "Someone";
+
         const sched = mySchedule || messSchedule;
         const dayDate = new Date(modalYear, modalMonth, day);
         const todayZero = new Date();
@@ -241,6 +259,9 @@ export default function MemberDashboard() {
         return {
             key,
             isSelected,
+            isPast,
+            isBookedByOther,
+            bookedByName,
             isCompleted,
             isUpcoming,
             isScheduled: !!sched,
@@ -263,7 +284,7 @@ export default function MemberDashboard() {
 
             if (res.ok) {
                 alert("✅ Payment request sent to manager for approval!");
-                setPaymentAmount(""); // ইনপুট ক্লিয়ার করা
+                setPaymentAmount(""); // Clear input
                 setPaymentNote("");
             } else {
                 alert("❌ Failed to send payment request.");
@@ -291,7 +312,7 @@ export default function MemberDashboard() {
 
             if (res.ok) {
                 alert("✅ Bazar expense submitted successfully!");
-                setExpenseAmount(""); // ইনপুট ক্লিয়ার করা
+                setExpenseAmount(""); // Clear input
                 setExpenseDetails("");
             } else {
                 alert("❌ Failed to submit expense.");
@@ -305,7 +326,7 @@ export default function MemberDashboard() {
     };
 
     const systemAlert = currentBalance < 0 
-        ? { title: "Payment Overdue", description: `Your balance is negative (৳${Math.abs(currentBalance)}). Please clear your dues immediately.`, type: "alert" }
+        ? { title: "Payment Overdue", description: `Your balance is negative (Tk ${Math.abs(currentBalance)}). Please clear your dues immediately.`, type: "alert" }
         : null;
 
     const topNotification = systemAlert || (notices.length > 0 ? notices[0] : null);
@@ -370,7 +391,7 @@ export default function MemberDashboard() {
                     </div>
                     <div className="mt-4 z-10">
                         <p className="text-gray-500 text-sm font-semibold mb-1">Total Deposit</p>
-                        <h3 className="text-3xl font-extrabold text-gray-900">৳ {isLoadingData ? "..." : totalDeposit}</h3>
+                        <h3 className="text-3xl font-extrabold text-gray-900">Tk {isLoadingData ? "..." : totalDeposit}</h3>
                     </div>
                     <IconWallet className="absolute -bottom-4 -right-4 w-24 h-24 text-blue-50/50" stroke={1} />
                 </div>
@@ -398,14 +419,14 @@ export default function MemberDashboard() {
                             </span>
                             <div className="flex items-center gap-1.5 bg-black/20 backdrop-blur-sm border border-white/10 px-2.5 py-1 rounded-lg text-white shadow-sm">
                                 <IconCalculator size={12} className={currentBalance < 0 ? 'text-red-200' : 'text-emerald-200'} />
-                                <span className="text-[10px] sm:text-xs font-bold tracking-wide">Rate: ৳{liveMealRate.toFixed(2)}</span>
+                                <span className="text-[10px] sm:text-xs font-bold tracking-wide">Rate: Tk {liveMealRate.toFixed(2)}</span>
                             </div>
                         </div>
                     </div>
                     <div className="mt-4 z-10">
                         <p className="text-white/90 text-sm font-semibold mb-1">Current Balance</p>
                         <h3 className="text-3xl font-extrabold text-white">
-                            {isLoadingData ? "..." : `${currentBalance >= 0 ? "+" : "-"} ৳${Math.abs(currentBalance)}`}
+                            {isLoadingData ? "..." : `${currentBalance >= 0 ? "+" : "-"} Tk ${Math.abs(currentBalance)}`}
                         </h3>
                     </div>
                     <div className="absolute right-0 bottom-0 opacity-20 z-0">
@@ -536,7 +557,7 @@ export default function MemberDashboard() {
                             {showPaymentForm ? (
                                 <form className="space-y-3" onSubmit={handlePaymentSubmit}>
                                     <div className="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 focus-within:ring-2 ring-orange-500/20 focus-within:border-orange-500 transition-all">
-                                        <span className="text-gray-500 font-bold mr-2">৳</span>
+                                        <span className="text-gray-500 font-bold mr-2">Tk </span>
                                         <input type="number" value={paymentAmount} onChange={(e) => setPaymentAmount(e.target.value)} placeholder="Enter payment amount (e.g. 500)" className="bg-transparent w-full outline-none text-sm font-bold text-gray-800" required />
                                     </div>
                                     <input type="text" value={paymentNote} onChange={(e) => setPaymentNote(e.target.value)} placeholder="Add a note (optional)" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none text-sm font-bold text-gray-800 focus:ring-2 ring-orange-500/20 focus:border-orange-500 transition-all" />
@@ -547,7 +568,7 @@ export default function MemberDashboard() {
                             ) : (
                                 <form className="space-y-3" onSubmit={handleExpenseSubmit}>
                                     <div className="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 focus-within:ring-2 ring-gray-900/20 focus-within:border-gray-900 transition-all">
-                                        <span className="text-gray-500 font-bold mr-2">৳</span>
+                                        <span className="text-gray-500 font-bold mr-2">Tk </span>
                                         <input type="number" value={expenseAmount} onChange={(e) => setExpenseAmount(e.target.value)} placeholder="Enter bazar amount (e.g, 1250)" className="bg-transparent w-full outline-none text-sm font-bold text-gray-800" required />
                                     </div>
                                     <input type="text" value={expenseDetails} onChange={(e) => setExpenseDetails(e.target.value)} placeholder="Add details (optional)" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none text-sm font-bold text-gray-800 focus:ring-2 ring-gray-900/20 focus:border-gray-900 transition-all" />
@@ -739,20 +760,28 @@ export default function MemberDashboard() {
                                     <button
                                         key={`day-${d}`}
                                         type="button"
-                                        onClick={() => toggleDateSelection(status.key)}
-                                        className={`h-9 w-9 mx-auto rounded-full flex flex-col items-center justify-center transition-all cursor-pointer text-xs font-bold relative
-                                            ${status.isSelected
-                                                ? "bg-[#FF6B00] text-white shadow-md shadow-orange-500/30 scale-105"
-                                                : status.isCompleted
-                                                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80 hover:bg-emerald-100/80"
-                                                    : status.isUpcoming
-                                                        ? "bg-orange-50 text-orange-800 border border-orange-200/80 hover:bg-orange-100/80"
-                                                        : "text-gray-800 hover:bg-orange-50 hover:text-orange-600"
+                                        disabled={status.isPast || status.isBookedByOther}
+                                        onClick={() => !(status.isPast || status.isBookedByOther) && toggleDateSelection(status.key, status.isBookedByOther)}
+                                        title={status.isBookedByOther ? `Booked by ${status.bookedByName}` : undefined}
+                                        className={`h-9 w-9 mx-auto rounded-full flex flex-col items-center justify-center transition-all text-xs font-bold relative
+                                            ${status.isPast
+                                                ? "text-gray-300 cursor-not-allowed line-through"
+                                                : status.isBookedByOther
+                                                    ? "bg-red-50 text-red-400 border border-red-200 cursor-not-allowed"
+                                                    : status.isSelected
+                                                        ? "bg-[#FF6B00] text-white shadow-md shadow-orange-500/30 scale-105 cursor-pointer"
+                                                        : status.isCompleted
+                                                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80 hover:bg-emerald-100/80 cursor-pointer"
+                                                            : status.isUpcoming
+                                                                ? "bg-orange-50 text-orange-800 border border-orange-200/80 hover:bg-orange-100/80 cursor-pointer"
+                                                                : "text-gray-800 hover:bg-orange-50 hover:text-orange-600 cursor-pointer"
                                             }
                                         `}
                                     >
                                         <span className="leading-none">{d}</span>
-                                        {status.isSelected ? (
+                                        {status.isPast ? null : status.isBookedByOther ? (
+                                            <span className="w-1 h-1 rounded-full bg-red-400 block mt-0.5"></span>
+                                        ) : status.isSelected ? (
                                             <span className="w-1 h-1 rounded-full bg-white block mt-0.5"></span>
                                         ) : status.isCompleted ? (
                                             <span className="w-1 h-1 rounded-full bg-emerald-500 block mt-0.5"></span>
@@ -784,6 +813,10 @@ export default function MemberDashboard() {
                             <div className="flex items-center gap-1.5">
                                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                                 <span>Completed</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span className="w-2.5 h-2.5 rounded-full bg-red-400 border border-red-300"></span>
+                                <span>Booked</span>
                             </div>
                         </div>
 

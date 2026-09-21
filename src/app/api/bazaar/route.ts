@@ -15,7 +15,7 @@ export async function GET() {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    // ১. আজকের দায়িত্ব কার
+    // 1. Whose responsibility is it today
     let todaySchedule = await prisma.bazaarSchedule.findFirst({
       where: {
         date: { gte: today, lt: tomorrow },
@@ -25,7 +25,7 @@ export async function GET() {
       },
     });
 
-    // যদি আজকের শিডিউল না থাকে, তবে প্রথম সক্রিয় ইউজার বা ম্যানেজারের নাম ফলব্যাক হিসেবে দেখতে পারি
+    // If there is no schedule today, fallback to the first active user or manager's name
     if (!todaySchedule) {
       const defaultUser = await prisma.user.findFirst({
         where: { role: { in: ["manager", "admin", "member"] } },
@@ -43,7 +43,7 @@ export async function GET() {
       }
     }
 
-    // ২. আসন্ন বাজার শিডিউল
+    // 2. Upcoming bazaar schedule
     const upcomingSchedules = await prisma.bazaarSchedule.findMany({
       where: {
         date: { gte: tomorrow },
@@ -55,7 +55,7 @@ export async function GET() {
       },
     });
 
-    // ৩. আজকের বাজারের খরচ
+    // 3. Today's bazaar expense
     const todayExpenses = await prisma.expense.findMany({
       where: {
         date: { gte: today, lt: tomorrow },
@@ -107,7 +107,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
     }
 
-    // যদি অ্যাডমিন বা ম্যানেজার সাবমিট করে, সরাসরি "Approved", সাধারণ মেম্বার হলে "Pending"
+    // If admin or manager submits, directly "Approved", if normal member then "Pending"
     const status = user.role === "admin" || user.role === "manager" ? "Approved" : "Pending";
 
     const expenseDate = date ? new Date(date) : new Date();

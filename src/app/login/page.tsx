@@ -26,7 +26,7 @@ export default function LoginPage() {
             });
 
             if (res?.error) {
-                setError("ইমেইল অথবা পাসওয়ার্ড ভুল হয়েছে!");
+                setError("Email or password incorrect!");
             } else {
                 const session = await getSession();
                 const userRole = (session?.user as { role?: string })?.role;
@@ -45,21 +45,21 @@ export default function LoginPage() {
     };
 
     return (
-        // min-h-screen এর জায়গায় min-h-[100dvh] ব্যবহার করা হয়েছে যাতে মোবাইলে পারফেক্ট সেন্টারিং হয়
+        // Replaced min-h-screen with min-h-[100dvh] for perfect centering on mobile
         <div className="min-h-[100dvh] w-full bg-[url('/login-bg-mobile.png')] lg:bg-[url('/login-bg.png')] bg-cover bg-center bg-no-repeat flex items-center justify-center lg:justify-end px-4 sm:px-6 lg:pr-[18%] xl:pr-[22%] relative py-6 lg:py-0">
 
-            {/* কার্ডটিকে ফুটিয়ে তোলার জন্য ওভারলে */}
+            {/* Overlay to highlight the card */}
             <div className="absolute inset-0 bg-black/10 sm:bg-black/5"></div>
 
-            {/* মেইন কন্টেইনার */}
+            {/* Main container */}
             <div className="w-full max-w-md flex flex-col items-center relative z-10">
                 
-                {/* ─── মোবাইল ভিউ হেডার (লোগো এবং টেক্সট - গ্যাপ কমানো হয়েছে) ─── */}
+                {/* ─── Mobile View Header (Logo and Text - gap reduced) ─── */}
                 <div className="lg:hidden flex flex-col items-center text-center mb-5 sm:mb-6">
                     <Link href="/" className="flex items-center justify-center mb-2 transition-transform hover:scale-105">
                         <Image
                             src="/logo.png"
-                            alt="আমাদের মেস লোগো"
+                            alt="Amader Mess Logo"
                             width={180} 
                             height={180}
                             priority
@@ -75,10 +75,10 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                {/* ─── লগইন কার্ড (Glassmorphism Effect) ─── */}
+                {/* ─── Login Card (Glassmorphism Effect) ─── */}
                 <div className="bg-white/30 backdrop-blur-xl w-full rounded-3xl sm:rounded-[2.5rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] p-6 sm:p-8 border border-white/50">
                     
-                    {/* ─── ডেস্কটপ ভিউ টাইটেল ─── */}
+                    {/* ─── Desktop View Title ─── */}
                     <div className="hidden lg:block text-center mb-10">
                         <h2 className="text-3xl font-extrabold text-[#5e2818] tracking-tight drop-shadow-sm mb-6">
                             Welcome Back

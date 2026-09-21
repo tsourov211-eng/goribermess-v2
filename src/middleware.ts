@@ -7,7 +7,7 @@ export default withAuth(
     const pathname = req.nextUrl.pathname;
     const role = (token?.role as string) || "member";
 
-    // ১. /admin রুটে শুধুমাত্র অ্যাডমিন ঢুকতে পারবে
+    // 1. Only admin can enter /admin route
     if (pathname.startsWith("/admin") && role !== "admin") {
       if (role === "manager") {
         return NextResponse.redirect(new URL("/manager", req.url));
@@ -15,7 +15,7 @@ export default withAuth(
       return NextResponse.redirect(new URL("/member", req.url));
     }
 
-    // ২. /manager রুটে অ্যাডমিন এবং ম্যানেজার ঢুকতে পারবে
+    // 2. Admin and manager can enter /manager route
     if (pathname.startsWith("/manager") && role !== "manager" && role !== "admin") {
       return NextResponse.redirect(new URL("/member", req.url));
     }

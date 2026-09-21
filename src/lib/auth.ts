@@ -24,7 +24,7 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("ইমেইল এবং পাসওয়ার্ড আবশ্যক!");
+          throw new Error("Email and password are required!");
         }
 
         const normalizedEmail = credentials.email.trim().toLowerCase();
@@ -33,7 +33,7 @@ export const authOptions: AuthOptions = {
         });
 
         if (!user || !user.password) {
-          throw new Error("ইমেইল অথবা পাসওয়ার্ড ভুল হয়েছে!");
+          throw new Error("Invalid email or password!");
         }
 
         const isPasswordValid = await bcrypt.compare(
@@ -42,11 +42,11 @@ export const authOptions: AuthOptions = {
         );
 
         if (!isPasswordValid) {
-          throw new Error("ইমেইল অথবা পাসওয়ার্ড ভুল হয়েছে!");
+          throw new Error("Invalid email or password!");
         }
 
         if (user.role === "pending") {
-          throw new Error("আপনার একাউন্টটি অ্যাডমিনের অনুমোদনের অপেক্ষায় রয়েছে!");
+          throw new Error("Your account is pending admin approval!");
         }
 
         return {

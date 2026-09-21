@@ -202,12 +202,12 @@ export default function LandingPage() {
                                     <div className="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm">
                                         <div className="w-8 h-8 bg-green-50 text-green-500 rounded-lg flex items-center justify-center mb-2"><IconReceipt size={16}/></div>
                                         <p className="text-[10px] text-gray-500 font-bold">Food Cost</p>
-                                        <p className="font-extrabold text-lg text-[#0B132B]">৳ 12,500</p>
+                                        <p className="font-extrabold text-lg text-[#0B132B]">Tk 12,500</p>
                                     </div>
                                     <div className="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm hidden md:block">
                                         <div className="w-8 h-8 bg-blue-50 text-blue-500 rounded-lg flex items-center justify-center mb-2"><IconWallet size={16}/></div>
                                         <p className="text-[10px] text-gray-500 font-bold">Current Balance</p>
-                                        <p className="font-extrabold text-lg text-[#0B132B]">৳ 3,200</p>
+                                        <p className="font-extrabold text-lg text-[#0B132B]">Tk 3,200</p>
                                     </div>
                                 </div>
 

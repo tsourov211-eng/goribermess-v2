@@ -37,7 +37,7 @@ model Session {
 
 // ─── MESS MANAGEMENT MODELS ───
 
-// ১. ইউজার টেবিল
+// 1. User table
 model User {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
   name          String?
@@ -46,13 +46,13 @@ model User {
   image         String?
   role          String    @default("member")
   
-  // 💡 নতুন যোগ করা ফিল্ড
+  // 💡 Newly added field
   password      String?   
   messName      String?   @default("Amader Mess")
   phone         String?   
   address       String?   
 
-  // ইউজারের ডিফল্ট মিল সেটিং
+  // User's default meal setting
   defaultBreakfast Float @default(0.5)
   defaultLunch     Float @default(1.0)
   defaultDinner    Float @default(1.0)
@@ -60,7 +60,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
 
-  // রিলেশনশিপ
+  // Relationships
   meals         MealLog[]
   deposits      Deposit[]
   expenses      Expense[]
@@ -68,7 +68,7 @@ model User {
   guestMeals    GuestMealRequest[]
 }
 
-// ২. প্রতিদিনের মিল সেভ করার টেবিল
+// 2. Table for saving daily meals
 model MealLog {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userId    String   @db.ObjectId
@@ -83,10 +83,10 @@ model MealLog {
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  @@unique([userId, date]) // এক দিনে একজন ইউজারের একটাই লগ থাকবে
+  @@unique([userId, date]) // One log per user per day
 }
 
-// ৩. ইউজারের জমা দেওয়া টাকার টেবিল (Deposit)
+// 3. User deposited money table (Deposit)
 model Deposit {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userId    String   @db.ObjectId
@@ -99,7 +99,7 @@ model Deposit {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// ৪. মেসের খরচের টেবিল (Expense / Bazar)
+// 4. Mess expense table (Expense / Bazar)
 model Expense {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   userId      String   @db.ObjectId        
@@ -111,7 +111,7 @@ model Expense {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade) 
 }
 
-// ৫. বাজারের রিকোয়েস্ট ডেট
+// 5. Bazar request date
 model BazaarSchedule {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userId    String   @db.ObjectId
@@ -121,7 +121,7 @@ model BazaarSchedule {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// ৬. নোটিশ বোর্ডের টেবিল
+// 6. Notice board table
 model Notice {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
@@ -131,7 +131,7 @@ model Notice {
   createdAt   DateTime @default(now())
 }
 
-// ৭. গেস্ট মিল রিকোয়েস্ট টেবিল
+// 7. Guest meal request table
 model GuestMealRequest {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userId    String   @db.ObjectId
