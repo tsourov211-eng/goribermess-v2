@@ -48,6 +48,8 @@ model User {
   
   // 💡 Newly added field
   password      String?   
+  resetToken    String?
+  resetTokenExpiry DateTime?
   messName      String?   @default("Amader Mess")
   phone         String?   
   address       String?   
